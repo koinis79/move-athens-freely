@@ -7,6 +7,7 @@ import Layout from "./components/Layout";
 import Index from "./pages/Index";
 import Equipment from "./pages/Equipment";
 import EquipmentDetail from "./pages/EquipmentDetail";
+import EquipmentCategory from "./pages/EquipmentCategory";
 import HowItWorks from "./pages/HowItWorks";
 import AccessibleAthens from "./pages/AccessibleAthens";
 import About from "./pages/About";
@@ -37,7 +38,8 @@ const App = () => (
           <Route element={<Layout />}>
             <Route path="/" element={<Index />} />
             <Route path="/equipment" element={<Equipment />} />
-            <Route path="/equipment/:slug" element={<EquipmentDetail />} />
+            <Route path="/equipment/:categorySlug" element={<EquipmentCategory />} />
+            <Route path="/equipment/:categorySlug/:slug" element={<EquipmentDetail />} />
             <Route path="/how-it-works" element={<HowItWorks />} />
             <Route path="/accessible-athens" element={<AccessibleAthens />} />
             <Route path="/about" element={<About />} />
