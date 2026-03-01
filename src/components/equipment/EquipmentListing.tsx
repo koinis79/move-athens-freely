@@ -1,0 +1,168 @@
+import { useState, useMemo } from "react";
+import { Link } from "react-router-dom";
+import { Button } from "@/components/ui/button";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { MessageCircle } from "lucide-react";
+import EquipmentCard from "./EquipmentCard";
+import {
+  equipmentItems,
+  categoryFilterLabels,
+  type EquipmentCategory,
+} from "@/data/equipment";
+
+type SortOption = "price-asc" | "price-desc" | "popular";
+
+interface Props {
+  /** Pre-filter by category slug (for category routes) */
+  categorySlug?: string;
+}
+
+const EquipmentListing = ({ categorySlug }: Props) => {
+  const [activeFilter, setActiveFilter] = useState(categorySlug ?? "");
+  const [sort, setSort] = useState<SortOption>("popular");
+
+  const filtered = useMemo(() => {
+    const slug = categorySlug ?? activeFilter;
+    let items = slug
+      ? equipmentItems.filter((i) => i.categorySlug === slug)
+      : [...equipmentItems];
+
+    switch (sort) {
+      case "price-asc":
+        items.sort((a, b) => a.pricePerDay - b.pricePerDay);
+        break;
+      case "price-desc":
+        items.sort((a, b) => b.pricePerDay - a.pricePerDay);
+        break;
+      case "popular":
+        items.sort((a, b) => (b.popular ? 1 : 0) - (a.popular ? 1 : 0));
+        break;
+    }
+    return items;
+  }, [activeFilter, categorySlug, sort]);
+
+  const heading = categorySlug
+    ? categoryFilterLabels.find((c) => c.slug === categorySlug)?.label ??
+      "Equipment"
+    : "Mobility Equipment for Rent";
+
+  return (
+    <div className="container py-10 md:py-16">
+      {/* Breadcrumb */}
+      <nav aria-label="Breadcrumb" className="mb-4 text-sm text-muted-foreground">
+        <ol className="flex items-center gap-1.5">
+          <li>
+            <Link to="/" className="hover:text-primary transition-colors">
+              Home
+            </Link>
+          </li>
+          <li aria-hidden="true">&gt;</li>
+          {categorySlug ? (
+            <>
+              <li>
+                <Link to="/equipment" className="hover:text-primary transition-colors">
+                  Equipment
+                </Link>
+              </li>
+              <li aria-hidden="true">&gt;</li>
+              <li className="text-foreground font-medium">
+                {categoryFilterLabels.find((c) => c.slug === categorySlug)?.label}
+              </li>
+            </>
+          ) : (
+            <li className="text-foreground font-medium">Equipment</li>
+          )}
+        </ol>
+      </nav>
+
+      {/* Heading */}
+      <h1 className="text-3xl font-heading font-bold text-foreground md:text-4xl">
+        {heading}
+      </h1>
+      <p className="mt-2 max-w-2xl text-muted-foreground">
+        Quality wheelchairs, scooters, and mobility aids delivered to your door
+        in Athens
+      </p>
+
+      {/* Filter bar */}
+      <div className="mt-8 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+        {!categorySlug && (
+          <div className="flex flex-wrap gap-2">
+            {categoryFilterLabels.map(({ label, slug }) => (
+              <Button
+                key={slug}
+                variant={activeFilter === slug ? "default" : "outline"}
+                size="sm"
+                className="rounded-xl"
+                onClick={() => setActiveFilter(slug)}
+              >
+                {label}
+              </Button>
+            ))}
+          </div>
+        )}
+
+        <Select
+          value={sort}
+          onValueChange={(v) => setSort(v as SortOption)}
+        >
+          <SelectTrigger className="w-52 rounded-xl">
+            <SelectValue placeholder="Sort by" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="popular">Most Popular</SelectItem>
+            <SelectItem value="price-asc">Price (Low to High)</SelectItem>
+            <SelectItem value="price-desc">Price (High to Low)</SelectItem>
+          </SelectContent>
+        </Select>
+      </div>
+
+      {/* Grid */}
+      <div className="mt-8 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+        {filtered.map((item) => (
+          <EquipmentCard key={item.id} item={item} />
+        ))}
+      </div>
+
+      {filtered.length === 0 && (
+        <p className="mt-12 text-center text-muted-foreground">
+          No equipment found in this category.
+        </p>
+      )}
+
+      {/* Need help CTA */}
+      <section className="mt-16 rounded-xl bg-muted/50 p-8 text-center md:p-12">
+        <h2 className="text-2xl font-heading font-bold text-foreground">
+          Need help choosing?
+        </h2>
+        <p className="mx-auto mt-2 max-w-lg text-muted-foreground">
+          Our team can recommend the right equipment based on your needs,
+          accommodation, and itinerary.
+        </p>
+        <div className="mt-6 flex flex-col items-center gap-4 sm:flex-row sm:justify-center">
+          <Button asChild size="lg" className="rounded-xl bg-accent text-accent-foreground hover:bg-accent/90">
+            <a
+              href="https://wa.me/30210XXXXXXX"
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              <MessageCircle className="mr-2 h-5 w-5" />
+              Chat on WhatsApp
+            </a>
+          </Button>
+          <Button asChild variant="outline" size="lg" className="rounded-xl">
+            <Link to="/contact">Contact Us</Link>
+          </Button>
+        </div>
+      </section>
+    </div>
+  );
+};
+
+export default EquipmentListing;

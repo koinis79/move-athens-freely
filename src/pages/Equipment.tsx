@@ -1,3 +1,5 @@
-import PlaceholderPage from "@/components/PlaceholderPage";
-const Equipment = () => <PlaceholderPage title="Equipment" />;
+import EquipmentListing from "@/components/equipment/EquipmentListing";
+
+const Equipment = () => <EquipmentListing />;
+
 export default Equipment;
