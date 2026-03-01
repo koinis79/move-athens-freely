@@ -1,6 +1,14 @@
 import { useState, useEffect } from "react";
 import { Link, useLocation } from "react-router-dom";
-import { Menu, X } from "lucide-react";
+import { Menu, X, ChevronDown, User, LogOut, LayoutDashboard } from "lucide-react";
+import { useAuth } from "@/context/AuthContext";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 
 const navLinks = [
   { label: "Equipment", to: "/equipment" },
@@ -15,10 +23,14 @@ const Header = () => {
   const [scrolled, setScrolled] = useState(false);
   const [lang, setLang] = useState<"EN" | "GR">("EN");
   const location = useLocation();
+  const { user, signOut } = useAuth();
 
-  useEffect(() => {
-    setMenuOpen(false);
-  }, [location.pathname]);
+  const displayName =
+    user?.user_metadata?.full_name ||
+    user?.email?.split("@")[0] ||
+    "Account";
+
+  useEffect(() => { setMenuOpen(false); }, [location.pathname]);
 
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 10);
@@ -34,12 +46,7 @@ const Header = () => {
       }`}
     >
       <div className="container flex h-[var(--header-height)] items-center justify-between">
-        {/* Logo */}
-        <Link
-          to="/"
-          className="font-heading text-xl font-extrabold text-primary tracking-tight"
-          aria-label="Moveability — Home"
-        >
+        <Link to="/" className="font-heading text-xl font-extrabold text-primary tracking-tight" aria-label="Moveability — Home">
           Moveability
         </Link>
 
@@ -50,9 +57,7 @@ const Header = () => {
               key={link.to}
               to={link.to}
               className={`px-3 py-2 rounded-lg text-sm font-medium transition-colors hover:bg-muted focus-visible:bg-muted ${
-                location.pathname.startsWith(link.to)
-                  ? "text-primary font-semibold"
-                  : "text-foreground/80"
+                location.pathname.startsWith(link.to) ? "text-primary font-semibold" : "text-foreground/80"
               }`}
             >
               {link.label}
@@ -69,12 +74,35 @@ const Header = () => {
           >
             {lang === "EN" ? "EN" : "GR"} | {lang === "EN" ? "GR" : "EN"}
           </button>
-          <Link
-            to="/login"
-            className="text-sm font-medium text-foreground/80 hover:text-primary transition-colors"
-          >
-            Sign In
-          </Link>
+
+          {user ? (
+            <DropdownMenu>
+              <DropdownMenuTrigger className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm font-medium hover:bg-muted transition-colors">
+                <div className="h-7 w-7 rounded-full bg-primary/10 flex items-center justify-center">
+                  <User className="h-4 w-4 text-primary" />
+                </div>
+                <span className="max-w-[120px] truncate text-foreground/80">{displayName}</span>
+                <ChevronDown className="h-3.5 w-3.5 text-muted-foreground" />
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end" className="w-48">
+                <DropdownMenuItem asChild>
+                  <Link to="/dashboard" className="gap-2"><LayoutDashboard className="h-4 w-4" /> My Bookings</Link>
+                </DropdownMenuItem>
+                <DropdownMenuItem asChild>
+                  <Link to="/dashboard" className="gap-2"><User className="h-4 w-4" /> Profile</Link>
+                </DropdownMenuItem>
+                <DropdownMenuSeparator />
+                <DropdownMenuItem onClick={signOut} className="gap-2 text-destructive focus:text-destructive">
+                  <LogOut className="h-4 w-4" /> Sign Out
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
+          ) : (
+            <Link to="/login" className="text-sm font-medium text-foreground/80 hover:text-primary transition-colors">
+              Sign In
+            </Link>
+          )}
+
           <Link
             to="/equipment"
             className="inline-flex items-center justify-center px-5 py-2.5 rounded-xl bg-primary text-primary-foreground text-sm font-semibold hover:bg-primary/90 transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary"
@@ -106,11 +134,7 @@ const Header = () => {
         aria-label="Mobile navigation"
       >
         <div className="flex justify-end p-4">
-          <button
-            onClick={() => setMenuOpen(false)}
-            className="p-2 rounded-lg hover:bg-muted"
-            aria-label="Close menu"
-          >
+          <button onClick={() => setMenuOpen(false)} className="p-2 rounded-lg hover:bg-muted" aria-label="Close menu">
             <X className="h-6 w-6" />
           </button>
         </div>
@@ -120,9 +144,7 @@ const Header = () => {
               key={link.to}
               to={link.to}
               className={`px-3 py-3 rounded-lg font-medium transition-colors hover:bg-muted ${
-                location.pathname.startsWith(link.to)
-                  ? "text-primary font-semibold"
-                  : "text-foreground/80"
+                location.pathname.startsWith(link.to) ? "text-primary font-semibold" : "text-foreground/80"
               }`}
             >
               {link.label}
@@ -135,12 +157,25 @@ const Header = () => {
           >
             Language: {lang}
           </button>
-          <Link
-            to="/login"
-            className="px-3 py-3 rounded-lg font-medium hover:bg-muted transition-colors"
-          >
-            Sign In
-          </Link>
+
+          {user ? (
+            <>
+              <Link to="/dashboard" className="px-3 py-3 rounded-lg font-medium hover:bg-muted transition-colors">
+                My Bookings
+              </Link>
+              <button
+                onClick={signOut}
+                className="px-3 py-3 text-left rounded-lg font-medium text-destructive hover:bg-muted transition-colors"
+              >
+                Sign Out
+              </button>
+            </>
+          ) : (
+            <Link to="/login" className="px-3 py-3 rounded-lg font-medium hover:bg-muted transition-colors">
+              Sign In
+            </Link>
+          )}
+
           <Link
             to="/equipment"
             className="mt-2 inline-flex items-center justify-center px-5 py-3 rounded-xl bg-primary text-primary-foreground font-semibold hover:bg-primary/90 transition-colors"
@@ -150,7 +185,6 @@ const Header = () => {
         </nav>
       </div>
 
-      {/* Overlay */}
       {menuOpen && (
         <div
           className="fixed inset-0 z-40 bg-foreground/20 backdrop-blur-sm lg:hidden"
