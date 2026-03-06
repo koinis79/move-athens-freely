@@ -217,10 +217,32 @@ const Checkout = () => {
       }
 
       const bookingNumber = data[0].booking_number;
-
-      // Clear cart and redirect
       clearCart();
-      navigate(`/booking/confirmation/${bookingNumber}`);
+
+      // Call edge function to create Stripe Checkout Session
+      const { data: { session: supabaseSession } } = await supabase.auth.getSession();
+      const res = await fetch(
+        `${import.meta.env.VITE_SUPABASE_URL ?? "https://lmgpuqgwkiapgpdsxvmb.supabase.co"}/functions/v1/create-checkout-session`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            "apikey": import.meta.env.VITE_SUPABASE_ANON_KEY ?? "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImxtZ3B1cWd3a2lhcGdwZHN4dm1iIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzIzNjc1NzksImV4cCI6MjA4Nzk0MzU3OX0.WTs1-rimMSZtPoedl7qgxiWXGOJm8-yMaUEKfU7XuCI",
+            ...(supabaseSession?.access_token
+              ? { Authorization: `Bearer ${supabaseSession.access_token}` }
+              : {}),
+          },
+          body: JSON.stringify({ booking_number: bookingNumber }),
+        }
+      );
+
+      const result = await res.json();
+      if (!res.ok || !result.url) {
+        throw new Error(result.error ?? "Failed to create payment session");
+      }
+
+      // Redirect to Stripe Checkout
+      window.location.href = result.url;
     } catch (err: any) {
       setSubmitError(err.message ?? "Something went wrong. Please try again.");
       setSubmitting(false);
