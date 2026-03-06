@@ -44,6 +44,7 @@ function mapRow(row: EquipmentRow): EquipmentItem {
         ? "Limited"
         : "Unavailable",
     popular: row.is_popular ?? false,
+    // Use first DB image URL, fall back to empty string (card handles missing gracefully)
     image: row.images?.[0] ?? "",
   };
 }
@@ -87,7 +88,12 @@ export function useEquipment(categorySlug?: string) {
       setLoading(false);
     }
 
-    fetchItems();
+    fetchItems().catch((err) => {
+      if (!cancelled) {
+        setError(err?.message ?? "Unexpected error loading equipment");
+        setLoading(false);
+      }
+    });
     return () => {
       cancelled = true;
     };
@@ -144,7 +150,12 @@ export function useEquipmentDetail(slug: string | undefined) {
       setLoading(false);
     }
 
-    fetchDetail();
+    fetchDetail().catch((err) => {
+      if (!cancelled) {
+        setError(err?.message ?? "Unexpected error loading equipment");
+        setLoading(false);
+      }
+    });
     return () => {
       cancelled = true;
     };
