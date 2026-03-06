@@ -2,6 +2,7 @@ import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Accessibility, MapPin, Heart } from "lucide-react";
+import aboutHeroImg from "@/assets/about-hero.jpg";
 
 const values = [
   {
