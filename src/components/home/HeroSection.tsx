@@ -1,6 +1,7 @@
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { CheckCircle } from "lucide-react";
+import heroImage from "@/assets/hero-athens.jpg";
 
 const trustItems = [
   "Free delivery in city center",
@@ -9,7 +10,22 @@ const trustItems = [
 ];
 
 const HeroSection = () => (
-  <section className="relative overflow-hidden bg-gradient-to-br from-primary/10 via-background to-background py-20 md:py-28 lg:py-32">
+  <section className="relative overflow-hidden py-20 md:py-28 lg:py-32">
+    {/* Background image - light mode only */}
+    <div
+      className="absolute inset-0 bg-cover bg-center dark:hidden"
+      style={{ backgroundImage: `url(${heroImage})` }}
+    />
+    {/* Light overlay for readability */}
+    <div className="absolute inset-0 bg-white/75 dark:hidden" />
+
+    {/* Dark mode fallback gradient */}
+    <div className="absolute inset-0 hidden dark:block bg-gradient-to-br from-primary/10 via-background to-background" />
+
+    {/* Decorative blobs */}
+    <div className="pointer-events-none absolute -right-32 -top-32 h-96 w-96 rounded-full bg-primary/5 blur-3xl" />
+    <div className="pointer-events-none absolute -bottom-24 -left-24 h-72 w-72 rounded-full bg-secondary/10 blur-3xl" />
+
     <div className="container relative z-10 flex flex-col items-center text-center">
       <h1 className="max-w-3xl text-4xl font-heading font-extrabold tracking-tight text-foreground md:text-5xl lg:text-6xl">
         Move Freely. Explore Athens.
@@ -38,10 +54,6 @@ const HeroSection = () => (
         ))}
       </div>
     </div>
-
-    {/* Decorative blobs */}
-    <div className="pointer-events-none absolute -right-32 -top-32 h-96 w-96 rounded-full bg-primary/5 blur-3xl" />
-    <div className="pointer-events-none absolute -bottom-24 -left-24 h-72 w-72 rounded-full bg-secondary/10 blur-3xl" />
   </section>
 );
 
