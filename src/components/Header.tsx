@@ -25,6 +25,7 @@ const Header = () => {
   const [lang, setLang] = useState<"EN" | "GR">("EN");
   const location = useLocation();
   const { user, signOut } = useAuth();
+  const { theme, setTheme } = useTheme();
 
   const displayName =
     user?.user_metadata?.full_name ||
