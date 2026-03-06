@@ -1,6 +1,7 @@
 import { useState, useEffect, useMemo } from "react";
+import { Link } from "react-router-dom";
 import { format, differenceInDays } from "date-fns";
-import { CalendarIcon, Minus, Plus, ShieldCheck } from "lucide-react";
+import { CalendarIcon, Minus, Plus, ShieldCheck, ShoppingCart } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { Calendar } from "@/components/ui/calendar";
@@ -19,6 +20,7 @@ import {
 import { supabase } from "@/integrations/supabase/client";
 import { getPriceForDays, type EquipmentItem } from "@/data/equipment";
 import { useCart } from "@/context/CartContext";
+import { useToast } from "@/hooks/use-toast";
 
 interface DeliveryZone {
   id: string;
@@ -40,6 +42,7 @@ const TIER_LABELS = [
 
 const BookingPanel = ({ item }: Props) => {
   const { addItem } = useCart();
+  const { toast } = useToast();
   const [startDate, setStartDate] = useState<Date>();
   const [endDate, setEndDate] = useState<Date>();
   const [qty, setQty] = useState(1);
@@ -97,6 +100,18 @@ const BookingPanel = ({ item }: Props) => {
     });
     setAdded(true);
     setTimeout(() => setAdded(false), 2000);
+    toast({
+      title: "Added to cart!",
+      description: `${item.name}${qty > 1 ? ` × ${qty}` : ""} added for ${numDays} day${numDays !== 1 ? "s" : ""}.`,
+      action: (
+        <Link
+          to="/cart"
+          className="inline-flex h-8 items-center justify-center rounded-md border border-input bg-transparent px-3 text-sm font-medium ring-offset-background transition-colors hover:bg-accent hover:text-accent-foreground"
+        >
+          View Cart
+        </Link>
+      ),
+    });
   };
 
   return (
@@ -297,8 +312,20 @@ const BookingPanel = ({ item }: Props) => {
           disabled={!startDate || !endDate || numDays === 0 || added}
           onClick={handleAddToCart}
         >
-          {added ? "Added to Cart ✓" : "Add to Cart"}
+          <ShoppingCart className="mr-2 h-5 w-5" />
+          {added ? "Added to Cart!" : "Add to Cart"}
         </Button>
+
+        {added && (
+          <div className="flex justify-center">
+            <Link
+              to="/cart"
+              className="text-sm text-primary font-medium underline underline-offset-2"
+            >
+              View cart &amp; checkout →
+            </Link>
+          </div>
+        )}
 
         <p className="flex items-center justify-center gap-1.5 text-xs text-muted-foreground">
           <ShieldCheck className="h-3.5 w-3.5 text-accent" />
