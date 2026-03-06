@@ -2,6 +2,7 @@ import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Accessibility, MapPin, Heart } from "lucide-react";
+import aboutHeroImg from "@/assets/about-hero.jpg";
 
 const values = [
   {
@@ -63,7 +64,7 @@ const About = () => (
         <div className="overflow-hidden rounded-2xl border border-border bg-muted/50">
           <div className="flex aspect-[4/3] items-center justify-center text-sm text-muted-foreground">
             <img
-              src="/placeholder.svg"
+              src={aboutHeroImg}
               alt="Someone exploring Athens with mobility equipment"
               className="h-full w-full object-cover"
             />

@@ -1,3 +1,13 @@
+// Equipment product images
+import lightweightFoldingWheelchairImg from "@/assets/equipment/lightweight-folding-wheelchair.jpg";
+import heavyDutyWheelchairImg from "@/assets/equipment/heavy-duty-wheelchair.jpg";
+import compactPowerWheelchairImg from "@/assets/equipment/compact-power-wheelchair.jpg";
+import premiumPowerWheelchairImg from "@/assets/equipment/premium-power-wheelchair.jpg";
+import fourWheelScooterImg from "@/assets/equipment/4-wheel-mobility-scooter.jpg";
+import foldableTravelScooterImg from "@/assets/equipment/foldable-travel-scooter.jpg";
+import standardRollatorImg from "@/assets/equipment/standard-rollator.jpg";
+import lightweightCarbonRollatorImg from "@/assets/equipment/lightweight-carbon-rollator.jpg";
+
 export type EquipmentCategory =
   | "Wheelchair"
   | "Power Wheelchair"
@@ -17,6 +27,7 @@ export interface EquipmentItem {
   pricePerWeek: number;
   availability: Availability;
   popular?: boolean;
+  image: string;
 }
 
 export const categorySlugMap: Record<string, EquipmentCategory> = {
@@ -46,6 +57,7 @@ export const equipmentItems: EquipmentItem[] = [
     pricePerWeek: 60,
     availability: "Available",
     popular: true,
+    image: lightweightFoldingWheelchairImg,
   },
   {
     id: "2",
@@ -57,6 +69,7 @@ export const equipmentItems: EquipmentItem[] = [
     pricePerDay: 15,
     pricePerWeek: 85,
     availability: "Available",
+    image: heavyDutyWheelchairImg,
   },
   {
     id: "3",
@@ -69,6 +82,7 @@ export const equipmentItems: EquipmentItem[] = [
     pricePerWeek: 210,
     availability: "Available",
     popular: true,
+    image: compactPowerWheelchairImg,
   },
   {
     id: "4",
@@ -80,6 +94,7 @@ export const equipmentItems: EquipmentItem[] = [
     pricePerDay: 45,
     pricePerWeek: 280,
     availability: "Limited",
+    image: premiumPowerWheelchairImg,
   },
   {
     id: "5",
@@ -92,6 +107,7 @@ export const equipmentItems: EquipmentItem[] = [
     pricePerWeek: 150,
     availability: "Available",
     popular: true,
+    image: fourWheelScooterImg,
   },
   {
     id: "6",
@@ -103,6 +119,7 @@ export const equipmentItems: EquipmentItem[] = [
     pricePerDay: 30,
     pricePerWeek: 180,
     availability: "Available",
+    image: foldableTravelScooterImg,
   },
   {
     id: "7",
@@ -114,6 +131,7 @@ export const equipmentItems: EquipmentItem[] = [
     pricePerDay: 5,
     pricePerWeek: 30,
     availability: "Available",
+    image: standardRollatorImg,
   },
   {
     id: "8",
@@ -125,5 +143,6 @@ export const equipmentItems: EquipmentItem[] = [
     pricePerDay: 8,
     pricePerWeek: 45,
     availability: "Available",
+    image: lightweightCarbonRollatorImg,
   },
 ];

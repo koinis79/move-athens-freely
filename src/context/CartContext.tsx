@@ -39,6 +39,7 @@ const defaultItems: CartItem[] = [
       pricePerWeek: 60,
       availability: "Available",
       popular: true,
+      image: "",
     },
     startDate: mockStartDate,
     endDate: mockEndDate,
