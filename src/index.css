@@ -46,6 +46,9 @@
     --sidebar-ring: 217 91% 53%;
 
     --header-height: 4.5rem;
+
+    --footer-bg: 220 20% 16%;
+    --footer-fg: 40 20% 96%;
   }
 
   .dark {
@@ -76,6 +79,9 @@
     --sidebar-accent-foreground: 40 20% 96%;
     --sidebar-border: 220 15% 22%;
     --sidebar-ring: 217 91% 60%;
+
+    --footer-bg: 220 20% 8%;
+    --footer-fg: 40 20% 90%;
   }
 }
 
