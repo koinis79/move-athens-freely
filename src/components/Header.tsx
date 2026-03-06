@@ -43,9 +43,9 @@ const Header = () => {
   return (
     <header
       role="banner"
-      className={`sticky top-0 z-50 w-full bg-background/95 backdrop-blur-sm transition-shadow duration-300 ${
-        scrolled ? "shadow-md" : "shadow-none"
-      }`}
+      className={`sticky top-0 z-50 w-full bg-background/95 transition-shadow duration-300 ${
+        !menuOpen ? "backdrop-blur-sm" : ""
+      } ${scrolled ? "shadow-md" : "shadow-none"}`}
     >
       <div className="container flex h-[var(--header-height)] items-center justify-between">
         <Link to="/" className="font-heading text-xl font-extrabold text-primary tracking-tight" aria-label="Moveability — Home">
@@ -135,7 +135,7 @@ const Header = () => {
       {/* Mobile slide-in menu */}
       <div
         id="mobile-menu"
-        className={`fixed inset-y-0 right-0 z-50 w-72 bg-background shadow-2xl transform transition-transform duration-300 ease-in-out lg:hidden ${
+        className={`fixed inset-y-0 right-0 z-50 w-72 bg-background shadow-2xl transform transition-transform duration-300 ease-in-out lg:hidden overflow-y-auto ${
           menuOpen ? "translate-x-0" : "translate-x-full"
         }`}
         role="dialog"
