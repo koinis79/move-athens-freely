@@ -25,9 +25,21 @@ export interface EquipmentItem {
   description: string;
   pricePerDay: number;
   pricePerWeek: number;
+  priceTier1: number;
+  priceTier2: number;
+  priceTier3: number;
+  priceTier4: number;
   availability: Availability;
   popular?: boolean;
   image: string;
+}
+
+/** Return the correct tier price for a given number of rental days */
+export function getPriceForDays(item: EquipmentItem, days: number): number {
+  if (days <= 3) return item.priceTier1;
+  if (days <= 7) return item.priceTier2;
+  if (days <= 14) return item.priceTier3;
+  return item.priceTier4;
 }
 
 export const categorySlugMap: Record<string, EquipmentCategory> = {
@@ -55,6 +67,10 @@ export const equipmentItems: EquipmentItem[] = [
     description: "Ultra-light aluminium frame, folds compactly for travel and storage.",
     pricePerDay: 10,
     pricePerWeek: 60,
+    priceTier1: 10,
+    priceTier2: 60,
+    priceTier3: 100,
+    priceTier4: 200,
     availability: "Available",
     popular: true,
     image: lightweightFoldingWheelchairImg,
@@ -68,6 +84,10 @@ export const equipmentItems: EquipmentItem[] = [
     description: "Reinforced steel frame supporting up to 150 kg with padded seating.",
     pricePerDay: 15,
     pricePerWeek: 85,
+    priceTier1: 15,
+    priceTier2: 85,
+    priceTier3: 150,
+    priceTier4: 280,
     availability: "Available",
     image: heavyDutyWheelchairImg,
   },
@@ -80,6 +100,10 @@ export const equipmentItems: EquipmentItem[] = [
     description: "Joystick-controlled electric wheelchair, ideal for city exploration.",
     pricePerDay: 35,
     pricePerWeek: 210,
+    priceTier1: 35,
+    priceTier2: 210,
+    priceTier3: 380,
+    priceTier4: 700,
     availability: "Available",
     popular: true,
     image: compactPowerWheelchairImg,
@@ -93,6 +117,10 @@ export const equipmentItems: EquipmentItem[] = [
     description: "Top-of-the-line power chair with extended battery and suspension.",
     pricePerDay: 45,
     pricePerWeek: 280,
+    priceTier1: 45,
+    priceTier2: 280,
+    priceTier3: 500,
+    priceTier4: 900,
     availability: "Limited",
     image: premiumPowerWheelchairImg,
   },
@@ -105,6 +133,10 @@ export const equipmentItems: EquipmentItem[] = [
     description: "Stable four-wheel scooter perfect for outdoor sightseeing in Athens.",
     pricePerDay: 25,
     pricePerWeek: 150,
+    priceTier1: 25,
+    priceTier2: 150,
+    priceTier3: 270,
+    priceTier4: 500,
     availability: "Available",
     popular: true,
     image: fourWheelScooterImg,
@@ -118,6 +150,10 @@ export const equipmentItems: EquipmentItem[] = [
     description: "Lightweight foldable scooter that fits in most car trunks and taxis.",
     pricePerDay: 30,
     pricePerWeek: 180,
+    priceTier1: 30,
+    priceTier2: 180,
+    priceTier3: 320,
+    priceTier4: 600,
     availability: "Available",
     image: foldableTravelScooterImg,
   },
@@ -130,6 +166,10 @@ export const equipmentItems: EquipmentItem[] = [
     description: "Four-wheeled rollator with built-in seat, basket, and hand brakes.",
     pricePerDay: 5,
     pricePerWeek: 30,
+    priceTier1: 5,
+    priceTier2: 30,
+    priceTier3: 50,
+    priceTier4: 90,
     availability: "Available",
     image: standardRollatorImg,
   },
@@ -142,6 +182,10 @@ export const equipmentItems: EquipmentItem[] = [
     description: "Premium carbon-fibre rollator, extremely light yet durable.",
     pricePerDay: 8,
     pricePerWeek: 45,
+    priceTier1: 8,
+    priceTier2: 45,
+    priceTier3: 80,
+    priceTier4: 150,
     availability: "Available",
     image: lightweightCarbonRollatorImg,
   },

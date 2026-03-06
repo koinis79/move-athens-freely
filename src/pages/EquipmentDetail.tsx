@@ -69,6 +69,7 @@ const EquipmentDetail = () => {
   const specs = Object.entries(specifications).map(([label, value]) => ({
     label,
     value: String(value),
+    icon: "Circle",
   }));
 
   return (

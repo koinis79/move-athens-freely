@@ -1,6 +1,7 @@
 import { Navigate } from "react-router-dom";
 import { useAuth } from "@/context/AuthContext";
 import { useEffect, useState } from "react";
+import { supabase } from "@/integrations/supabase/client";
 
 const AdminRoute = ({ children }: { children: React.ReactNode }) => {
   const { user, loading } = useAuth();
@@ -9,11 +10,9 @@ const AdminRoute = ({ children }: { children: React.ReactNode }) => {
   useEffect(() => {
     if (!user) return;
 
-    // TODO: Once user_roles table + has_role() function are created via migration,
-    // replace this with: supabase.rpc('has_role', { _user_id: user.id, _role: 'admin' })
     const checkAdmin = async () => {
-      // For now, allow all authenticated users during development
-      setIsAdmin(true);
+      const { data, error } = await supabase.rpc("is_admin");
+      setIsAdmin(error ? false : data === true);
     };
 
     checkAdmin();

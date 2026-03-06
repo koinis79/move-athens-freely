@@ -35,7 +35,6 @@ function mapRow(row: EquipmentRow): EquipmentItem {
     priceTier2: Number(row.price_tier2),
     priceTier3: Number(row.price_tier3),
     priceTier4: Number(row.price_tier4),
-    // pricePerDay / pricePerWeek kept for any legacy display usage
     pricePerDay: Number(row.price_tier1),
     pricePerWeek: Number(row.price_tier2),
     availability:
@@ -45,6 +44,7 @@ function mapRow(row: EquipmentRow): EquipmentItem {
         ? "Limited"
         : "Unavailable",
     popular: row.is_popular ?? false,
+    image: row.images?.[0] ?? "",
   };
 }
 
