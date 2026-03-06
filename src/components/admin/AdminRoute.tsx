@@ -1,7 +1,6 @@
 import { Navigate } from "react-router-dom";
 import { useAuth } from "@/context/AuthContext";
 import { useEffect, useState } from "react";
-import { supabase } from "@/integrations/supabase/client";
 
 const AdminRoute = ({ children }: { children: React.ReactNode }) => {
   const { user, loading } = useAuth();
