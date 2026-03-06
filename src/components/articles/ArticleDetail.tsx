@@ -91,7 +91,7 @@ const ArticleDetail = ({
           {/* Featured image */}
           <div className="mt-8 overflow-hidden rounded-xl border border-border bg-muted">
             <img
-              src="/placeholder.svg"
+              src={article.image}
               alt={article.title}
               className="aspect-[16/9] w-full object-cover"
             />
