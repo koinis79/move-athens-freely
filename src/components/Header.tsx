@@ -135,7 +135,7 @@ const Header = () => {
       {/* Mobile slide-in menu */}
       <div
         id="mobile-menu"
-        className={`fixed inset-y-0 right-0 z-50 w-72 bg-background shadow-2xl transform transition-transform duration-300 ease-in-out lg:hidden ${
+        className={`fixed inset-y-0 right-0 z-50 w-72 bg-background shadow-2xl transform transition-transform duration-300 ease-in-out lg:hidden overflow-y-auto ${
           menuOpen ? "translate-x-0" : "translate-x-full"
         }`}
         role="dialog"
