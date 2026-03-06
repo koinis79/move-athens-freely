@@ -1,16 +1,22 @@
 import { useParams, Link } from "react-router-dom";
 import { Badge } from "@/components/ui/badge";
+import { Skeleton } from "@/components/ui/skeleton";
 import { CheckCircle2 } from "lucide-react";
-import { equipmentItems, categoryFilterLabels } from "@/data/equipment";
-import {
-  equipmentDetailsMap,
-  defaultDetails,
-} from "@/data/equipmentSpecs";
+import { categoryFilterLabels } from "@/data/equipment";
+import { useEquipmentDetail, useRelatedEquipment } from "@/hooks/useEquipment";
 import ImageGallery from "@/components/equipment/ImageGallery";
 import BookingPanel from "@/components/equipment/BookingPanel";
 import SpecificationsSection from "@/components/equipment/SpecificationsSection";
 import EquipmentCard from "@/components/equipment/EquipmentCard";
 import NotFound from "./NotFound";
+
+const DEFAULT_INCLUDED = [
+  "Professionally sanitized before delivery",
+  "Free safety check and demonstration",
+  "Delivery & pickup by our team",
+  "24/7 emergency support during rental",
+  "Equipment insurance included",
+];
 
 const availabilityStyles: Record<string, string> = {
   Available: "bg-accent/15 text-accent border-accent/30",
@@ -22,43 +28,53 @@ const categoryColors: Record<string, string> = {
   Wheelchair: "bg-primary/10 text-primary",
   "Power Wheelchair": "bg-primary/10 text-primary",
   "Mobility Scooter": "bg-secondary/10 text-secondary",
-  Rollator: "bg-accent/10 text-accent",
+  "Walking Aid": "bg-accent/10 text-accent",
 };
 
 const EquipmentDetail = () => {
   const { categorySlug, slug } = useParams();
+  const { data, loading, error } = useEquipmentDetail(slug);
+  const { related, loading: relatedLoading } = useRelatedEquipment(
+    data?.item.categorySlug,
+    data?.item.id
+  );
 
-  const item = equipmentItems.find((i) => i.slug === slug);
-  if (!item) return <NotFound />;
+  // Loading skeleton
+  if (loading) {
+    return (
+      <div className="container py-8 md:py-12">
+        <Skeleton className="h-4 w-48 mb-6" />
+        <div className="grid gap-8 lg:grid-cols-[3fr_2fr]">
+          <Skeleton className="h-96 rounded-2xl" />
+          <div className="space-y-4">
+            <Skeleton className="h-6 w-32" />
+            <Skeleton className="h-8 w-3/4" />
+            <Skeleton className="h-20 w-full" />
+            <Skeleton className="h-64 w-full rounded-xl" />
+          </div>
+        </div>
+      </div>
+    );
+  }
 
-  const details = equipmentDetailsMap[item.slug] ?? {
-    ...defaultDetails,
-    pricePerMonth: Math.round(item.pricePerDay * 30 * 0.67),
-  };
+  if (error || !data) return <NotFound />;
+
+  const { item, images, specifications, longDescription } = data;
 
   const categoryLabel =
     categoryFilterLabels.find((c) => c.slug === item.categorySlug)?.label ??
     item.category;
 
-  // Related items: same category first, then others, exclude current
-  const related = equipmentItems
-    .filter((i) => i.id !== item.id)
-    .sort((a, b) =>
-      a.categorySlug === item.categorySlug
-        ? -1
-        : b.categorySlug === item.categorySlug
-        ? 1
-        : 0
-    )
-    .slice(0, 3);
+  // Convert specifications JSONB to SpecItem[] for SpecificationsSection
+  const specs = Object.entries(specifications).map(([label, value]) => ({
+    label,
+    value: String(value),
+  }));
 
   return (
     <div className="container py-8 md:py-12">
       {/* Breadcrumb */}
-      <nav
-        aria-label="Breadcrumb"
-        className="mb-6 text-sm text-muted-foreground"
-      >
+      <nav aria-label="Breadcrumb" className="mb-6 text-sm text-muted-foreground">
         <ol className="flex flex-wrap items-center gap-1.5">
           <li>
             <Link to="/" className="hover:text-primary transition-colors">
@@ -67,10 +83,7 @@ const EquipmentDetail = () => {
           </li>
           <li aria-hidden="true">&gt;</li>
           <li>
-            <Link
-              to="/equipment"
-              className="hover:text-primary transition-colors"
-            >
+            <Link to="/equipment" className="hover:text-primary transition-colors">
               Equipment
             </Link>
           </li>
@@ -91,7 +104,7 @@ const EquipmentDetail = () => {
       {/* Two-column layout */}
       <div className="grid gap-8 lg:grid-cols-[3fr_2fr]">
         {/* Left — Image gallery */}
-        <ImageGallery images={details.images} alt={item.name} />
+        <ImageGallery images={images} alt={item.name} />
 
         {/* Right — Info + Booking */}
         <div className="space-y-5">
@@ -115,17 +128,19 @@ const EquipmentDetail = () => {
           </h1>
 
           <p className="text-muted-foreground leading-relaxed">
-            {details.longDescription}
+            {longDescription || item.description}
           </p>
 
-          <BookingPanel item={item} details={details} />
+          <BookingPanel item={item} />
         </div>
       </div>
 
       {/* Specifications */}
-      <div className="mt-12 md:mt-16">
-        <SpecificationsSection specs={details.specs} />
-      </div>
+      {specs.length > 0 && (
+        <div className="mt-12 md:mt-16">
+          <SpecificationsSection specs={specs} />
+        </div>
+      )}
 
       {/* What's Included */}
       <section className="mt-12 space-y-4">
@@ -133,7 +148,7 @@ const EquipmentDetail = () => {
           What's Included
         </h2>
         <ul className="grid gap-2 sm:grid-cols-2">
-          {details.included.map((text) => (
+          {DEFAULT_INCLUDED.map((text) => (
             <li key={text} className="flex items-center gap-2 text-foreground">
               <CheckCircle2 className="h-4 w-4 shrink-0 text-accent" />
               {text}
@@ -147,11 +162,19 @@ const EquipmentDetail = () => {
         <h2 className="text-2xl font-heading font-bold text-foreground">
           You might also need
         </h2>
-        <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
-          {related.map((r) => (
-            <EquipmentCard key={r.id} item={r} />
-          ))}
-        </div>
+        {relatedLoading ? (
+          <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+            {Array.from({ length: 3 }).map((_, i) => (
+              <Skeleton key={i} className="h-64 rounded-2xl" />
+            ))}
+          </div>
+        ) : (
+          <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+            {related.map((r) => (
+              <EquipmentCard key={r.id} item={r} />
+            ))}
+          </div>
+        )}
       </section>
     </div>
   );
