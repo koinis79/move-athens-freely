@@ -6,6 +6,7 @@ import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { CartProvider } from "@/context/CartContext";
 import { AuthProvider } from "@/context/AuthContext";
 import ProtectedRoute from "@/components/ProtectedRoute";
+import AdminRoute from "@/components/admin/AdminRoute";
 import Layout from "./components/Layout";
 import Index from "./pages/Index";
 import Equipment from "./pages/Equipment";
@@ -60,7 +61,7 @@ const App = () => (
                 <Route path="/forgot-password" element={<ForgotPassword />} />
                 <Route path="/reset-password" element={<ResetPassword />} />
                 <Route path="/dashboard" element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
-                <Route path="/admin" element={<ProtectedRoute><Admin /></ProtectedRoute>} />
+                <Route path="/admin" element={<AdminRoute><Admin /></AdminRoute>} />
                 <Route path="/blog" element={<Blog />} />
                 <Route path="/blog/:slug" element={<BlogPost />} />
                 <Route path="/privacy-policy" element={<PrivacyPolicy />} />
