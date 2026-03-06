@@ -2,21 +2,31 @@ import { Link } from "react-router-dom";
 import { ArrowRight } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 
+import acropolisImg from "@/assets/guides/acropolis.jpg";
+import restaurantsImg from "@/assets/guides/restaurants.jpg";
+import airportImg from "@/assets/guides/airport-transfer.jpg";
+
 const guides = [
   {
     title: "Is the Acropolis Wheelchair Accessible?",
     excerpt:
       "Discover the accessible routes, lifts, and facilities available at the Acropolis archaeological site.",
+    slug: "acropolis",
+    image: acropolisImg,
   },
   {
     title: "Accessible Restaurants in Plaka",
     excerpt:
       "A curated list of wheelchair-friendly restaurants in Athens' historic Plaka neighborhood.",
+    slug: "restaurants",
+    image: restaurantsImg,
   },
   {
     title: "Getting from Athens Airport with Mobility Equipment",
     excerpt:
       "Your complete guide to accessible transport options from Athens International Airport.",
+    slug: "airport-transfer",
+    image: airportImg,
   },
 ];
 
@@ -31,12 +41,12 @@ const AccessibleAthensSection = () => (
       </p>
 
       <div className="mt-12 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
-        {guides.map(({ title, excerpt }) => (
-          <Link key={title} to="/accessible-athens" className="group">
+        {guides.map(({ title, excerpt, slug, image }) => (
+          <Link key={slug} to={`/accessible-athens/${slug}`} className="group">
             <Card className="overflow-hidden transition-all duration-200 hover:-translate-y-1 hover:shadow-lg h-full">
               <div className="aspect-video bg-muted flex items-center justify-center">
                 <img
-                  src="/placeholder.svg"
+                  src={image}
                   alt={title}
                   className="h-full w-full object-cover"
                   loading="lazy"

@@ -25,7 +25,7 @@ const EquipmentCard = ({ item }: { item: EquipmentItem }) => (
     <Card className="h-full overflow-hidden transition-all duration-200 hover:-translate-y-1 hover:shadow-lg">
       <div className="relative aspect-[3/2] bg-muted flex items-center justify-center">
         <img
-          src="/placeholder.svg"
+          src={item.image}
           alt={item.name}
           className="h-full w-full object-cover"
           loading="lazy"
