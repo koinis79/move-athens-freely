@@ -167,43 +167,8 @@ const Checkout = () => {
     setSubmitError(null);
 
     try {
-      // 1. Insert booking
-      const { data: booking, error: bookingErr } = await supabase
-        .from("bookings")
-        .insert({
-          booking_number: "",
-          user_id: user?.id ?? null,
-          customer_name: form.name.trim(),
-          customer_email: form.email.trim(),
-          customer_phone: form.phone.trim(),
-          delivery_zone_id: form.deliveryZoneId || null,
-          delivery_address: `${form.hotelName.trim()}, ${form.address.trim()}`,
-          delivery_time_slot: form.deliveryTimeSlot,
-          delivery_notes: form.deliveryNotes.trim() || null,
-          rental_start: format(rentalStart, "yyyy-MM-dd"),
-          rental_end: format(rentalEnd, "yyyy-MM-dd"),
-          num_days: Math.max(
-            1,
-            differenceInDays(rentalEnd, rentalStart)
-          ),
-          subtotal: equipmentTotal,
-          delivery_fee: deliveryFee,
-          discount_amount: 0,
-          total_amount: total,
-          deposit_amount: 0,
-          status: "pending",
-          payment_status: "pending",
-        })
-        .select("id, booking_number")
-        .single();
-
-      if (bookingErr || !booking) {
-        throw new Error(bookingErr?.message ?? "Failed to create booking");
-      }
-
-      // 2. Insert booking items
-      const bookingItems = lineItems.map((line) => ({
-        booking_id: booking.id,
+      // Build items payload
+      const itemsPayload = lineItems.map((line) => ({
         equipment_id: line.equipment.id,
         quantity: line.quantity,
         price_per_day: line.equipment.priceTier1,
@@ -211,43 +176,51 @@ const Checkout = () => {
         subtotal: line.subtotal,
       }));
 
-      const { error: itemsErr } = await supabase
-        .from("booking_items")
-        .insert(bookingItems);
-
-      if (itemsErr) {
-        throw new Error(itemsErr.message ?? "Failed to save booking items");
-      }
-
-      // 3. Insert availability records
-      const availabilityRows: {
-        equipment_id: string;
-        booking_id: string;
-        date: string;
-        quantity_booked: number;
-      }[] = [];
-
+      // Build availability payload
+      const availabilityPayload: { equipment_id: string; date: string; quantity_booked: number }[] = [];
       for (const line of lineItems) {
         const days = differenceInDays(line.endDate, line.startDate);
         for (let d = 0; d < days; d++) {
           const date = new Date(line.startDate);
           date.setDate(date.getDate() + d);
-          availabilityRows.push({
+          availabilityPayload.push({
             equipment_id: line.equipment.id,
-            booking_id: booking.id,
             date: format(date, "yyyy-MM-dd"),
             quantity_booked: line.quantity,
           });
         }
       }
 
-      if (availabilityRows.length > 0) {
-        await supabase.from("equipment_availability").insert(availabilityRows);
+      // Call SECURITY DEFINER function — bypasses RLS for INSERT + RETURNING
+      const { data, error: rpcErr } = await supabase.rpc("create_booking", {
+        p_booking_number: "",
+        p_user_id: user?.id ?? null,
+        p_customer_name: form.name.trim(),
+        p_customer_email: form.email.trim(),
+        p_customer_phone: form.phone.trim(),
+        p_delivery_zone_id: form.deliveryZoneId || null,
+        p_delivery_address: `${form.hotelName.trim()}, ${form.address.trim()}`,
+        p_delivery_time_slot: form.deliveryTimeSlot,
+        p_delivery_notes: form.deliveryNotes.trim() || null,
+        p_rental_start: format(rentalStart, "yyyy-MM-dd"),
+        p_rental_end: format(rentalEnd, "yyyy-MM-dd"),
+        p_num_days: Math.max(1, differenceInDays(rentalEnd, rentalStart)),
+        p_subtotal: equipmentTotal,
+        p_delivery_fee: deliveryFee,
+        p_total_amount: total,
+        p_items: itemsPayload,
+        p_availability: availabilityPayload,
+      });
+
+      if (rpcErr || !data || data.length === 0) {
+        throw new Error(rpcErr?.message ?? "Failed to create booking");
       }
 
-      // 4. Clear cart and redirect
+      const bookingNumber = data[0].booking_number;
+
+      // Clear cart and redirect
       clearCart();
-      navigate(`/booking/confirmation/${booking.booking_number}`);
+      navigate(`/booking/confirmation/${bookingNumber}`);
     } catch (err: any) {
       setSubmitError(err.message ?? "Something went wrong. Please try again.");
       setSubmitting(false);
@@ -492,7 +465,7 @@ const Checkout = () => {
                         ? "🛵"
                         : line.equipment.category === "Power Wheelchair"
                         ? "⚡"
-                        : line.equipment.category === "Rollator"
+                        : line.equipment.category === "Walking Aid"
                         ? "🦯"
                         : "♿"}
                     </div>
