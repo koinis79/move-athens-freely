@@ -14,6 +14,9 @@ import {
   Truck,
   Smile,
   MapPin,
+  Hotel,
+  Ship,
+  Plane,
   ArrowRight,
 } from "lucide-react";
 
@@ -29,7 +32,7 @@ const steps = [
     num: 2,
     Icon: CalendarDays,
     title: "Select Your Dates",
-    desc: "Choose your rental start and end dates. Need it for a day, a week, or a month? We have flexible pricing for every duration.",
+    desc: "Choose your rental start and end dates. Need it for 1 day, a week, or a month? We have flexible tiered pricing for every duration.",
   },
   {
     num: 3,
@@ -41,7 +44,7 @@ const steps = [
     num: 4,
     Icon: Truck,
     title: "We Deliver to Your Door",
-    desc: "Our team delivers your sanitized equipment directly to your hotel or accommodation. We'll meet you at reception and show you how everything works.",
+    desc: "Our team delivers your sanitized equipment directly to your hotel, airport, or cruise port. We'll meet you at reception and show you how everything works.",
   },
   {
     num: 5,
@@ -53,36 +56,71 @@ const steps = [
 
 /* ── Pricing cards ──────────────────────────────────────── */
 const pricingCards = [
-  { label: "Daily", price: "€5", unit: "day", note: "Best for short visits" },
-  { label: "Weekly", price: "€30", unit: "week", note: "Save up to 14%" },
-  { label: "Monthly", price: "€100", unit: "month", note: "Save up to 33%" },
+  {
+    label: "1–3 Days",
+    items: [
+      "Rollators from €20",
+      "Wheelchairs from €35",
+      "Scooters from €100",
+      "Power Wheelchairs from €150",
+    ],
+  },
+  {
+    label: "4–7 Days",
+    items: [
+      "Rollators from €35",
+      "Wheelchairs from €55",
+      "Scooters from €170",
+      "Power Wheelchairs from €250",
+    ],
+  },
+  {
+    label: "8–14 Days",
+    items: [
+      "Rollators from €55",
+      "Wheelchairs from €80",
+      "Scooters from €280",
+      "Power Wheelchairs from €400",
+    ],
+  },
 ];
 
 /* ── Delivery zones ─────────────────────────────────────── */
 const zones = [
   {
-    name: "Athens City Center",
-    areas: "Plaka, Monastiraki, Syntagma, Kolonaki",
-    fee: "Free delivery",
-    highlight: true,
+    Icon: Hotel,
+    name: "Hotel — City Center",
+    areas: "Syntagma, Plaka, Monastiraki, Psiri",
+    fee: "€10",
+    note: null,
   },
   {
-    name: "Greater Athens",
-    areas: "Kifisia, Glyfada, Marousi, Piraeus",
+    Icon: Hotel,
+    name: "Hotel — Extended Center",
+    areas: "Kallithea, Kolonaki, Pagkrati",
     fee: "€15",
-    highlight: false,
+    note: null,
   },
   {
-    name: "Piraeus Port",
-    areas: "Cruise terminals & port area",
+    Icon: Hotel,
+    name: "Hotel — Suburbs & Riviera",
+    areas: "Glyfada, Kifisia, Vouliagmeni",
     fee: "€20",
-    highlight: false,
+    note: null,
   },
   {
-    name: "Athens Airport",
-    areas: "Eleftherios Venizelos",
+    Icon: Ship,
+    name: "Piraeus Cruise / Ferry Terminal",
+    areas: "Cruise & ferry port area",
     fee: "€25",
-    highlight: false,
+    note: "pre-arranged",
+  },
+  {
+    Icon: Plane,
+    name: "Athens Airport (ATH)",
+    areas: "Eleftherios Venizelos",
+    fee: "€30",
+    note: "pre-arranged",
   },
 ];
 
@@ -129,7 +167,6 @@ const HowItWorks = () => (
     <section className="bg-background py-16 md:py-24">
       <div className="container max-w-4xl">
         <div className="relative">
-          {/* vertical line — desktop only */}
           <div className="absolute left-1/2 top-0 hidden h-full w-px -translate-x-1/2 bg-border md:block" />
 
           <div className="flex flex-col gap-12 md:gap-16">
@@ -140,7 +177,6 @@ const HowItWorks = () => (
                   key={num}
                   className="relative flex flex-col items-center md:flex-row"
                 >
-                  {/* Desktop: left or right content */}
                   <div
                     className={`hidden w-5/12 md:block ${
                       isLeft ? "pr-10 text-right" : "order-3 pl-10 text-left"
@@ -157,19 +193,16 @@ const HowItWorks = () => (
                     </Card>
                   </div>
 
-                  {/* Center node */}
                   <div className="z-10 flex h-12 w-12 shrink-0 items-center justify-center rounded-full bg-primary text-lg font-bold text-primary-foreground shadow-md md:order-2">
                     {num}
                   </div>
 
-                  {/* spacer on opposite side */}
                   <div
                     className={`hidden w-5/12 md:block ${
                       isLeft ? "order-3" : ""
                     }`}
                   />
 
-                  {/* Mobile card */}
                   <Card className="mt-4 w-full border-none bg-muted/50 shadow-none md:hidden">
                     <CardContent className="flex flex-col items-center p-6 text-center">
                       <Icon className="mb-3 h-7 w-7 text-primary" />
@@ -193,32 +226,43 @@ const HowItWorks = () => (
         <h2 className="text-center text-3xl font-heading font-bold text-foreground md:text-4xl">
           Transparent Pricing
         </h2>
+        <p className="mx-auto mt-4 max-w-2xl text-center text-muted-foreground">
+          Prices are per rental period — the longer you rent, the lower your
+          daily cost.
+        </p>
 
-        <div className="mx-auto mt-12 grid max-w-3xl gap-6 sm:grid-cols-3">
+        <div className="mx-auto mt-12 grid max-w-4xl gap-6 sm:grid-cols-3">
           {pricingCards.map((c) => (
             <Card
               key={c.label}
-              className="border border-border bg-card text-center shadow-sm"
+              className="border border-border bg-card shadow-sm"
             >
-              <CardContent className="flex flex-col items-center p-8">
+              <CardContent className="flex flex-col p-8">
                 <span className="text-sm font-semibold uppercase tracking-wider text-primary">
                   {c.label}
                 </span>
-                <p className="mt-3 text-4xl font-heading font-extrabold text-foreground">
-                  {c.price}
-                  <span className="text-lg font-medium text-muted-foreground">
-                    /{c.unit}
-                  </span>
-                </p>
-                <p className="mt-2 text-sm text-muted-foreground">{c.note}</p>
+                <ul className="mt-4 space-y-2">
+                  {c.items.map((item) => (
+                    <li
+                      key={item}
+                      className="text-sm text-foreground"
+                    >
+                      {item}
+                    </li>
+                  ))}
+                </ul>
               </CardContent>
             </Card>
           ))}
         </div>
 
         <p className="mx-auto mt-8 max-w-xl text-center text-sm text-muted-foreground">
-          All prices include sanitization, safety checks, and equipment
-          insurance. Delivery fees vary by zone.
+          All prices include sanitization and safety checks. Delivery fees vary
+          by zone. See full pricing on the{" "}
+          <Link to="/equipment" className="font-medium text-primary underline underline-offset-2">
+            Equipment page
+          </Link>
+          .
         </p>
       </div>
     </section>
@@ -230,42 +274,34 @@ const HowItWorks = () => (
           Delivery Zones
         </h2>
 
-        <div className="mx-auto mt-12 grid max-w-5xl gap-6 sm:grid-cols-2 lg:grid-cols-4">
+        <div className="mx-auto mt-12 grid max-w-6xl gap-6 sm:grid-cols-2 lg:grid-cols-5">
           {zones.map((z) => (
             <Card
               key={z.name}
-              className={`border text-center shadow-sm ${
-                z.highlight
-                  ? "border-primary/40 bg-primary/5"
-                  : "border-border bg-card"
-              }`}
+              className="border border-border bg-card text-center shadow-sm"
             >
               <CardContent className="flex flex-col items-center p-6">
-                <MapPin
-                  className={`h-7 w-7 ${
-                    z.highlight ? "text-primary" : "text-muted-foreground"
-                  }`}
-                />
-                <h3 className="mt-3 text-lg font-heading font-semibold text-foreground">
+                <z.Icon className="h-7 w-7 text-muted-foreground" />
+                <h3 className="mt-3 text-base font-heading font-semibold text-foreground">
                   {z.name}
                 </h3>
-                <p className="mt-1 text-sm text-muted-foreground">{z.areas}</p>
-                <span
-                  className={`mt-4 inline-block rounded-full px-4 py-1 text-sm font-semibold ${
-                    z.highlight
-                      ? "bg-accent text-accent-foreground"
-                      : "bg-muted text-foreground"
-                  }`}
-                >
+                <p className="mt-1 text-xs text-muted-foreground">{z.areas}</p>
+                <span className="mt-4 inline-block rounded-full bg-muted px-4 py-1 text-sm font-semibold text-foreground">
                   {z.fee}
                 </span>
+                {z.note && (
+                  <span className="mt-1 text-xs italic text-muted-foreground">
+                    {z.note}
+                  </span>
+                )}
               </CardContent>
             </Card>
           ))}
         </div>
 
         <p className="mx-auto mt-8 max-w-xl text-center text-sm text-muted-foreground">
-          Pickup is included at no extra charge for all zones.
+          Store pickup is free at any of our 4 Koinis locations. Pickup is
+          always included at no extra charge for all zones.
         </p>
       </div>
     </section>
