@@ -1,8 +1,9 @@
 import { useState, useEffect } from "react";
 import { Link, useLocation } from "react-router-dom";
-import { Menu, X, ChevronDown, User, LogOut, LayoutDashboard, Sun, Moon } from "lucide-react";
+import { Menu, X, ChevronDown, User, LogOut, LayoutDashboard, Sun, Moon, ShoppingCart } from "lucide-react";
 import { useTheme } from "next-themes";
 import { useAuth } from "@/context/AuthContext";
+import { useCart } from "@/context/CartContext";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -26,6 +27,7 @@ const Header = () => {
   const location = useLocation();
   const { user, signOut } = useAuth();
   const { theme, setTheme } = useTheme();
+  const { itemCount } = useCart();
 
   const displayName =
     user?.user_metadata?.full_name ||
@@ -113,12 +115,39 @@ const Header = () => {
           )}
 
           <Link
+            to="/cart"
+            className="relative p-2 rounded-lg border border-border hover:bg-muted transition-colors"
+            aria-label={`Cart${itemCount > 0 ? `, ${itemCount} item${itemCount !== 1 ? "s" : ""}` : ""}`}
+          >
+            <ShoppingCart className="h-4 w-4" />
+            {itemCount > 0 && (
+              <span className="absolute -top-1.5 -right-1.5 flex h-4 w-4 items-center justify-center rounded-full bg-primary text-[10px] font-bold text-primary-foreground">
+                {itemCount > 9 ? "9+" : itemCount}
+              </span>
+            )}
+          </Link>
+
+          <Link
             to="/equipment"
             className="inline-flex items-center justify-center px-5 py-2.5 rounded-xl bg-primary text-primary-foreground text-sm font-semibold hover:bg-primary/90 transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary"
           >
             Book Now
           </Link>
         </div>
+
+        {/* Mobile cart icon */}
+        <Link
+          to="/cart"
+          className="lg:hidden relative p-2 rounded-lg hover:bg-muted transition-colors"
+          aria-label={`Cart${itemCount > 0 ? `, ${itemCount} item${itemCount !== 1 ? "s" : ""}` : ""}`}
+        >
+          <ShoppingCart className="h-5 w-5" />
+          {itemCount > 0 && (
+            <span className="absolute -top-1 -right-1 flex h-4 w-4 items-center justify-center rounded-full bg-primary text-[10px] font-bold text-primary-foreground">
+              {itemCount > 9 ? "9+" : itemCount}
+            </span>
+          )}
+        </Link>
 
         {/* Mobile menu button */}
         <button
@@ -173,6 +202,16 @@ const Header = () => {
             {theme === "dark" ? <Sun className="h-4 w-4" /> : <Moon className="h-4 w-4" />}
             {theme === "dark" ? "Light Mode" : "Dark Mode"}
           </button>
+
+          <Link to="/cart" className="px-3 py-3 rounded-lg font-medium hover:bg-muted transition-colors flex items-center gap-2">
+            <ShoppingCart className="h-4 w-4" />
+            Cart
+            {itemCount > 0 && (
+              <span className="ml-auto flex h-5 w-5 items-center justify-center rounded-full bg-primary text-[10px] font-bold text-primary-foreground">
+                {itemCount > 9 ? "9+" : itemCount}
+              </span>
+            )}
+          </Link>
 
           {user ? (
             <>
