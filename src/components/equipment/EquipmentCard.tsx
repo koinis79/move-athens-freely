@@ -15,6 +15,16 @@ const categoryColors: Record<string, string> = {
   "Power Wheelchair": "bg-primary/10 text-primary",
   "Mobility Scooter": "bg-secondary/10 text-secondary",
   Rollator: "bg-accent/10 text-accent",
+  "Walking Aid": "bg-accent/10 text-accent",
+};
+
+// Emoji placeholder shown when no image URL is available from the DB
+const categoryEmoji: Record<string, string> = {
+  Wheelchair: "♿",
+  "Power Wheelchair": "⚡",
+  "Mobility Scooter": "🛵",
+  Rollator: "🦯",
+  "Walking Aid": "🦯",
 };
 
 const EquipmentCard = ({ item }: { item: EquipmentItem }) => (
@@ -24,12 +34,22 @@ const EquipmentCard = ({ item }: { item: EquipmentItem }) => (
   >
     <Card className="h-full overflow-hidden transition-all duration-200 hover:-translate-y-1 hover:shadow-lg">
       <div className="relative aspect-[3/2] bg-muted flex items-center justify-center">
-        <img
-          src={item.image}
-          alt={item.name}
-          className="h-full w-full object-cover"
-          loading="lazy"
-        />
+        {item.image ? (
+          <img
+            src={item.image}
+            alt={item.name}
+            className="h-full w-full object-cover"
+            loading="lazy"
+            onError={(e) => {
+              // If the URL is broken, hide img and show emoji fallback
+              (e.target as HTMLImageElement).style.display = "none";
+            }}
+          />
+        ) : (
+          <span className="text-6xl select-none" aria-hidden="true">
+            {categoryEmoji[item.category] ?? "♿"}
+          </span>
+        )}
         <Badge
           variant="secondary"
           className={`absolute left-3 top-3 text-xs font-semibold ${categoryColors[item.category] ?? ""}`}
@@ -45,22 +65,22 @@ const EquipmentCard = ({ item }: { item: EquipmentItem }) => (
           </h3>
           <Badge
             variant="outline"
-            className={`shrink-0 text-xs ${availabilityStyles[item.availability]}`}
+            className={`shrink-0 text-xs ${availabilityStyles[item.availability] ?? ""}`}
           >
             {item.availability}
           </Badge>
         </div>
 
-        <p className="text-sm text-muted-foreground line-clamp-1">
+        <p className="text-sm text-muted-foreground line-clamp-2">
           {item.description}
         </p>
 
         <div className="mt-1">
           <span className="text-lg font-bold text-primary">
-            From €{item.pricePerDay}/day
+            From €{item.priceTier1}
           </span>
           <span className="ml-2 text-sm text-muted-foreground">
-            €{item.pricePerWeek}/week
+            for 1–3 days
           </span>
         </div>
 
