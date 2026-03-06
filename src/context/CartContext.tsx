@@ -1,4 +1,4 @@
-import { createContext, useContext, useState, ReactNode } from "react";
+import { createContext, useContext, useState, useEffect, ReactNode } from "react";
 import type { EquipmentItem } from "@/data/equipment";
 
 export interface CartItem {
@@ -22,39 +22,44 @@ interface CartContextType {
 
 const CartContext = createContext<CartContextType | undefined>(undefined);
 
-// Mock item so the cart isn't empty on first visit
-const mockStartDate = new Date(2026, 3, 1); // Apr 1 2026
-const mockEndDate = new Date(2026, 3, 8);   // Apr 8 2026
+const CART_KEY = "moveability_cart";
 
-const defaultItems: CartItem[] = [
-  {
-    equipment: {
-      id: "1",
-      slug: "lightweight-folding-wheelchair",
-      name: "Lightweight Folding Wheelchair",
-      category: "Wheelchair",
-      categorySlug: "wheelchairs",
-      description: "Ultra-light aluminium frame, folds compactly for travel and storage.",
-      pricePerDay: 10,
-      pricePerWeek: 60,
-      priceTier1: 10,
-      priceTier2: 60,
-      priceTier3: 100,
-      priceTier4: 200,
-      availability: "Available",
-      popular: true,
-      image: "",
-    },
-    startDate: mockStartDate,
-    endDate: mockEndDate,
-    quantity: 1,
-    deliveryZone: "Athens City Center — Free delivery",
-    deliveryFee: 0,
-  },
-];
+function loadCart(): CartItem[] {
+  try {
+    const raw = localStorage.getItem(CART_KEY);
+    if (!raw) return [];
+    const parsed = JSON.parse(raw);
+    return parsed.map((i: any) => ({
+      ...i,
+      startDate: new Date(i.startDate),
+      endDate: new Date(i.endDate),
+    }));
+  } catch {
+    return [];
+  }
+}
+
+function saveCart(items: CartItem[]) {
+  try {
+    localStorage.setItem(
+      CART_KEY,
+      JSON.stringify(
+        items.map((i) => ({
+          ...i,
+          startDate: i.startDate.toISOString(),
+          endDate: i.endDate.toISOString(),
+        }))
+      )
+    );
+  } catch {}
+}
 
 export const CartProvider = ({ children }: { children: ReactNode }) => {
-  const [items, setItems] = useState<CartItem[]>(defaultItems);
+  const [items, setItems] = useState<CartItem[]>(loadCart);
+
+  useEffect(() => {
+    saveCart(items);
+  }, [items]);
 
   const addItem = (item: CartItem) => {
     setItems((prev) => {
