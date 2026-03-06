@@ -1,4 +1,4 @@
-import { useState, useMemo } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { format, differenceInDays } from "date-fns";
 import { CalendarIcon, Minus, Plus, ShieldCheck } from "lucide-react";
 import { cn } from "@/lib/utils";
@@ -16,29 +16,51 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import type { EquipmentItem } from "@/data/equipment";
-import type { EquipmentDetails } from "@/data/equipmentSpecs";
+import { supabase } from "@/integrations/supabase/client";
+import { getPriceForDays, type EquipmentItem } from "@/data/equipment";
+import { useCart } from "@/context/CartContext";
 
-const deliveryZones = [
-  { label: "Athens City Center — Free delivery", fee: 0 },
-  { label: "Greater Athens — €15 delivery", fee: 15 },
-  { label: "Athens Airport — €25 delivery", fee: 25 },
-  { label: "Piraeus Port — €20 delivery", fee: 20 },
-];
+interface DeliveryZone {
+  id: string;
+  name_en: string;
+  slug: string;
+  delivery_fee: number;
+}
 
 interface Props {
   item: EquipmentItem;
-  details: EquipmentDetails;
 }
 
-const BookingPanel = ({ item, details }: Props) => {
+const TIER_LABELS = [
+  { days: "1–3 days", tier: "priceTier1" as const },
+  { days: "4–7 days", tier: "priceTier2" as const },
+  { days: "8–14 days", tier: "priceTier3" as const },
+  { days: "15–30 days", tier: "priceTier4" as const },
+];
+
+const BookingPanel = ({ item }: Props) => {
+  const { addItem } = useCart();
   const [startDate, setStartDate] = useState<Date>();
   const [endDate, setEndDate] = useState<Date>();
   const [qty, setQty] = useState(1);
-  const [zone, setZone] = useState<string>();
+  const [zoneId, setZoneId] = useState<string>();
+  const [zones, setZones] = useState<DeliveryZone[]>([]);
+  const [added, setAdded] = useState(false);
 
   const today = new Date();
   today.setHours(0, 0, 0, 0);
+
+  // Fetch delivery zones from Supabase
+  useEffect(() => {
+    supabase
+      .from("delivery_zones")
+      .select("id, name_en, slug, delivery_fee")
+      .eq("is_active", true)
+      .order("sort_order")
+      .then(({ data }) => {
+        if (data) setZones(data as DeliveryZone[]);
+      });
+  }, []);
 
   const numDays = useMemo(() => {
     if (!startDate || !endDate) return 0;
@@ -46,93 +68,69 @@ const BookingPanel = ({ item, details }: Props) => {
     return d > 0 ? d : 0;
   }, [startDate, endDate]);
 
-  const { rateLabel, unitPrice, subtotal } = useMemo(() => {
-    if (numDays === 0)
-      return { rateLabel: "", unitPrice: 0, subtotal: 0 };
+  const subtotal = useMemo(() => {
+    if (numDays === 0) return 0;
+    return getPriceForDays(item, numDays) * qty;
+  }, [numDays, qty, item]);
 
-    if (numDays >= 30 && details.pricePerMonth > 0) {
-      const months = Math.ceil(numDays / 30);
-      return {
-        rateLabel: `${months} month${months > 1 ? "s" : ""} × €${details.pricePerMonth}`,
-        unitPrice: details.pricePerMonth,
-        subtotal: months * details.pricePerMonth * qty,
-      };
-    }
-    if (numDays >= 7) {
-      const weeks = Math.ceil(numDays / 7);
-      return {
-        rateLabel: `${weeks} week${weeks > 1 ? "s" : ""} × €${item.pricePerWeek}`,
-        unitPrice: item.pricePerWeek,
-        subtotal: weeks * item.pricePerWeek * qty,
-      };
-    }
-    return {
-      rateLabel: `${numDays} day${numDays > 1 ? "s" : ""} × €${item.pricePerDay}`,
-      unitPrice: item.pricePerDay,
-      subtotal: numDays * item.pricePerDay * qty,
-    };
-  }, [numDays, qty, item, details]);
-
-  const deliveryFee = zone
-    ? deliveryZones.find((z) => z.label === zone)?.fee ?? 0
-    : 0;
-
+  const selectedZone = zones.find((z) => z.id === zoneId);
+  const deliveryFee = selectedZone?.delivery_fee ?? 0;
   const total = subtotal + deliveryFee;
 
-  // Savings calculations
-  const dailyTotal7 = 7 * item.pricePerDay;
-  const weeklySaving = Math.round(
-    ((dailyTotal7 - item.pricePerWeek) / dailyTotal7) * 100
-  );
-  const dailyTotal30 = 30 * item.pricePerDay;
-  const monthlySaving =
-    details.pricePerMonth > 0
-      ? Math.round(
-          ((dailyTotal30 - details.pricePerMonth) / dailyTotal30) * 100
-        )
-      : 0;
+  // Savings % vs buying all days at tier1 rate
+  const savingsLabel = (tierPrice: number, tier: keyof EquipmentItem) => {
+    const base = item.priceTier1;
+    if (tier === "priceTier1" || tierPrice <= base) return null;
+    const saving = Math.round(((base - tierPrice / 7) / base) * 100);
+    return saving > 0 ? `Save ~${saving}%` : null;
+  };
+
+  const handleAddToCart = () => {
+    if (!startDate || !endDate || numDays === 0) return;
+    addItem({
+      equipment: item,
+      startDate,
+      endDate,
+      quantity: qty,
+      deliveryZone: selectedZone?.name_en,
+      deliveryFee,
+    });
+    setAdded(true);
+    setTimeout(() => setAdded(false), 2000);
+  };
 
   return (
     <div className="space-y-6">
-      {/* Pricing table */}
+      {/* Tier pricing table */}
       <div className="rounded-xl border bg-card p-5 space-y-3">
         <h3 className="font-heading font-semibold text-foreground">Pricing</h3>
-        <div className="divide-y">
-          <div className="flex items-center justify-between py-2">
-            <span className="text-muted-foreground">Daily</span>
-            <span className="font-semibold text-foreground">
-              €{item.pricePerDay}/day
-            </span>
-          </div>
-          <div className="flex items-center justify-between py-2">
-            <span className="text-muted-foreground">Weekly</span>
-            <div className="flex items-center gap-2">
-              <span className="font-semibold text-foreground">
-                €{item.pricePerWeek}/week
-              </span>
-              {weeklySaving > 0 && (
-                <span className="text-xs font-medium text-accent">
-                  Save {weeklySaving}%
-                </span>
-              )}
-            </div>
-          </div>
-          {details.pricePerMonth > 0 && (
-            <div className="flex items-center justify-between py-2">
-              <span className="text-muted-foreground">Monthly</span>
+        <div className="divide-y text-sm">
+          {TIER_LABELS.map(({ days, tier }) => (
+            <div key={tier} className="flex items-center justify-between py-2">
+              <span className="text-muted-foreground">{days}</span>
               <div className="flex items-center gap-2">
                 <span className="font-semibold text-foreground">
-                  €{details.pricePerMonth}/month
+                  €{item[tier]}
                 </span>
-                {monthlySaving > 0 && (
+                {tier !== "priceTier1" && (
                   <span className="text-xs font-medium text-accent">
-                    Save {monthlySaving}%
+                    {(() => {
+                      const pct = Math.round(
+                        ((item.priceTier1 - item[tier] / [3, 7, 14, 30][[
+                          "priceTier1","priceTier2","priceTier3","priceTier4"
+                        ].indexOf(tier)]) / item.priceTier1) * 100
+                      );
+                      return pct > 0 ? `~${pct}% cheaper/day` : "";
+                    })()}
                   </span>
                 )}
               </div>
             </div>
-          )}
+          ))}
         </div>
+        <p className="text-xs text-muted-foreground pt-1">
+          Prices are per rental period, not per day.
+        </p>
       </div>
 
       {/* Booking form */}
@@ -195,9 +193,7 @@ const BookingPanel = ({ item, details }: Props) => {
                   mode="single"
                   selected={endDate}
                   onSelect={setEndDate}
-                  disabled={(d) =>
-                    d < (startDate ?? today)
-                  }
+                  disabled={(d) => d < (startDate ?? today)}
                   initialFocus
                   className="p-3 pointer-events-auto"
                 />
@@ -205,6 +201,21 @@ const BookingPanel = ({ item, details }: Props) => {
             </Popover>
           </div>
         </div>
+
+        {/* Active tier indicator */}
+        {numDays > 0 && (
+          <p className="text-xs text-primary font-medium">
+            {numDays} day{numDays !== 1 ? "s" : ""} selected →{" "}
+            {numDays <= 3
+              ? "1–3 day rate"
+              : numDays <= 7
+              ? "4–7 day rate"
+              : numDays <= 14
+              ? "8–14 day rate"
+              : "15–30 day rate"}{" "}
+            applies
+          </p>
+        )}
 
         {/* Quantity */}
         <div className="space-y-1.5">
@@ -241,31 +252,31 @@ const BookingPanel = ({ item, details }: Props) => {
           <label className="text-sm font-medium text-foreground">
             Delivery Zone
           </label>
-          <Select value={zone} onValueChange={setZone}>
+          <Select value={zoneId} onValueChange={setZoneId}>
             <SelectTrigger className="w-full">
               <SelectValue placeholder="Select delivery zone" />
             </SelectTrigger>
             <SelectContent>
-              {deliveryZones.map((z) => (
-                <SelectItem key={z.label} value={z.label}>
-                  {z.label}
+              {zones.map((z) => (
+                <SelectItem key={z.id} value={z.id}>
+                  {z.name_en}
+                  {z.delivery_fee === 0 ? " — Free" : ` — €${z.delivery_fee}`}
                 </SelectItem>
               ))}
             </SelectContent>
           </Select>
         </div>
 
-        {/* Price calculation */}
+        {/* Price breakdown */}
         {numDays > 0 && (
           <div className="space-y-2 rounded-lg bg-muted/50 p-4 text-sm">
             <div className="flex justify-between">
               <span className="text-muted-foreground">
-                {rateLabel}
-                {qty > 1 ? ` × ${qty}` : ""}
+                Equipment{qty > 1 ? ` × ${qty}` : ""}
               </span>
               <span className="text-foreground">€{subtotal}</span>
             </div>
-            {zone && (
+            {zoneId && (
               <div className="flex justify-between">
                 <span className="text-muted-foreground">Delivery fee</span>
                 <span className="text-foreground">
@@ -280,8 +291,13 @@ const BookingPanel = ({ item, details }: Props) => {
           </div>
         )}
 
-        <Button size="lg" className="w-full rounded-xl text-base">
-          Add to Cart
+        <Button
+          size="lg"
+          className="w-full rounded-xl text-base"
+          disabled={!startDate || !endDate || numDays === 0 || added}
+          onClick={handleAddToCart}
+        >
+          {added ? "Added to Cart ✓" : "Add to Cart"}
         </Button>
 
         <p className="flex items-center justify-center gap-1.5 text-xs text-muted-foreground">
