@@ -14,6 +14,7 @@ import EquipmentDetail from "./pages/EquipmentDetail";
 import EquipmentCategory from "./pages/EquipmentCategory";
 import HowItWorks from "./pages/HowItWorks";
 import AccessibleAthens from "./pages/AccessibleAthens";
+import AccessibleAthensGuide from "./pages/AccessibleAthensGuide";
 import About from "./pages/About";
 import Contact from "./pages/Contact";
 import FAQ from "./pages/FAQ";
