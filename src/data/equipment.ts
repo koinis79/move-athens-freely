@@ -25,9 +25,21 @@ export interface EquipmentItem {
   description: string;
   pricePerDay: number;
   pricePerWeek: number;
+  priceTier1: number;
+  priceTier2: number;
+  priceTier3: number;
+  priceTier4: number;
   availability: Availability;
   popular?: boolean;
   image: string;
+}
+
+/** Return the correct tier price for a given number of rental days */
+export function getPriceForDays(item: EquipmentItem, days: number): number {
+  if (days <= 3) return item.priceTier1;
+  if (days <= 7) return item.priceTier2;
+  if (days <= 14) return item.priceTier3;
+  return item.priceTier4;
 }
 
 export const categorySlugMap: Record<string, EquipmentCategory> = {
