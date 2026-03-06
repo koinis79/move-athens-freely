@@ -10,20 +10,11 @@ const AdminRoute = ({ children }: { children: React.ReactNode }) => {
   useEffect(() => {
     if (!user) return;
 
-    // Check admin role - for now use mock check since profiles table isn't set up yet
-    // Once migrations are run, this will query: supabase.from('user_roles').select('role').eq('user_id', user.id).eq('role', 'admin')
+    // TODO: Once user_roles table + has_role() function are created via migration,
+    // replace this with: supabase.rpc('has_role', { _user_id: user.id, _role: 'admin' })
     const checkAdmin = async () => {
-      const { data } = await supabase
-        .rpc('has_role', { _user_id: user.id, _role: 'admin' })
-        .single();
-
-      // If the function doesn't exist yet, fall back to allowing access for development
-      if (data === true) {
-        setIsAdmin(true);
-      } else {
-        // Fallback: allow access during development before DB is set up
-        setIsAdmin(true);
-      }
+      // For now, allow all authenticated users during development
+      setIsAdmin(true);
     };
 
     checkAdmin();
