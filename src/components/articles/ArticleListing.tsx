@@ -39,7 +39,7 @@ const ArticleListing = ({
             <Card className="h-full overflow-hidden border border-border bg-card shadow-sm transition-shadow group-hover:shadow-md">
               <div className="aspect-[16/9] bg-muted">
                 <img
-                  src="/placeholder.svg"
+                  src={a.image}
                   alt={a.title}
                   className="h-full w-full object-cover"
                 />
