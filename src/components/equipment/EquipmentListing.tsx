@@ -10,11 +10,8 @@ import {
 } from "@/components/ui/select";
 import { MessageCircle } from "lucide-react";
 import EquipmentCard from "./EquipmentCard";
-import {
-  equipmentItems,
-  categoryFilterLabels,
-  type EquipmentCategory,
-} from "@/data/equipment";
+import { categoryFilterLabels } from "@/data/equipment";
+import { useEquipment } from "@/hooks/useEquipment";
 
 type SortOption = "price-asc" | "price-desc" | "popular";
 
@@ -23,29 +20,42 @@ interface Props {
   categorySlug?: string;
 }
 
+const SkeletonCard = () => (
+  <div className="rounded-2xl border bg-card animate-pulse">
+    <div className="h-48 bg-muted rounded-t-2xl" />
+    <div className="p-5 space-y-3">
+      <div className="h-4 bg-muted rounded w-1/3" />
+      <div className="h-5 bg-muted rounded w-2/3" />
+      <div className="h-4 bg-muted rounded w-full" />
+      <div className="h-4 bg-muted rounded w-3/4" />
+      <div className="h-10 bg-muted rounded-xl mt-2" />
+    </div>
+  </div>
+);
+
 const EquipmentListing = ({ categorySlug }: Props) => {
   const [activeFilter, setActiveFilter] = useState(categorySlug ?? "");
   const [sort, setSort] = useState<SortOption>("popular");
 
-  const filtered = useMemo(() => {
-    const slug = categorySlug ?? activeFilter;
-    let items = slug
-      ? equipmentItems.filter((i) => i.categorySlug === slug)
-      : [...equipmentItems];
+  // Fetch from Supabase — pass the active category slug for server-side narrowing
+  const effectiveSlug = categorySlug ?? (activeFilter || undefined);
+  const { items, loading, error } = useEquipment(effectiveSlug);
 
+  const sorted = useMemo(() => {
+    const copy = [...items];
     switch (sort) {
       case "price-asc":
-        items.sort((a, b) => a.pricePerDay - b.pricePerDay);
+        copy.sort((a, b) => a.priceTier1 - b.priceTier1);
         break;
       case "price-desc":
-        items.sort((a, b) => b.pricePerDay - a.pricePerDay);
+        copy.sort((a, b) => b.priceTier1 - a.priceTier1);
         break;
       case "popular":
-        items.sort((a, b) => (b.popular ? 1 : 0) - (a.popular ? 1 : 0));
+        copy.sort((a, b) => (b.popular ? 1 : 0) - (a.popular ? 1 : 0));
         break;
     }
-    return items;
-  }, [activeFilter, categorySlug, sort]);
+    return copy;
+  }, [items, sort]);
 
   const heading = categorySlug
     ? categoryFilterLabels.find((c) => c.slug === categorySlug)?.label ??
@@ -90,7 +100,7 @@ const EquipmentListing = ({ categorySlug }: Props) => {
         in Athens
       </p>
 
-      {/* Filter bar */}
+      {/* Filter + Sort bar */}
       <div className="mt-8 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         {!categorySlug && (
           <div className="flex flex-wrap gap-2">
@@ -108,10 +118,7 @@ const EquipmentListing = ({ categorySlug }: Props) => {
           </div>
         )}
 
-        <Select
-          value={sort}
-          onValueChange={(v) => setSort(v as SortOption)}
-        >
+        <Select value={sort} onValueChange={(v) => setSort(v as SortOption)}>
           <SelectTrigger className="w-52 rounded-xl">
             <SelectValue placeholder="Sort by" />
           </SelectTrigger>
@@ -123,14 +130,22 @@ const EquipmentListing = ({ categorySlug }: Props) => {
         </Select>
       </div>
 
+      {/* Error state */}
+      {error && (
+        <div className="mt-8 rounded-xl border border-destructive/30 bg-destructive/10 p-6 text-center text-destructive">
+          <p className="font-semibold">Failed to load equipment</p>
+          <p className="text-sm mt-1">{error}</p>
+        </div>
+      )}
+
       {/* Grid */}
       <div className="mt-8 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
-        {filtered.map((item) => (
-          <EquipmentCard key={item.id} item={item} />
-        ))}
+        {loading
+          ? Array.from({ length: 6 }).map((_, i) => <SkeletonCard key={i} />)
+          : sorted.map((item) => <EquipmentCard key={item.id} item={item} />)}
       </div>
 
-      {filtered.length === 0 && (
+      {!loading && !error && sorted.length === 0 && (
         <p className="mt-12 text-center text-muted-foreground">
           No equipment found in this category.
         </p>
@@ -146,9 +161,13 @@ const EquipmentListing = ({ categorySlug }: Props) => {
           accommodation, and itinerary.
         </p>
         <div className="mt-6 flex flex-col items-center gap-4 sm:flex-row sm:justify-center">
-          <Button asChild size="lg" className="rounded-xl bg-accent text-accent-foreground hover:bg-accent/90">
+          <Button
+            asChild
+            size="lg"
+            className="rounded-xl bg-accent text-accent-foreground hover:bg-accent/90"
+          >
             <a
-              href="https://wa.me/30210XXXXXXX"
+              href="https://wa.me/302109511750"
               target="_blank"
               rel="noopener noreferrer"
             >
