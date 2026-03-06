@@ -43,9 +43,9 @@ const Header = () => {
   return (
     <header
       role="banner"
-      className={`sticky top-0 z-50 w-full bg-background/95 backdrop-blur-sm transition-shadow duration-300 ${
-        scrolled ? "shadow-md" : "shadow-none"
-      }`}
+      className={`sticky top-0 z-50 w-full bg-background/95 transition-shadow duration-300 ${
+        !menuOpen ? "backdrop-blur-sm" : ""
+      } ${scrolled ? "shadow-md" : "shadow-none"}`}
     >
       <div className="container flex h-[var(--header-height)] items-center justify-between">
         <Link to="/" className="font-heading text-xl font-extrabold text-primary tracking-tight" aria-label="Moveability — Home">
