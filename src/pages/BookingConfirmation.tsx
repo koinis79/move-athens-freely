@@ -74,32 +74,7 @@ const BookingConfirmation = () => {
     if (!bookingNumber) return;
 
     supabase
-      .from("bookings")
-      .select(`
-        id,
-        booking_number,
-        customer_name,
-        customer_email,
-        customer_phone,
-        delivery_address,
-        delivery_time_slot,
-        rental_start,
-        rental_end,
-        subtotal,
-        delivery_fee,
-        total_amount,
-        status,
-        created_at,
-        delivery_zones ( name_en, delivery_fee ),
-        booking_items (
-          quantity,
-          num_days,
-          subtotal,
-          equipment ( name_en, slug )
-        )
-      `)
-      .eq("booking_number", bookingNumber)
-      .single()
+      .rpc("get_booking_by_number", { p_booking_number: bookingNumber })
       .then(({ data, error }) => {
         if (error || !data) {
           setNotFound(true);
