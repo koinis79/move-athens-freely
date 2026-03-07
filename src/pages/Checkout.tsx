@@ -489,7 +489,7 @@ const Checkout = () => {
                         ? "🛵"
                         : line.equipment.category === "Power Wheelchair"
                         ? "⚡"
-                        : line.equipment.category === "Walking Aid"
+                        : line.equipment.category === "Rollator"
                         ? "🦯"
                         : "♿"}
                     </div>
