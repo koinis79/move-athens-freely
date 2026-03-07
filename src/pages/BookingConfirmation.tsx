@@ -1,6 +1,5 @@
 import { useEffect, useState } from "react";
-import { useParams, useSearchParams, Link } from "react-router-dom";
-import { useCart } from "@/context/CartContext";
+import { useParams, Link } from "react-router-dom";
 import { format } from "date-fns";
 import {
   CheckCircle2,
@@ -66,20 +65,10 @@ const Row = ({ label, value }: { label: string; value: React.ReactNode }) => (
 
 const BookingConfirmation = () => {
   const { id: bookingNumber } = useParams<{ id: string }>();
-  const [searchParams] = useSearchParams();
   const { toast } = useToast();
-  const { clearCart } = useCart();
   const [booking, setBooking] = useState<Booking | null>(null);
   const [loading, setLoading] = useState(true);
   const [notFound, setNotFound] = useState(false);
-
-  // Clear the cart once when arriving from a successful Stripe payment
-  useEffect(() => {
-    if (searchParams.get("paid") === "1") {
-      clearCart();
-    }
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
 
   useEffect(() => {
     if (!bookingNumber) return;
