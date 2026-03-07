@@ -567,6 +567,35 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      create_booking: {
+        Args: {
+          p_availability: Json
+          p_booking_number: string
+          p_customer_email: string
+          p_customer_name: string
+          p_customer_phone: string
+          p_delivery_address: string
+          p_delivery_fee: number
+          p_delivery_notes: string
+          p_delivery_time_slot: string
+          p_delivery_zone_id: string
+          p_items: Json
+          p_num_days: number
+          p_rental_end: string
+          p_rental_start: string
+          p_subtotal: number
+          p_total_amount: number
+          p_user_id: string
+        }
+        Returns: {
+          booking_id: string
+          booking_number: string
+        }[]
+      }
+      get_booking_by_number: {
+        Args: { p_booking_number: string }
+        Returns: Json
+      }
       is_admin: { Args: never; Returns: boolean }
     }
     Enums: {
