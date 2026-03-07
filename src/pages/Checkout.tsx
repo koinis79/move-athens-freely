@@ -97,10 +97,10 @@ const Checkout = () => {
       });
   }, []);
 
-  // Redirect if cart is empty
+  // Redirect if cart is empty — but not while a submission is in progress
   useEffect(() => {
-    if (items.length === 0) navigate("/equipment");
-  }, [items, navigate]);
+    if (items.length === 0 && !submitting) navigate("/equipment");
+  }, [items, navigate, submitting]);
 
   // ── Pricing calculations ─────────────────────────────────────────────────
   const lineItems = useMemo(
@@ -217,7 +217,9 @@ const Checkout = () => {
       }
 
       const bookingNumber = data[0].booking_number;
-      clearCart();
+      // Don't clearCart() here — doing so empties items[], which triggers
+      // the "redirect if cart empty" useEffect and navigates away before
+      // the Stripe redirect happens. Cart is cleared on the confirmation page.
 
       // Call edge function to create Stripe Checkout Session
       const { data: { session: supabaseSession } } = await supabase.auth.getSession();
