@@ -191,6 +191,8 @@ const Checkout = () => {
         }
       }
 
+      console.log("[Checkout] Step 1: Creating booking...", { items: itemsPayload.length });
+
       // Call SECURITY DEFINER function — bypasses RLS for INSERT + RETURNING
       const { data, error: rpcErr } = await supabase.rpc("create_booking", {
         p_booking_number: "",
@@ -212,14 +214,26 @@ const Checkout = () => {
         p_availability: availabilityPayload,
       });
 
-      if (rpcErr || !data || data.length === 0) {
-        throw new Error(rpcErr?.message ?? "Failed to create booking");
+      console.log("[Checkout] create_booking result:", { data, rpcErr });
+
+      if (rpcErr || !data || (Array.isArray(data) && data.length === 0)) {
+        throw new Error(rpcErr?.message ?? "Failed to create booking — no data returned");
       }
 
-      const bookingNumber = data[0].booking_number;
+      // data may be an array or a single object depending on Supabase version
+      const row = Array.isArray(data) ? data[0] : data;
+      const bookingNumber = row?.booking_number;
+      console.log("[Checkout] Step 2: Booking created:", bookingNumber);
+
+      if (!bookingNumber) {
+        throw new Error(`Booking created but no booking_number returned. Raw: ${JSON.stringify(data)}`);
+      }
+
       // Don't clearCart() here — doing so empties items[], which triggers
       // the "redirect if cart empty" useEffect and navigates away before
       // the Stripe redirect happens. Cart is cleared on the confirmation page.
+
+      console.log("[Checkout] Step 3: Calling edge function...");
 
       // Call edge function to create Stripe Checkout Session
       const { data: { session: supabaseSession } } = await supabase.auth.getSession();
@@ -239,14 +253,18 @@ const Checkout = () => {
       );
 
       const result = await res.json();
+      console.log("[Checkout] Step 4: Edge function response:", { status: res.status, result });
+
       if (!res.ok || !result.url) {
-        throw new Error(result.error ?? "Failed to create payment session");
+        throw new Error(result.error ?? `Edge function failed (HTTP ${res.status})`);
       }
 
-      // Redirect to Stripe Checkout
+      console.log("[Checkout] Step 5: Redirecting to Stripe:", result.url);
       window.location.href = result.url;
     } catch (err: any) {
-      setSubmitError(err.message ?? "Something went wrong. Please try again.");
+      const msg = err?.message ?? "Something went wrong. Please try again.";
+      console.error("[Checkout] Error:", msg, err);
+      setSubmitError(msg);
       setSubmitting(false);
     }
   };
