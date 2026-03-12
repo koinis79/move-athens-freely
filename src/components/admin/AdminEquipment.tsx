@@ -1,10 +1,11 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Switch } from "@/components/ui/switch";
+import { Skeleton } from "@/components/ui/skeleton";
 import {
   Table, TableBody, TableCell, TableHead, TableHeader, TableRow,
 } from "@/components/ui/table";
@@ -15,56 +16,120 @@ import {
   Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
 } from "@/components/ui/select";
 import { Plus, Pencil, X } from "lucide-react";
-import { equipmentItems } from "@/data/equipment";
+import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 
+interface Category {
+  id: string;
+  name_en: string;
+}
+
+interface Equipment {
+  id: string;
+  name_en: string;
+  name_el: string | null;
+  slug: string;
+  description_en: string | null;
+  description_el: string | null;
+  price_tier1: number;
+  price_tier2: number;
+  price_tier3: number;
+  price_tier4: number;
+  deposit_amount: number;
+  quantity_total: number;
+  is_active: boolean;
+  is_popular: boolean;
+  specifications: Record<string, string>;
+  category_id: string;
+  equipment_categories: { name_en: string } | null;
+}
+
 interface EquipmentForm {
-  nameEn: string;
-  nameGr: string;
-  category: string;
-  descriptionEn: string;
-  descriptionGr: string;
-  pricePerDay: string;
-  pricePerWeek: string;
-  pricePerMonth: string;
-  deposit: string;
-  quantity: string;
-  active: boolean;
+  name_en: string;
+  name_el: string;
+  category_id: string;
+  description_en: string;
+  description_el: string;
+  price_tier1: string;
+  price_tier2: string;
+  price_tier3: string;
+  price_tier4: string;
+  deposit_amount: string;
+  quantity_total: string;
+  is_active: boolean;
+  is_popular: boolean;
   specs: { key: string; value: string }[];
 }
 
 const emptyForm: EquipmentForm = {
-  nameEn: "", nameGr: "", category: "Wheelchair",
-  descriptionEn: "", descriptionGr: "",
-  pricePerDay: "", pricePerWeek: "", pricePerMonth: "",
-  deposit: "", quantity: "1", active: true, specs: [{ key: "", value: "" }],
+  name_en: "", name_el: "", category_id: "",
+  description_en: "", description_el: "",
+  price_tier1: "", price_tier2: "", price_tier3: "", price_tier4: "",
+  deposit_amount: "0", quantity_total: "1",
+  is_active: true, is_popular: false,
+  specs: [{ key: "", value: "" }],
 };
-
-const categories = ["Wheelchair", "Power Wheelchair", "Mobility Scooter", "Rollator"];
 
 const AdminEquipment = () => {
   const { toast } = useToast();
+  const [items, setItems] = useState<Equipment[]>([]);
+  const [categories, setCategories] = useState<Category[]>([]);
+  const [loading, setLoading] = useState(true);
   const [modalOpen, setModalOpen] = useState(false);
   const [form, setForm] = useState<EquipmentForm>(emptyForm);
   const [editingId, setEditingId] = useState<string | null>(null);
+  const [saving, setSaving] = useState(false);
+
+  const fetchData = async () => {
+    const [{ data: equip }, { data: cats }] = await Promise.all([
+      supabase
+        .from("equipment")
+        .select(`
+          id, name_en, name_el, slug, description_en, description_el,
+          price_tier1, price_tier2, price_tier3, price_tier4,
+          deposit_amount, quantity_total, is_active, is_popular,
+          specifications, category_id,
+          equipment_categories ( name_en )
+        `)
+        .order("name_en"),
+      supabase
+        .from("equipment_categories")
+        .select("id, name_en")
+        .eq("is_active", true)
+        .order("sort_order"),
+    ]);
+    setItems((equip as Equipment[]) ?? []);
+    setCategories((cats as Category[]) ?? []);
+    setLoading(false);
+  };
+
+  useEffect(() => { fetchData(); }, []);
 
   const openAdd = () => {
-    setForm(emptyForm);
+    setForm({ ...emptyForm, category_id: categories[0]?.id ?? "" });
     setEditingId(null);
     setModalOpen(true);
   };
 
-  const openEdit = (id: string) => {
-    const item = equipmentItems.find((e) => e.id === id);
-    if (!item) return;
+  const openEdit = (item: Equipment) => {
+    const specs = Object.entries(item.specifications ?? {}).map(([key, value]) => ({ key, value: String(value) }));
     setForm({
-      nameEn: item.name, nameGr: "", category: item.category,
-      descriptionEn: item.description, descriptionGr: "",
-      pricePerDay: String(item.pricePerDay), pricePerWeek: String(item.pricePerWeek),
-      pricePerMonth: "", deposit: "", quantity: "3", active: true,
-      specs: [{ key: "Weight", value: "12 kg" }],
+      name_en: item.name_en,
+      name_el: item.name_el ?? "",
+      category_id: item.category_id,
+      description_en: item.description_en ?? "",
+      description_el: item.description_el ?? "",
+      price_tier1: String(item.price_tier1),
+      price_tier2: String(item.price_tier2),
+      price_tier3: String(item.price_tier3),
+      price_tier4: String(item.price_tier4),
+      deposit_amount: String(item.deposit_amount),
+      quantity_total: String(item.quantity_total),
+      is_active: item.is_active,
+      is_popular: item.is_popular,
+      specs: specs.length > 0 ? specs : [{ key: "", value: "" }],
     });
-    setEditingId(id);
+    setEditingId(item.id);
     setModalOpen(true);
   };
 
@@ -76,9 +141,49 @@ const AdminEquipment = () => {
   const updateSpec = (i: number, field: "key" | "value", val: string) =>
     setForm((f) => ({ ...f, specs: f.specs.map((s, idx) => (idx === i ? { ...s, [field]: val } : s)) }));
 
-  const handleSave = () => {
-    toast({ title: editingId ? "Equipment updated" : "Equipment added" });
-    setModalOpen(false);
+  const handleSave = async () => {
+    if (!form.name_en.trim() || !form.category_id) {
+      toast({ title: "Name and category are required", variant: "destructive" });
+      return;
+    }
+    setSaving(true);
+
+    const specsObj = Object.fromEntries(
+      form.specs.filter((s) => s.key.trim()).map((s) => [s.key.trim(), s.value.trim()])
+    );
+
+    const payload = {
+      name_en: form.name_en.trim(),
+      name_el: form.name_el.trim() || null,
+      category_id: form.category_id,
+      description_en: form.description_en.trim() || null,
+      description_el: form.description_el.trim() || null,
+      price_tier1: parseFloat(form.price_tier1) || 0,
+      price_tier2: parseFloat(form.price_tier2) || 0,
+      price_tier3: parseFloat(form.price_tier3) || 0,
+      price_tier4: parseFloat(form.price_tier4) || 0,
+      deposit_amount: parseFloat(form.deposit_amount) || 0,
+      quantity_total: parseInt(form.quantity_total) || 1,
+      is_active: form.is_active,
+      is_popular: form.is_popular,
+      specifications: specsObj,
+    };
+
+    const { error } = editingId
+      ? await supabase.from("equipment").update(payload).eq("id", editingId)
+      : await supabase.from("equipment").insert({
+          ...payload,
+          slug: form.name_en.trim().toLowerCase().replace(/\s+/g, "-").replace(/[^a-z0-9-]/g, ""),
+        });
+
+    setSaving(false);
+    if (error) {
+      toast({ title: "Error", description: error.message, variant: "destructive" });
+    } else {
+      toast({ title: editingId ? "Equipment updated" : "Equipment added" });
+      setModalOpen(false);
+      fetchData();
+    }
   };
 
   return (
@@ -92,39 +197,48 @@ const AdminEquipment = () => {
         <Table>
           <TableHeader>
             <TableRow>
-              <TableHead className="w-12"></TableHead>
               <TableHead>Name</TableHead>
               <TableHead>Category</TableHead>
-              <TableHead>Daily</TableHead>
-              <TableHead>Weekly</TableHead>
+              <TableHead>1–3 days</TableHead>
+              <TableHead>4–7 days</TableHead>
               <TableHead>Qty</TableHead>
               <TableHead>Status</TableHead>
               <TableHead className="text-right">Actions</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
-            {equipmentItems.map((item) => (
-              <TableRow key={item.id}>
-                <TableCell>
-                  <img src="/placeholder.svg" alt="" className="h-8 w-8 rounded object-cover" />
-                </TableCell>
-                <TableCell className="font-medium">{item.name}</TableCell>
-                <TableCell>{item.category}</TableCell>
-                <TableCell>€{item.pricePerDay}</TableCell>
-                <TableCell>€{item.pricePerWeek}</TableCell>
-                <TableCell>3</TableCell>
-                <TableCell>
-                  <Badge variant="outline" className="bg-accent/15 text-accent border-accent/30 text-xs">
-                    Active
-                  </Badge>
-                </TableCell>
-                <TableCell className="text-right">
-                  <Button variant="ghost" size="sm" onClick={() => openEdit(item.id)}>
-                    <Pencil className="h-3.5 w-3.5" />
-                  </Button>
-                </TableCell>
-              </TableRow>
-            ))}
+            {loading
+              ? Array.from({ length: 5 }).map((_, i) => (
+                  <TableRow key={i}>
+                    {Array.from({ length: 7 }).map((__, j) => (
+                      <TableCell key={j}><Skeleton className="h-4 w-full" /></TableCell>
+                    ))}
+                  </TableRow>
+                ))
+              : items.map((item) => (
+                  <TableRow key={item.id}>
+                    <TableCell className="font-medium">{item.name_en}</TableCell>
+                    <TableCell>{item.equipment_categories?.name_en ?? "—"}</TableCell>
+                    <TableCell>€{Number(item.price_tier1).toFixed(0)}</TableCell>
+                    <TableCell>€{Number(item.price_tier2).toFixed(0)}</TableCell>
+                    <TableCell>{item.quantity_total}</TableCell>
+                    <TableCell>
+                      <Badge
+                        variant="outline"
+                        className={item.is_active
+                          ? "bg-accent/15 text-accent border-accent/30 text-xs"
+                          : "bg-muted text-muted-foreground border-border text-xs"}
+                      >
+                        {item.is_active ? "Active" : "Inactive"}
+                      </Badge>
+                    </TableCell>
+                    <TableCell className="text-right">
+                      <Button variant="ghost" size="sm" onClick={() => openEdit(item)}>
+                        <Pencil className="h-3.5 w-3.5" />
+                      </Button>
+                    </TableCell>
+                  </TableRow>
+                ))}
           </TableBody>
         </Table>
       </Card>
@@ -140,63 +254,65 @@ const AdminEquipment = () => {
           <div className="space-y-4 text-sm">
             <div className="grid grid-cols-2 gap-3">
               <div>
-                <label className="text-muted-foreground block mb-1">Name (EN)</label>
-                <Input value={form.nameEn} onChange={(e) => updateField("nameEn", e.target.value)} />
+                <label className="text-muted-foreground block mb-1">Name (EN) *</label>
+                <Input value={form.name_en} onChange={(e) => updateField("name_en", e.target.value)} />
               </div>
               <div>
                 <label className="text-muted-foreground block mb-1">Name (GR)</label>
-                <Input value={form.nameGr} onChange={(e) => updateField("nameGr", e.target.value)} />
+                <Input value={form.name_el} onChange={(e) => updateField("name_el", e.target.value)} />
               </div>
             </div>
 
             <div>
-              <label className="text-muted-foreground block mb-1">Category</label>
-              <Select value={form.category} onValueChange={(v) => updateField("category", v)}>
-                <SelectTrigger><SelectValue /></SelectTrigger>
+              <label className="text-muted-foreground block mb-1">Category *</label>
+              <Select value={form.category_id} onValueChange={(v) => updateField("category_id", v)}>
+                <SelectTrigger><SelectValue placeholder="Select category" /></SelectTrigger>
                 <SelectContent>
-                  {categories.map((c) => <SelectItem key={c} value={c}>{c}</SelectItem>)}
+                  {categories.map((c) => <SelectItem key={c.id} value={c.id}>{c.name_en}</SelectItem>)}
                 </SelectContent>
               </Select>
             </div>
 
             <div>
               <label className="text-muted-foreground block mb-1">Description (EN)</label>
-              <Textarea value={form.descriptionEn} onChange={(e) => updateField("descriptionEn", e.target.value)} rows={2} />
+              <Textarea value={form.description_en} onChange={(e) => updateField("description_en", e.target.value)} rows={2} />
             </div>
             <div>
               <label className="text-muted-foreground block mb-1">Description (GR)</label>
-              <Textarea value={form.descriptionGr} onChange={(e) => updateField("descriptionGr", e.target.value)} rows={2} />
+              <Textarea value={form.description_el} onChange={(e) => updateField("description_el", e.target.value)} rows={2} />
             </div>
 
-            <div className="grid grid-cols-3 gap-3">
-              <div>
-                <label className="text-muted-foreground block mb-1">Price/Day (€)</label>
-                <Input type="number" value={form.pricePerDay} onChange={(e) => updateField("pricePerDay", e.target.value)} />
-              </div>
-              <div>
-                <label className="text-muted-foreground block mb-1">Price/Week (€)</label>
-                <Input type="number" value={form.pricePerWeek} onChange={(e) => updateField("pricePerWeek", e.target.value)} />
-              </div>
-              <div>
-                <label className="text-muted-foreground block mb-1">Price/Month (€)</label>
-                <Input type="number" value={form.pricePerMonth} onChange={(e) => updateField("pricePerMonth", e.target.value)} />
+            <div>
+              <p className="text-muted-foreground mb-2">Pricing (€ per rental period)</p>
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <label className="text-muted-foreground block mb-1">1–3 days</label>
+                  <Input type="number" value={form.price_tier1} onChange={(e) => updateField("price_tier1", e.target.value)} />
+                </div>
+                <div>
+                  <label className="text-muted-foreground block mb-1">4–7 days</label>
+                  <Input type="number" value={form.price_tier2} onChange={(e) => updateField("price_tier2", e.target.value)} />
+                </div>
+                <div>
+                  <label className="text-muted-foreground block mb-1">8–14 days</label>
+                  <Input type="number" value={form.price_tier3} onChange={(e) => updateField("price_tier3", e.target.value)} />
+                </div>
+                <div>
+                  <label className="text-muted-foreground block mb-1">15–30 days</label>
+                  <Input type="number" value={form.price_tier4} onChange={(e) => updateField("price_tier4", e.target.value)} />
+                </div>
               </div>
             </div>
 
             <div className="grid grid-cols-2 gap-3">
               <div>
                 <label className="text-muted-foreground block mb-1">Deposit (€)</label>
-                <Input type="number" value={form.deposit} onChange={(e) => updateField("deposit", e.target.value)} />
+                <Input type="number" value={form.deposit_amount} onChange={(e) => updateField("deposit_amount", e.target.value)} />
               </div>
               <div>
                 <label className="text-muted-foreground block mb-1">Total Quantity</label>
-                <Input type="number" value={form.quantity} onChange={(e) => updateField("quantity", e.target.value)} />
+                <Input type="number" value={form.quantity_total} onChange={(e) => updateField("quantity_total", e.target.value)} />
               </div>
-            </div>
-
-            <div className="border border-border rounded-lg p-4 text-center text-muted-foreground">
-              <p className="text-sm">Drag & drop images here, or click to browse</p>
-              <p className="text-xs mt-1">PNG, JPG up to 5MB each</p>
             </div>
 
             <div>
@@ -213,15 +329,23 @@ const AdminEquipment = () => {
               ))}
             </div>
 
-            <div className="flex items-center gap-3">
-              <Switch checked={form.active} onCheckedChange={(v) => updateField("active", v)} />
-              <span>{form.active ? "Active" : "Inactive"}</span>
+            <div className="flex items-center gap-6">
+              <div className="flex items-center gap-2">
+                <Switch checked={form.is_active} onCheckedChange={(v) => updateField("is_active", v)} />
+                <span>{form.is_active ? "Active" : "Inactive"}</span>
+              </div>
+              <div className="flex items-center gap-2">
+                <Switch checked={form.is_popular} onCheckedChange={(v) => updateField("is_popular", v)} />
+                <span>Popular</span>
+              </div>
             </div>
           </div>
 
           <DialogFooter>
             <Button variant="outline" onClick={() => setModalOpen(false)}>Cancel</Button>
-            <Button onClick={handleSave}>Save</Button>
+            <Button onClick={handleSave} disabled={saving}>
+              {saving ? "Saving…" : "Save"}
+            </Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>
