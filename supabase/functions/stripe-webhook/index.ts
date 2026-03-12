@@ -1,4 +1,4 @@
-import Stripe from "https://esm.sh/stripe@14?target=deno";
+import Stripe from "npm:stripe@14";
 import { createClient } from "npm:@supabase/supabase-js@2";
 
 Deno.serve(async (req) => {
@@ -49,6 +49,26 @@ Deno.serve(async (req) => {
           .eq("booking_number", bookingNumber);
 
         console.log(`Booking ${bookingNumber} marked as paid + confirmed`);
+
+        // Send confirmation email — fire-and-forget, don't fail the webhook on email errors
+        try {
+          const emailRes = await fetch(
+            `${Deno.env.get("SUPABASE_URL")}/functions/v1/send-booking-confirmation`,
+            {
+              method: "POST",
+              headers: {
+                "Content-Type": "application/json",
+                "Authorization": `Bearer ${Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")}`,
+              },
+              body: JSON.stringify({ booking_number: bookingNumber }),
+            }
+          );
+          const emailResult = await emailRes.json();
+          console.log(`Email for ${bookingNumber}:`, emailResult);
+        } catch (emailErr) {
+          console.error(`Email send failed for ${bookingNumber}:`, emailErr);
+        }
+
         break;
       }
 
