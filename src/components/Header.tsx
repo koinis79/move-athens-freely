@@ -25,7 +25,6 @@ const Header = () => {
   const [lang, setLang] = useState<"EN" | "GR">("EN");
   const location = useLocation();
   const { user, signOut } = useAuth();
-  const { theme, setTheme } = useTheme();
   const { itemCount } = useCart();
 
   const displayName =
