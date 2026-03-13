@@ -226,6 +226,7 @@ export type Database = {
       }
       contact_inquiries: {
         Row: {
+          admin_notes: string | null
           created_at: string
           email: string
           id: string
@@ -237,6 +238,7 @@ export type Database = {
           subject: string | null
         }
         Insert: {
+          admin_notes?: string | null
           created_at?: string
           email: string
           id?: string
@@ -248,6 +250,7 @@ export type Database = {
           subject?: string | null
         }
         Update: {
+          admin_notes?: string | null
           created_at?: string
           email?: string
           id?: string
