@@ -27,6 +27,7 @@ const Header = () => {
   const location = useLocation();
   const { user, signOut } = useAuth();
   const { itemCount } = useCart();
+  const { theme, setTheme } = useTheme();
 
   const displayName =
     user?.user_metadata?.full_name ||
