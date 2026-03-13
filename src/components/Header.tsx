@@ -187,56 +187,75 @@ const Header = () => {
           </button>
         </div>
         <nav className="flex flex-col px-6 gap-1" aria-label="Mobile navigation">
-          {navLinks.map((link) => (
+          {navLinks.map((link, i) => (
             <Link
               key={link.to}
               to={link.to}
-              className={`px-3 py-3 rounded-lg font-medium transition-colors hover:bg-muted ${
+              className={`px-3 py-3 rounded-lg font-medium transition-all duration-200 hover:bg-muted hover:translate-x-1 ${
                 location.pathname.startsWith(link.to) ? "text-primary font-semibold" : "text-foreground/80"
               }`}
+              style={{
+                opacity: menuOpen ? 1 : 0,
+                transform: menuOpen ? "translateX(0)" : "translateX(20px)",
+                transition: `opacity 300ms ease ${i * 50}ms, transform 300ms ease ${i * 50}ms`,
+              }}
             >
               {link.label}
             </Link>
           ))}
           <hr className="my-3 border-border" />
-          <button
-            onClick={toggleLang}
-            className="px-3 py-3 text-left rounded-lg font-medium hover:bg-muted transition-colors"
-          >
-            {t("nav.language")}: <span className={currentLang === "EN" ? "font-bold" : "opacity-60"}>EN</span> | <span className={currentLang === "GR" ? "font-bold" : "opacity-60"}>GR</span>
-          </button>
-          <button
-            onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
-            className="px-3 py-3 text-left rounded-lg font-medium hover:bg-muted transition-colors flex items-center gap-2"
-          >
-            {theme === "dark" ? <Sun className="h-4 w-4" /> : <Moon className="h-4 w-4" />}
-            {theme === "dark" ? t("nav.lightMode") : t("nav.darkMode")}
-          </button>
-
-          <Link to="/cart" className="px-3 py-3 rounded-lg font-medium hover:bg-muted transition-colors flex items-center gap-2">
-            <ShoppingCart className="h-4 w-4" />
-            {t("nav.cart")}
-            {itemCount > 0 && (
-              <span className="ml-auto flex h-5 w-5 items-center justify-center rounded-full bg-primary text-[10px] font-bold text-primary-foreground">
-                {itemCount > 9 ? "9+" : itemCount}
-              </span>
-            )}
-          </Link>
+          {[
+            <button
+              key="lang"
+              onClick={toggleLang}
+              className="px-3 py-3 text-left rounded-lg font-medium hover:bg-muted hover:translate-x-1 transition-all duration-200"
+            >
+              {t("nav.language")}: <span className={currentLang === "EN" ? "font-bold" : "opacity-60"}>EN</span> | <span className={currentLang === "GR" ? "font-bold" : "opacity-60"}>GR</span>
+            </button>,
+            <button
+              key="theme"
+              onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
+              className="px-3 py-3 text-left rounded-lg font-medium hover:bg-muted hover:translate-x-1 transition-all duration-200 flex items-center gap-2"
+            >
+              {theme === "dark" ? <Sun className="h-4 w-4" /> : <Moon className="h-4 w-4" />}
+              {theme === "dark" ? t("nav.lightMode") : t("nav.darkMode")}
+            </button>,
+            <Link key="cart" to="/cart" className="px-3 py-3 rounded-lg font-medium hover:bg-muted hover:translate-x-1 transition-all duration-200 flex items-center gap-2">
+              <ShoppingCart className="h-4 w-4" />
+              {t("nav.cart")}
+              {itemCount > 0 && (
+                <span className="ml-auto flex h-5 w-5 items-center justify-center rounded-full bg-primary text-[10px] font-bold text-primary-foreground">
+                  {itemCount > 9 ? "9+" : itemCount}
+                </span>
+              )}
+            </Link>,
+          ].map((el, i) => (
+            <div
+              key={i}
+              style={{
+                opacity: menuOpen ? 1 : 0,
+                transform: menuOpen ? "translateX(0)" : "translateX(20px)",
+                transition: `opacity 300ms ease ${(navLinks.length + i) * 50}ms, transform 300ms ease ${(navLinks.length + i) * 50}ms`,
+              }}
+            >
+              {el}
+            </div>
+          ))}
 
           {user ? (
             <>
-              <Link to="/dashboard" className="px-3 py-3 rounded-lg font-medium hover:bg-muted transition-colors">
+              <Link to="/dashboard" className="px-3 py-3 rounded-lg font-medium hover:bg-muted hover:translate-x-1 transition-all duration-200">
                 {t("nav.myBookings")}
               </Link>
               <button
                 onClick={signOut}
-                className="px-3 py-3 text-left rounded-lg font-medium text-destructive hover:bg-muted transition-colors"
+                className="px-3 py-3 text-left rounded-lg font-medium text-destructive hover:bg-muted hover:translate-x-1 transition-all duration-200"
               >
                 {t("nav.signOut")}
               </button>
             </>
           ) : (
-            <Link to="/login" className="px-3 py-3 rounded-lg font-medium hover:bg-muted transition-colors">
+            <Link to="/login" className="px-3 py-3 rounded-lg font-medium hover:bg-muted hover:translate-x-1 transition-all duration-200">
               {t("nav.signIn")}
             </Link>
           )}
@@ -247,6 +266,17 @@ const Header = () => {
           >
             {t("nav.bookNow")}
           </Link>
+
+          <a
+            href="https://wa.me/302109511750?text=Hi!%20I'm%20interested%20in%20renting%20mobility%20equipment%20in%20Athens."
+            target="_blank"
+            rel="noopener noreferrer"
+            className="mt-3 inline-flex items-center justify-center gap-2 px-5 py-3 rounded-xl font-semibold transition-colors hover:opacity-90 text-white"
+            style={{ backgroundColor: "#25D366" }}
+          >
+            <MessageCircle className="h-4 w-4" fill="white" />
+            Chat on WhatsApp
+          </a>
         </nav>
       </div>
 
