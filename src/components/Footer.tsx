@@ -30,8 +30,12 @@ const Footer = () => {
         <div className="grid grid-cols-1 gap-10 sm:grid-cols-2 lg:grid-cols-4">
           {/* Brand */}
           <div className="space-y-4">
-            <Link to="/" className="font-heading text-xl font-extrabold text-primary">
-              Moveability
+            <Link to="/" aria-label="Moveability — Home">
+              <img
+                src="https://lmgpuqgwkiapgpdsxvmb.supabase.co/storage/v1/object/public/assets/Gemini_Generated_Image_at7c4zat7c4zat7c.png"
+                alt="Moveability"
+                className="h-12 w-auto drop-shadow-[0_0_8px_hsl(var(--footer-bg)/0.4)]"
+              />
             </Link>
             <p className="text-sm leading-relaxed" style={{ color: footerFg70 }}>
               {t("footer.tagline")}
