@@ -34,7 +34,7 @@ const Footer = () => {
               <img
                 src="https://lmgpuqgwkiapgpdsxvmb.supabase.co/storage/v1/object/public/assets/Gemini_Generated_Image_at7c4zat7c4zat7c.png"
                 alt="Moveability"
-                className="h-12 w-auto drop-shadow-[0_0_8px_hsl(var(--footer-bg)/0.4)]"
+                className="h-14 w-auto rounded-lg p-0.5 bg-background dark:invert dark:hue-rotate-180"
               />
             </Link>
             <p className="text-sm leading-relaxed" style={{ color: footerFg70 }}>
