@@ -15,6 +15,12 @@ import EquipmentCardSkeleton from "./EquipmentCardSkeleton";
 import { categoryFilterLabels } from "@/data/equipment";
 import { useEquipment } from "@/hooks/useEquipment";
 
+type SortOption = "price-asc" | "price-desc" | "popular";
+
+interface Props {
+  categorySlug?: string;
+}
+
 const EquipmentListing = ({ categorySlug }: Props) => {
   const [activeFilter, setActiveFilter] = useState(categorySlug ?? "");
   const [sort, setSort] = useState<SortOption>("popular");
