@@ -82,8 +82,12 @@ const ResetPassword = () => {
   return (
     <div className="flex min-h-[70vh] items-center justify-center px-4 py-12">
       <div className="w-full max-w-[420px] rounded-2xl border bg-card p-8 shadow-sm space-y-6">
-        <Link to="/" className="block text-center font-heading text-2xl font-extrabold text-primary">
-          Moveability
+        <Link to="/" className="flex justify-center">
+          <img
+            src="https://lmgpuqgwkiapgpdsxvmb.supabase.co/storage/v1/object/public/assets/Gemini_Generated_Image_at7c4zat7c4zat7c.png"
+            alt="Moveability"
+            className="h-12 w-auto rounded-lg p-0.5 bg-background dark:invert dark:hue-rotate-180"
+          />
         </Link>
         <div className="text-center">
           <h1 className="text-2xl font-heading font-bold text-foreground">Set new password</h1>
