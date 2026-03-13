@@ -67,7 +67,7 @@ const EquipmentCard = ({ item }: { item: EquipmentItem }) => {
             <span className="ml-2 text-sm text-muted-foreground">{t("equipmentListing.forDays")}</span>
           </div>
 
-          <Button variant="outline" className="mt-2 w-full rounded-xl" tabIndex={-1}>
+          <Button variant="outline" className="mt-2 w-full rounded-xl transition-colors duration-200 group-hover:bg-primary group-hover:text-primary-foreground group-hover:border-primary" tabIndex={-1}>
             {t("equipmentListing.viewDetails")}
           </Button>
         </CardContent>
