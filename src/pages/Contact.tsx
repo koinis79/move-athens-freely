@@ -71,23 +71,18 @@ type ContactFormValues = z.infer<typeof contactSchema>;
 const stores = [
   {
     name: "Athens Center",
-    address: "Stadiou 31, 105 59 Athens",
+    address: "Stadiou 31, Athens (City Center)",
     phone: "210 32 23 041",
   },
   {
     name: "Kallithea",
-    address: "Davaki 16, 176 72 Kallithea",
+    address: "Davaki 16, Kallithea",
     phone: "210 95 11 750",
   },
   {
     name: "Chalandri",
-    address: "Kolokotroni 22, 152 33 Chalandri",
+    address: "Kolokotroni 22, Chalandri",
     phone: "210 68 35 517",
-  },
-  {
-    name: "Korinthos",
-    address: "Koliatsou 50, 20 100 Korinthos",
-    phone: "27410 28 607",
   },
 ];
 
