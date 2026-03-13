@@ -379,11 +379,33 @@ const Contact = () => {
               </div>
             </div>
 
-            <div className="overflow-hidden rounded-lg border border-border bg-muted/50">
-              <div className="flex h-48 items-center justify-center text-sm text-muted-foreground">
-                <MapPin className="mr-2 h-5 w-5" />
-                Google Maps embed placeholder
-              </div>
+            <div className="overflow-hidden rounded-xl border border-border">
+              <iframe
+                src="https://www.google.com/maps/embed?pb=!1m16!1m12!1m3!1d50410.38684722!2d23.72!3d37.98!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!2m1!1sKoinis+Healthcare+Athens!5e0!3m2!1sen!2sgr!4v1710340000000!5m2!1sen!2sgr"
+                width="100%"
+                height="300"
+                style={{ border: 0 }}
+                allowFullScreen
+                loading="lazy"
+                referrerPolicy="no-referrer-when-downgrade"
+                title="Koinis Healthcare Athens store locations"
+              />
+            </div>
+
+            {/* Our Stores */}
+            <div className="mt-6 space-y-3">
+              <p className="font-heading font-semibold text-foreground">
+                Our Stores (Free Pickup)
+              </p>
+              {stores.map((s) => (
+                <div key={s.name} className="flex items-start gap-3">
+                  <MapPin className="mt-0.5 h-4 w-4 shrink-0 text-primary" />
+                  <div>
+                    <p className="text-sm font-medium text-foreground">{s.name}</p>
+                    <p className="text-sm text-muted-foreground">{s.address}</p>
+                  </div>
+                </div>
+              ))}
             </div>
           </div>
         </div>
