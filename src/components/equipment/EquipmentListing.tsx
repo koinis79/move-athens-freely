@@ -11,6 +11,7 @@ import {
 import { MessageCircle } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import EquipmentCard from "./EquipmentCard";
+import EquipmentCardSkeleton from "./EquipmentCardSkeleton";
 import { categoryFilterLabels } from "@/data/equipment";
 import { useEquipment } from "@/hooks/useEquipment";
 
@@ -19,19 +20,6 @@ type SortOption = "price-asc" | "price-desc" | "popular";
 interface Props {
   categorySlug?: string;
 }
-
-const SkeletonCard = () => (
-  <div className="rounded-2xl border bg-card animate-pulse">
-    <div className="h-48 bg-muted rounded-t-2xl" />
-    <div className="p-5 space-y-3">
-      <div className="h-4 bg-muted rounded w-1/3" />
-      <div className="h-5 bg-muted rounded w-2/3" />
-      <div className="h-4 bg-muted rounded w-full" />
-      <div className="h-4 bg-muted rounded w-3/4" />
-      <div className="h-10 bg-muted rounded-xl mt-2" />
-    </div>
-  </div>
-);
 
 const EquipmentListing = ({ categorySlug }: Props) => {
   const [activeFilter, setActiveFilter] = useState(categorySlug ?? "");
@@ -128,7 +116,7 @@ const EquipmentListing = ({ categorySlug }: Props) => {
 
       <div className="mt-8 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
         {loading
-          ? Array.from({ length: 6 }).map((_, i) => <SkeletonCard key={i} />)
+          ? Array.from({ length: 6 }).map((_, i) => <EquipmentCardSkeleton key={i} />)
           : sorted.map((item) => <EquipmentCard key={item.id} item={item} />)}
       </div>
 

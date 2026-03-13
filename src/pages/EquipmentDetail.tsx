@@ -1,6 +1,5 @@
 import { useParams, Link } from "react-router-dom";
 import { Badge } from "@/components/ui/badge";
-import { Skeleton } from "@/components/ui/skeleton";
 import { CheckCircle2 } from "lucide-react";
 import { categoryFilterLabels } from "@/data/equipment";
 import { useEquipmentDetail, useRelatedEquipment } from "@/hooks/useEquipment";
@@ -8,6 +7,7 @@ import ImageGallery from "@/components/equipment/ImageGallery";
 import BookingPanel from "@/components/equipment/BookingPanel";
 import SpecificationsSection from "@/components/equipment/SpecificationsSection";
 import EquipmentCard from "@/components/equipment/EquipmentCard";
+import EquipmentCardSkeleton from "@/components/equipment/EquipmentCardSkeleton";
 import NotFound from "./NotFound";
 
 const DEFAULT_INCLUDED = [
@@ -43,14 +43,25 @@ const EquipmentDetail = () => {
   if (loading) {
     return (
       <div className="container py-8 md:py-12">
-        <Skeleton className="h-4 w-48 mb-6" />
+        <div className="h-4 w-48 mb-6 rounded bg-muted animate-pulse" />
         <div className="grid gap-8 lg:grid-cols-[3fr_2fr]">
-          <Skeleton className="h-96 rounded-2xl" />
+          <div className="relative aspect-[3/2] overflow-hidden rounded-2xl bg-muted">
+            <div className="absolute inset-0 animate-shimmer bg-gradient-to-r from-transparent via-foreground/5 to-transparent" />
+          </div>
           <div className="space-y-4">
-            <Skeleton className="h-6 w-32" />
-            <Skeleton className="h-8 w-3/4" />
-            <Skeleton className="h-20 w-full" />
-            <Skeleton className="h-64 w-full rounded-xl" />
+            <div className="flex gap-2">
+              <div className="h-6 w-24 rounded-full bg-muted animate-pulse" />
+              <div className="h-6 w-20 rounded-full bg-muted animate-pulse" />
+            </div>
+            <div className="h-8 w-3/4 rounded bg-muted animate-pulse" />
+            <div className="space-y-2">
+              <div className="h-4 w-full rounded bg-muted animate-pulse" />
+              <div className="h-4 w-full rounded bg-muted animate-pulse" />
+              <div className="h-4 w-2/3 rounded bg-muted animate-pulse" />
+            </div>
+            <div className="relative h-64 w-full overflow-hidden rounded-xl bg-muted">
+              <div className="absolute inset-0 animate-shimmer bg-gradient-to-r from-transparent via-foreground/5 to-transparent" />
+            </div>
           </div>
         </div>
       </div>
@@ -166,7 +177,7 @@ const EquipmentDetail = () => {
         {relatedLoading ? (
           <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
             {Array.from({ length: 3 }).map((_, i) => (
-              <Skeleton key={i} className="h-64 rounded-2xl" />
+              <EquipmentCardSkeleton key={i} />
             ))}
           </div>
         ) : (
