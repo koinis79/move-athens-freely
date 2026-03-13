@@ -203,6 +203,7 @@ const Header = () => {
             {theme === "dark" ? "Light Mode" : "Dark Mode"}
           </button>
 
+          <Link to="/cart" className="px-3 py-3 rounded-lg font-medium hover:bg-muted transition-colors flex items-center gap-2">
             <ShoppingCart className="h-4 w-4" />
             Cart
             {itemCount > 0 && (
