@@ -8,6 +8,7 @@ import { AuthProvider } from "@/context/AuthContext";
 import ProtectedRoute from "@/components/ProtectedRoute";
 import AdminRoute from "@/components/admin/AdminRoute";
 import Layout from "./components/Layout";
+import ScrollToTop from "./components/ScrollToTop";
 import Index from "./pages/Index";
 import Equipment from "./pages/Equipment";
 import EquipmentDetail from "./pages/EquipmentDetail";
