@@ -43,14 +43,25 @@ const EquipmentDetail = () => {
   if (loading) {
     return (
       <div className="container py-8 md:py-12">
-        <Skeleton className="h-4 w-48 mb-6" />
+        <div className="h-4 w-48 mb-6 rounded bg-muted animate-pulse" />
         <div className="grid gap-8 lg:grid-cols-[3fr_2fr]">
-          <Skeleton className="h-96 rounded-2xl" />
+          <div className="relative aspect-[3/2] overflow-hidden rounded-2xl bg-muted">
+            <div className="absolute inset-0 animate-shimmer bg-gradient-to-r from-transparent via-foreground/5 to-transparent" />
+          </div>
           <div className="space-y-4">
-            <Skeleton className="h-6 w-32" />
-            <Skeleton className="h-8 w-3/4" />
-            <Skeleton className="h-20 w-full" />
-            <Skeleton className="h-64 w-full rounded-xl" />
+            <div className="flex gap-2">
+              <div className="h-6 w-24 rounded-full bg-muted animate-pulse" />
+              <div className="h-6 w-20 rounded-full bg-muted animate-pulse" />
+            </div>
+            <div className="h-8 w-3/4 rounded bg-muted animate-pulse" />
+            <div className="space-y-2">
+              <div className="h-4 w-full rounded bg-muted animate-pulse" />
+              <div className="h-4 w-full rounded bg-muted animate-pulse" />
+              <div className="h-4 w-2/3 rounded bg-muted animate-pulse" />
+            </div>
+            <div className="relative h-64 w-full overflow-hidden rounded-xl bg-muted">
+              <div className="absolute inset-0 animate-shimmer bg-gradient-to-r from-transparent via-foreground/5 to-transparent" />
+            </div>
           </div>
         </div>
       </div>

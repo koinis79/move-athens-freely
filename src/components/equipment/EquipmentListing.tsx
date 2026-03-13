@@ -110,7 +110,7 @@ const EquipmentListing = ({ categorySlug }: Props) => {
 
       <div className="mt-8 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
         {loading
-          ? Array.from({ length: 6 }).map((_, i) => <SkeletonCard key={i} />)
+          ? Array.from({ length: 6 }).map((_, i) => <EquipmentCardSkeleton key={i} />)
           : sorted.map((item) => <EquipmentCard key={item.id} item={item} />)}
       </div>
 
