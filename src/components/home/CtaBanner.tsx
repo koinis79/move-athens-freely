@@ -20,7 +20,7 @@ const CtaBanner = () => (
           className="rounded-xl bg-accent px-8 text-base font-semibold text-accent-foreground hover:bg-accent/90"
         >
           <a
-            href="https://wa.me/30210XXXXXXX"
+            href="https://wa.me/302109511750?text=Hi!%20I'm%20interested%20in%20renting%20mobility%20equipment%20in%20Athens."
             target="_blank"
             rel="noopener noreferrer"
           >
