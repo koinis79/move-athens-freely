@@ -62,7 +62,7 @@ const Header = () => {
           <img
             src="https://lmgpuqgwkiapgpdsxvmb.supabase.co/storage/v1/object/public/assets/Gemini_Generated_Image_at7c4zat7c4zat7c.png"
             alt="Moveability"
-            className="h-11 lg:h-[52px] w-auto dark:opacity-90 dark:brightness-90 dark:contrast-90"
+            className="h-11 lg:h-[52px] w-auto dark:bg-foreground/10 dark:rounded-lg dark:p-1 dark:opacity-90 dark:brightness-90 dark:contrast-90"
           />
         </Link>
 
