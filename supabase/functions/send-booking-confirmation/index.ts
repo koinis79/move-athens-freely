@@ -226,6 +226,16 @@ function buildHtml(b: Booking): string {
 }
 
 Deno.serve(async (req) => {
+  // This function is only called server-to-server (from stripe-webhook).
+  // Reject any request that doesn't carry the service role key.
+  const authHeader = req.headers.get("Authorization");
+  if (authHeader !== `Bearer ${Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")}`) {
+    return new Response(JSON.stringify({ error: "Unauthorized" }), {
+      status: 401,
+      headers: { "Content-Type": "application/json" },
+    });
+  }
+
   if (req.method === "OPTIONS") {
     return new Response("ok", { headers: corsHeaders });
   }
