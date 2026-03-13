@@ -9,6 +9,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { MessageCircle } from "lucide-react";
+import { useTranslation } from "react-i18next";
 import EquipmentCard from "./EquipmentCard";
 import { categoryFilterLabels } from "@/data/equipment";
 import { useEquipment } from "@/hooks/useEquipment";
@@ -16,7 +17,6 @@ import { useEquipment } from "@/hooks/useEquipment";
 type SortOption = "price-asc" | "price-desc" | "popular";
 
 interface Props {
-  /** Pre-filter by category slug (for category routes) */
   categorySlug?: string;
 }
 
@@ -36,8 +36,8 @@ const SkeletonCard = () => (
 const EquipmentListing = ({ categorySlug }: Props) => {
   const [activeFilter, setActiveFilter] = useState(categorySlug ?? "");
   const [sort, setSort] = useState<SortOption>("popular");
+  const { t } = useTranslation();
 
-  // Fetch from Supabase — pass the active category slug for server-side narrowing
   const effectiveSlug = categorySlug ?? (activeFilter || undefined);
   const { items, loading, error } = useEquipment(effectiveSlug);
 
@@ -58,9 +58,8 @@ const EquipmentListing = ({ categorySlug }: Props) => {
   }, [items, sort]);
 
   const heading = categorySlug
-    ? categoryFilterLabels.find((c) => c.slug === categorySlug)?.label ??
-      "Equipment"
-    : "Mobility Equipment for Rent";
+    ? categoryFilterLabels.find((c) => c.slug === categorySlug)?.label ?? t("nav.equipment")
+    : t("equipmentListing.title");
 
   return (
     <div className="container py-10 md:py-16">
@@ -68,17 +67,13 @@ const EquipmentListing = ({ categorySlug }: Props) => {
       <nav aria-label="Breadcrumb" className="mb-4 text-sm text-muted-foreground">
         <ol className="flex items-center gap-1.5">
           <li>
-            <Link to="/" className="hover:text-primary transition-colors">
-              Home
-            </Link>
+            <Link to="/" className="hover:text-primary transition-colors">{t("equipmentListing.home")}</Link>
           </li>
           <li aria-hidden="true">&gt;</li>
           {categorySlug ? (
             <>
               <li>
-                <Link to="/equipment" className="hover:text-primary transition-colors">
-                  Equipment
-                </Link>
+                <Link to="/equipment" className="hover:text-primary transition-colors">{t("nav.equipment")}</Link>
               </li>
               <li aria-hidden="true">&gt;</li>
               <li className="text-foreground font-medium">
@@ -86,19 +81,13 @@ const EquipmentListing = ({ categorySlug }: Props) => {
               </li>
             </>
           ) : (
-            <li className="text-foreground font-medium">Equipment</li>
+            <li className="text-foreground font-medium">{t("nav.equipment")}</li>
           )}
         </ol>
       </nav>
 
-      {/* Heading */}
-      <h1 className="text-3xl font-heading font-bold text-foreground md:text-4xl">
-        {heading}
-      </h1>
-      <p className="mt-2 max-w-2xl text-muted-foreground">
-        Quality wheelchairs, scooters, and mobility aids delivered to your door
-        in Athens
-      </p>
+      <h1 className="text-3xl font-heading font-bold text-foreground md:text-4xl">{heading}</h1>
+      <p className="mt-2 max-w-2xl text-muted-foreground">{t("equipmentListing.subtitle")}</p>
 
       {/* Filter + Sort bar */}
       <div className="mt-8 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
@@ -120,25 +109,23 @@ const EquipmentListing = ({ categorySlug }: Props) => {
 
         <Select value={sort} onValueChange={(v) => setSort(v as SortOption)}>
           <SelectTrigger className="w-52 rounded-xl">
-            <SelectValue placeholder="Sort by" />
+            <SelectValue placeholder={t("equipmentListing.sortBy")} />
           </SelectTrigger>
           <SelectContent>
-            <SelectItem value="popular">Most Popular</SelectItem>
-            <SelectItem value="price-asc">Price (Low to High)</SelectItem>
-            <SelectItem value="price-desc">Price (High to Low)</SelectItem>
+            <SelectItem value="popular">{t("equipmentListing.sortPopular")}</SelectItem>
+            <SelectItem value="price-asc">{t("equipmentListing.sortPriceAsc")}</SelectItem>
+            <SelectItem value="price-desc">{t("equipmentListing.sortPriceDesc")}</SelectItem>
           </SelectContent>
         </Select>
       </div>
 
-      {/* Error state */}
       {error && (
         <div className="mt-8 rounded-xl border border-destructive/30 bg-destructive/10 p-6 text-center text-destructive">
-          <p className="font-semibold">Failed to load equipment</p>
+          <p className="font-semibold">{t("equipmentListing.failedToLoad")}</p>
           <p className="text-sm mt-1">{error}</p>
         </div>
       )}
 
-      {/* Grid */}
       <div className="mt-8 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
         {loading
           ? Array.from({ length: 6 }).map((_, i) => <SkeletonCard key={i} />)
@@ -146,37 +133,21 @@ const EquipmentListing = ({ categorySlug }: Props) => {
       </div>
 
       {!loading && !error && sorted.length === 0 && (
-        <p className="mt-12 text-center text-muted-foreground">
-          No equipment found in this category.
-        </p>
+        <p className="mt-12 text-center text-muted-foreground">{t("equipmentListing.noEquipment")}</p>
       )}
 
-      {/* Need help CTA */}
       <section className="mt-16 rounded-xl bg-muted/50 p-8 text-center md:p-12">
-        <h2 className="text-2xl font-heading font-bold text-foreground">
-          Need help choosing?
-        </h2>
-        <p className="mx-auto mt-2 max-w-lg text-muted-foreground">
-          Our team can recommend the right equipment based on your needs,
-          accommodation, and itinerary.
-        </p>
+        <h2 className="text-2xl font-heading font-bold text-foreground">{t("equipmentListing.needHelp")}</h2>
+        <p className="mx-auto mt-2 max-w-lg text-muted-foreground">{t("equipmentListing.needHelpDesc")}</p>
         <div className="mt-6 flex flex-col items-center gap-4 sm:flex-row sm:justify-center">
-          <Button
-            asChild
-            size="lg"
-            className="rounded-xl bg-accent text-accent-foreground hover:bg-accent/90"
-          >
-            <a
-              href="https://wa.me/302109511750"
-              target="_blank"
-              rel="noopener noreferrer"
-            >
+          <Button asChild size="lg" className="rounded-xl bg-accent text-accent-foreground hover:bg-accent/90">
+            <a href="https://wa.me/302109511750" target="_blank" rel="noopener noreferrer">
               <MessageCircle className="mr-2 h-5 w-5" />
-              Chat on WhatsApp
+              {t("equipmentListing.chatWhatsApp")}
             </a>
           </Button>
           <Button asChild variant="outline" size="lg" className="rounded-xl">
-            <Link to="/contact">Contact Us</Link>
+            <Link to="/contact">{t("equipmentListing.contactUs")}</Link>
           </Button>
         </div>
       </section>
