@@ -7,6 +7,7 @@ import ImageGallery from "@/components/equipment/ImageGallery";
 import BookingPanel from "@/components/equipment/BookingPanel";
 import SpecificationsSection from "@/components/equipment/SpecificationsSection";
 import EquipmentCard from "@/components/equipment/EquipmentCard";
+import EquipmentCardSkeleton from "@/components/equipment/EquipmentCardSkeleton";
 import NotFound from "./NotFound";
 
 const DEFAULT_INCLUDED = [
