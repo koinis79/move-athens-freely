@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { Link, useLocation } from "react-router-dom";
-import { Menu, X, ChevronDown, User, LogOut, LayoutDashboard, ShoppingCart } from "lucide-react";
+import { Menu, X, ChevronDown, User, LogOut, LayoutDashboard, ShoppingCart, Sun, Moon } from "lucide-react";
+import { useTheme } from "next-themes";
 import { useAuth } from "@/context/AuthContext";
 import { useCart } from "@/context/CartContext";
 import {
