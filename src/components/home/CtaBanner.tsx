@@ -32,7 +32,7 @@ const CtaBanner = () => (
           asChild
           variant="outline"
           size="lg"
-          className="rounded-xl border-primary-foreground/30 px-8 text-base font-semibold text-primary-foreground hover:bg-primary-foreground/10"
+          className="rounded-xl border-2 border-primary-foreground bg-transparent px-8 text-base font-semibold text-primary-foreground hover:bg-primary-foreground hover:text-primary"
         >
           <Link to="/contact">Contact Us</Link>
         </Button>
