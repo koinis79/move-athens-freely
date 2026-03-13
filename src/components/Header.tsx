@@ -70,13 +70,6 @@ const Header = () => {
         {/* Desktop right */}
         <div className="hidden lg:flex items-center gap-2">
           <button
-            onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
-            className="p-2 rounded-lg border border-border hover:bg-muted transition-colors"
-            aria-label={`Switch to ${theme === "dark" ? "light" : "dark"} mode`}
-          >
-            {theme === "dark" ? <Sun className="h-4 w-4" /> : <Moon className="h-4 w-4" />}
-          </button>
-          <button
             onClick={() => setLang(lang === "EN" ? "GR" : "EN")}
             className="px-3 py-1.5 text-sm font-medium rounded-lg border border-border hover:bg-muted transition-colors"
             aria-label={`Switch language to ${lang === "EN" ? "Greek" : "English"}`}
