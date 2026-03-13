@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import { Link, useLocation } from "react-router-dom";
 import { Menu, X, ChevronDown, User, LogOut, LayoutDashboard, ShoppingCart, Sun, Moon } from "lucide-react";
 import { useTheme } from "next-themes";
+import { useTranslation } from "react-i18next";
 import { useAuth } from "@/context/AuthContext";
 import { useCart } from "@/context/CartContext";
 import {
@@ -12,22 +13,24 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 
-const navLinks = [
-  { label: "Equipment", to: "/equipment" },
-  { label: "How It Works", to: "/how-it-works" },
-  { label: "Accessible Athens", to: "/accessible-athens" },
-  { label: "About", to: "/about" },
-  { label: "Contact", to: "/contact" },
-];
-
 const Header = () => {
   const [menuOpen, setMenuOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
-  const [lang, setLang] = useState<"EN" | "GR">("EN");
   const location = useLocation();
   const { user, signOut } = useAuth();
   const { itemCount } = useCart();
   const { theme, setTheme } = useTheme();
+  const { t, i18n } = useTranslation();
+
+  const currentLang = i18n.language === "gr" ? "GR" : "EN";
+
+  const navLinks = [
+    { label: t("nav.equipment"), to: "/equipment" },
+    { label: t("nav.howItWorks"), to: "/how-it-works" },
+    { label: t("nav.accessibleAthens"), to: "/accessible-athens" },
+    { label: t("nav.about"), to: "/about" },
+    { label: t("nav.contact"), to: "/contact" },
+  ];
 
   const displayName =
     user?.user_metadata?.full_name ||
@@ -41,6 +44,11 @@ const Header = () => {
     window.addEventListener("scroll", onScroll, { passive: true });
     return () => window.removeEventListener("scroll", onScroll);
   }, []);
+
+  const toggleLang = () => {
+    const newLang = currentLang === "EN" ? "gr" : "en";
+    i18n.changeLanguage(newLang);
+  };
 
   return (
     <header
@@ -79,11 +87,13 @@ const Header = () => {
             {theme === "dark" ? <Sun className="h-4 w-4" /> : <Moon className="h-4 w-4" />}
           </button>
           <button
-            onClick={() => setLang(lang === "EN" ? "GR" : "EN")}
+            onClick={toggleLang}
             className="px-3 py-1.5 text-sm font-medium rounded-lg border border-border hover:bg-muted transition-colors"
-            aria-label={`Switch language to ${lang === "EN" ? "Greek" : "English"}`}
+            aria-label={`Switch language to ${currentLang === "EN" ? "Greek" : "English"}`}
           >
-            {lang === "EN" ? "EN" : "GR"} | {lang === "EN" ? "GR" : "EN"}
+            <span className={currentLang === "EN" ? "font-bold underline underline-offset-2" : "opacity-60"}>EN</span>
+            {" | "}
+            <span className={currentLang === "GR" ? "font-bold underline underline-offset-2" : "opacity-60"}>GR</span>
           </button>
 
           {user ? (
@@ -97,27 +107,27 @@ const Header = () => {
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end" className="w-48">
                 <DropdownMenuItem asChild>
-                  <Link to="/dashboard" className="gap-2"><LayoutDashboard className="h-4 w-4" /> My Bookings</Link>
+                  <Link to="/dashboard" className="gap-2"><LayoutDashboard className="h-4 w-4" /> {t("nav.myBookings")}</Link>
                 </DropdownMenuItem>
                 <DropdownMenuItem asChild>
-                  <Link to="/dashboard" className="gap-2"><User className="h-4 w-4" /> Profile</Link>
+                  <Link to="/dashboard" className="gap-2"><User className="h-4 w-4" /> {t("nav.profile")}</Link>
                 </DropdownMenuItem>
                 <DropdownMenuSeparator />
                 <DropdownMenuItem onClick={signOut} className="gap-2 text-destructive focus:text-destructive">
-                  <LogOut className="h-4 w-4" /> Sign Out
+                  <LogOut className="h-4 w-4" /> {t("nav.signOut")}
                 </DropdownMenuItem>
               </DropdownMenuContent>
             </DropdownMenu>
           ) : (
             <Link to="/login" className="text-sm font-medium text-foreground/80 hover:text-primary transition-colors">
-              Sign In
+              {t("nav.signIn")}
             </Link>
           )}
 
           <Link
             to="/cart"
             className="relative p-2 rounded-lg border border-border hover:bg-muted transition-colors"
-            aria-label={`Cart${itemCount > 0 ? `, ${itemCount} item${itemCount !== 1 ? "s" : ""}` : ""}`}
+            aria-label={`${t("nav.cart")}${itemCount > 0 ? `, ${itemCount} item${itemCount !== 1 ? "s" : ""}` : ""}`}
           >
             <ShoppingCart className="h-4 w-4" />
             {itemCount > 0 && (
@@ -131,7 +141,7 @@ const Header = () => {
             to="/equipment"
             className="inline-flex items-center justify-center px-5 py-2.5 rounded-xl bg-primary text-primary-foreground text-sm font-semibold hover:bg-primary/90 transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary"
           >
-            Book Now
+            {t("nav.bookNow")}
           </Link>
         </div>
 
@@ -139,7 +149,7 @@ const Header = () => {
         <Link
           to="/cart"
           className="lg:hidden relative p-2 rounded-lg hover:bg-muted transition-colors"
-          aria-label={`Cart${itemCount > 0 ? `, ${itemCount} item${itemCount !== 1 ? "s" : ""}` : ""}`}
+          aria-label={`${t("nav.cart")}${itemCount > 0 ? `, ${itemCount} item${itemCount !== 1 ? "s" : ""}` : ""}`}
         >
           <ShoppingCart className="h-5 w-5" />
           {itemCount > 0 && (
@@ -190,22 +200,22 @@ const Header = () => {
           ))}
           <hr className="my-3 border-border" />
           <button
-            onClick={() => setLang(lang === "EN" ? "GR" : "EN")}
+            onClick={toggleLang}
             className="px-3 py-3 text-left rounded-lg font-medium hover:bg-muted transition-colors"
           >
-            Language: {lang}
+            {t("nav.language")}: <span className={currentLang === "EN" ? "font-bold" : "opacity-60"}>EN</span> | <span className={currentLang === "GR" ? "font-bold" : "opacity-60"}>GR</span>
           </button>
           <button
             onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
             className="px-3 py-3 text-left rounded-lg font-medium hover:bg-muted transition-colors flex items-center gap-2"
           >
             {theme === "dark" ? <Sun className="h-4 w-4" /> : <Moon className="h-4 w-4" />}
-            {theme === "dark" ? "Light Mode" : "Dark Mode"}
+            {theme === "dark" ? t("nav.lightMode") : t("nav.darkMode")}
           </button>
 
           <Link to="/cart" className="px-3 py-3 rounded-lg font-medium hover:bg-muted transition-colors flex items-center gap-2">
             <ShoppingCart className="h-4 w-4" />
-            Cart
+            {t("nav.cart")}
             {itemCount > 0 && (
               <span className="ml-auto flex h-5 w-5 items-center justify-center rounded-full bg-primary text-[10px] font-bold text-primary-foreground">
                 {itemCount > 9 ? "9+" : itemCount}
@@ -216,18 +226,18 @@ const Header = () => {
           {user ? (
             <>
               <Link to="/dashboard" className="px-3 py-3 rounded-lg font-medium hover:bg-muted transition-colors">
-                My Bookings
+                {t("nav.myBookings")}
               </Link>
               <button
                 onClick={signOut}
                 className="px-3 py-3 text-left rounded-lg font-medium text-destructive hover:bg-muted transition-colors"
               >
-                Sign Out
+                {t("nav.signOut")}
               </button>
             </>
           ) : (
             <Link to="/login" className="px-3 py-3 rounded-lg font-medium hover:bg-muted transition-colors">
-              Sign In
+              {t("nav.signIn")}
             </Link>
           )}
 
@@ -235,7 +245,7 @@ const Header = () => {
             to="/equipment"
             className="mt-2 inline-flex items-center justify-center px-5 py-3 rounded-xl bg-primary text-primary-foreground font-semibold hover:bg-primary/90 transition-colors"
           >
-            Book Now
+            {t("nav.bookNow")}
           </Link>
         </nav>
       </div>

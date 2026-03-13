@@ -1,5 +1,6 @@
 import { Star } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
+import { useTranslation } from "react-i18next";
 import {
   Carousel,
   CarouselContent,
@@ -10,20 +11,17 @@ import {
 
 const testimonials = [
   {
-    quote:
-      "Moveability made our Athens trip possible. The wheelchair was delivered to our hotel within hours of landing. Excellent service!",
+    quote: "Moveability made our Athens trip possible. The wheelchair was delivered to our hotel within hours of landing. Excellent service!",
     name: "Sarah T.",
     location: "London, UK",
   },
   {
-    quote:
-      "We rented a mobility scooter for my mother. She was able to explore the Acropolis Museum independently. Thank you!",
+    quote: "We rented a mobility scooter for my mother. She was able to explore the Acropolis Museum independently. Thank you!",
     name: "Marco R.",
     location: "Rome, Italy",
   },
   {
-    quote:
-      "Professional, responsive, and genuinely caring. The equipment was spotless and exactly what we needed.",
+    quote: "Professional, responsive, and genuinely caring. The equipment was spotless and exactly what we needed.",
     name: "Anna K.",
     location: "Berlin, Germany",
   },
@@ -37,56 +35,46 @@ const Stars = () => (
   </div>
 );
 
-const TestimonialCard = ({
-  quote,
-  name,
-  location,
-}: (typeof testimonials)[number]) => (
+const TestimonialCard = ({ quote, name, location }: (typeof testimonials)[number]) => (
   <Card className="h-full border-none shadow-md">
     <CardContent className="flex h-full flex-col justify-between p-6 md:p-8">
       <div>
         <Stars />
-        <blockquote className="mt-4 text-foreground leading-relaxed italic">
-          "{quote}"
-        </blockquote>
+        <blockquote className="mt-4 text-foreground leading-relaxed italic">"{quote}"</blockquote>
       </div>
-      <p className="mt-6 text-sm font-semibold text-muted-foreground">
-        {name}, {location}
-      </p>
+      <p className="mt-6 text-sm font-semibold text-muted-foreground">{name}, {location}</p>
     </CardContent>
   </Card>
 );
 
-const TestimonialsSection = () => (
-  <section className="bg-background py-16 md:py-20">
-    <div className="container">
-      <h2 className="text-center text-3xl font-heading font-bold text-foreground md:text-4xl">
-        What Our Customers Say
-      </h2>
+const TestimonialsSection = () => {
+  const { t } = useTranslation();
 
-      {/* Desktop grid */}
-      <div className="mt-12 hidden gap-6 md:grid md:grid-cols-3">
-        {testimonials.map((t) => (
-          <TestimonialCard key={t.name} {...t} />
-        ))}
-      </div>
+  return (
+    <section className="bg-background py-16 md:py-20">
+      <div className="container">
+        <h2 className="text-center text-3xl font-heading font-bold text-foreground md:text-4xl">
+          {t("testimonials.title")}
+        </h2>
 
-      {/* Mobile carousel */}
-      <div className="mt-12 md:hidden">
-        <Carousel opts={{ align: "start" }} className="mx-auto max-w-sm">
-          <CarouselContent>
-            {testimonials.map((t) => (
-              <CarouselItem key={t.name}>
-                <TestimonialCard {...t} />
-              </CarouselItem>
-            ))}
-          </CarouselContent>
-          <CarouselPrevious className="-left-4" />
-          <CarouselNext className="-right-4" />
-        </Carousel>
+        <div className="mt-12 hidden gap-6 md:grid md:grid-cols-3">
+          {testimonials.map((tm) => <TestimonialCard key={tm.name} {...tm} />)}
+        </div>
+
+        <div className="mt-12 md:hidden">
+          <Carousel opts={{ align: "start" }} className="mx-auto max-w-sm">
+            <CarouselContent>
+              {testimonials.map((tm) => (
+                <CarouselItem key={tm.name}><TestimonialCard {...tm} /></CarouselItem>
+              ))}
+            </CarouselContent>
+            <CarouselPrevious className="-left-4" />
+            <CarouselNext className="-right-4" />
+          </Carousel>
+        </div>
       </div>
-    </div>
-  </section>
-);
+    </section>
+  );
+};
 
 export default TestimonialsSection;
