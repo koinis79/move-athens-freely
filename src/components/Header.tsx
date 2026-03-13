@@ -186,13 +186,6 @@ const Header = () => {
           >
             Language: {lang}
           </button>
-          <button
-            onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
-            className="px-3 py-3 text-left rounded-lg font-medium hover:bg-muted transition-colors flex items-center gap-2"
-          >
-            {theme === "dark" ? <Sun className="h-4 w-4" /> : <Moon className="h-4 w-4" />}
-            {theme === "dark" ? "Light Mode" : "Dark Mode"}
-          </button>
 
           <Link to="/cart" className="px-3 py-3 rounded-lg font-medium hover:bg-muted transition-colors flex items-center gap-2">
             <ShoppingCart className="h-4 w-4" />
