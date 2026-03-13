@@ -1,29 +1,51 @@
 const spots = [
-  { caption: "Visiting the Acropolis Museum", alt: "Accessible entrance of the Acropolis Museum in Athens" },
-  { caption: "Strolling through Plaka", alt: "Cobblestone streets of Plaka neighborhood in Athens" },
-  { caption: "Enjoying the Athens Riviera", alt: "Seaside promenade along the Athens Riviera coast" },
-  { caption: "Exploring Monastiraki Square", alt: "Bustling Monastiraki Square with flea market stalls" },
+  {
+    src: "https://images.unsplash.com/photo-1573497019940-1c28c88b4f3e?w=600&h=400&fit=crop",
+    caption: "Independence at every landmark",
+    alt: "Person in wheelchair exploring outdoors",
+  },
+  {
+    src: "https://images.unsplash.com/photo-1541480601022-2308c0f02487?w=600&h=400&fit=crop",
+    caption: "Quality time with loved ones",
+    alt: "Senior couple enjoying outdoors together",
+  },
+  {
+    src: "https://images.unsplash.com/photo-1502920514313-52581002a659?w=600&h=400&fit=crop",
+    caption: "The Acropolis awaits",
+    alt: "View of the Parthenon in Athens",
+  },
+  {
+    src: "https://images.unsplash.com/photo-1555993539-1732b0258235?w=600&h=400&fit=crop",
+    caption: "Stroll through Plaka's charm",
+    alt: "Charming Athens street scene",
+  },
 ];
 
 const ExploreAthensSection = () => (
-  <section className="bg-gradient-to-b from-primary/5 via-primary/3 to-background py-16 md:py-24">
+  <section className="bg-gradient-to-b from-secondary/8 via-primary/5 to-background py-16 md:py-24">
     <div className="container">
       <h2 className="text-center text-3xl font-heading font-bold text-foreground md:text-4xl">
         Explore Athens Your Way
       </h2>
-      <p className="mx-auto mt-4 max-w-2xl text-center text-muted-foreground">
-        Discover the best of Athens with full accessibility — from ancient landmarks to vibrant neighborhoods.
+      <p className="mx-auto mt-4 max-w-2xl text-center text-lg text-muted-foreground">
+        Real freedom to discover the city at your own pace
       </p>
 
-      <div className="mx-auto mt-12 grid max-w-5xl gap-6 sm:grid-cols-2 lg:grid-cols-4">
+      <div className="mx-auto mt-12 grid max-w-4xl gap-6 sm:grid-cols-2">
         {spots.map((spot) => (
-          <div key={spot.caption} className="group">
-            <div className="aspect-[4/3] overflow-hidden rounded-lg bg-muted flex items-center justify-center">
-              <span className="px-4 text-center text-sm text-muted-foreground">{spot.alt}</span>
+          <div
+            key={spot.caption}
+            className="group relative overflow-hidden rounded-lg shadow-md"
+          >
+            <img
+              src={spot.src}
+              alt={spot.alt}
+              loading="lazy"
+              className="aspect-[3/2] w-full object-cover transition-transform duration-300 group-hover:scale-105"
+            />
+            <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/70 to-transparent px-4 pb-4 pt-10">
+              <p className="text-sm font-medium text-white">{spot.caption}</p>
             </div>
-            <p className="mt-3 text-center text-sm font-medium text-foreground">
-              {spot.caption}
-            </p>
           </div>
         ))}
       </div>
