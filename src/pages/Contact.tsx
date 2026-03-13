@@ -415,10 +415,10 @@ const Contact = () => {
       <section className="bg-muted/40 py-16 md:py-24">
         <div className="container">
           <h2 className="text-center text-3xl font-heading font-bold text-foreground md:text-4xl">
-            Our 4 Athens Locations
+            Our Athens Locations
           </h2>
 
-          <div className="mx-auto mt-12 grid max-w-5xl gap-6 sm:grid-cols-2 lg:grid-cols-4">
+          <div className="mx-auto mt-12 grid max-w-4xl gap-6 sm:grid-cols-3">
             {stores.map((s) => (
               <Card key={s.name} className="border border-border bg-card shadow-sm">
                 <CardContent className="flex flex-col items-center p-6 text-center">
