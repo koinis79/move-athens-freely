@@ -392,21 +392,25 @@ const Contact = () => {
               />
             </div>
 
-            {/* Our Stores */}
-            <div className="mt-6 space-y-3">
-              <p className="font-heading font-semibold text-foreground">
-                Our Stores (Free Pickup)
-              </p>
-              {stores.map((s) => (
-                <div key={s.name} className="flex items-start gap-3">
-                  <MapPin className="mt-0.5 h-4 w-4 shrink-0 text-primary" />
-                  <div>
-                    <p className="text-sm font-medium text-foreground">{s.name}</p>
-                    <p className="text-sm text-muted-foreground">{s.address}</p>
-                  </div>
+            {/* Free Pickup Locations */}
+            <Card className="border-primary/20 bg-primary/5">
+              <CardContent className="p-6">
+                <p className="font-heading font-semibold text-foreground">
+                  Free Pickup Locations
+                </p>
+                <div className="mt-4 space-y-3">
+                  {stores.map((s) => (
+                    <div key={s.name} className="flex items-start gap-3">
+                      <MapPin className="mt-0.5 h-5 w-5 shrink-0 text-primary" />
+                      <div>
+                        <p className="text-sm font-medium text-foreground">{s.name}</p>
+                        <p className="text-sm text-muted-foreground">{s.address}</p>
+                      </div>
+                    </div>
+                  ))}
                 </div>
-              ))}
-            </div>
+              </CardContent>
+            </Card>
           </div>
         </div>
       </section>
