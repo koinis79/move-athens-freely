@@ -71,23 +71,18 @@ type ContactFormValues = z.infer<typeof contactSchema>;
 const stores = [
   {
     name: "Athens Center",
-    address: "Stadiou 31, 105 59 Athens",
+    address: "Stadiou 31, Athens (City Center)",
     phone: "210 32 23 041",
   },
   {
     name: "Kallithea",
-    address: "Davaki 16, 176 72 Kallithea",
+    address: "Davaki 16, Kallithea",
     phone: "210 95 11 750",
   },
   {
     name: "Chalandri",
-    address: "Kolokotroni 22, 152 33 Chalandri",
+    address: "Kolokotroni 22, Chalandri",
     phone: "210 68 35 517",
-  },
-  {
-    name: "Korinthos",
-    address: "Koliatsou 50, 20 100 Korinthos",
-    phone: "27410 28 607",
   },
 ];
 
@@ -384,11 +379,33 @@ const Contact = () => {
               </div>
             </div>
 
-            <div className="overflow-hidden rounded-lg border border-border bg-muted/50">
-              <div className="flex h-48 items-center justify-center text-sm text-muted-foreground">
-                <MapPin className="mr-2 h-5 w-5" />
-                Google Maps embed placeholder
-              </div>
+            <div className="overflow-hidden rounded-xl border border-border">
+              <iframe
+                src="https://www.google.com/maps/embed?pb=!1m16!1m12!1m3!1d50410.38684722!2d23.72!3d37.98!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!2m1!1sKoinis+Healthcare+Athens!5e0!3m2!1sen!2sgr!4v1710340000000!5m2!1sen!2sgr"
+                width="100%"
+                height="300"
+                style={{ border: 0 }}
+                allowFullScreen
+                loading="lazy"
+                referrerPolicy="no-referrer-when-downgrade"
+                title="Koinis Healthcare Athens store locations"
+              />
+            </div>
+
+            {/* Our Stores */}
+            <div className="mt-6 space-y-3">
+              <p className="font-heading font-semibold text-foreground">
+                Our Stores (Free Pickup)
+              </p>
+              {stores.map((s) => (
+                <div key={s.name} className="flex items-start gap-3">
+                  <MapPin className="mt-0.5 h-4 w-4 shrink-0 text-primary" />
+                  <div>
+                    <p className="text-sm font-medium text-foreground">{s.name}</p>
+                    <p className="text-sm text-muted-foreground">{s.address}</p>
+                  </div>
+                </div>
+              ))}
             </div>
           </div>
         </div>
@@ -398,10 +415,10 @@ const Contact = () => {
       <section className="bg-muted/40 py-16 md:py-24">
         <div className="container">
           <h2 className="text-center text-3xl font-heading font-bold text-foreground md:text-4xl">
-            Our 4 Athens Locations
+            Our Athens Locations
           </h2>
 
-          <div className="mx-auto mt-12 grid max-w-5xl gap-6 sm:grid-cols-2 lg:grid-cols-4">
+          <div className="mx-auto mt-12 grid max-w-4xl gap-6 sm:grid-cols-3">
             {stores.map((s) => (
               <Card key={s.name} className="border border-border bg-card shadow-sm">
                 <CardContent className="flex flex-col items-center p-6 text-center">
