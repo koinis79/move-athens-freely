@@ -32,13 +32,13 @@ const EquipmentCard = ({ item }: { item: EquipmentItem }) => {
 
   return (
     <Link to={`/equipment/${item.categorySlug}/${item.slug}`} className="group block">
-      <Card className="h-full overflow-hidden transition-all duration-200 hover:-translate-y-1 hover:shadow-lg">
-        <div className="relative aspect-[3/2] bg-muted flex items-center justify-center">
+      <Card className="h-full overflow-hidden transition-all duration-200 hover:-translate-y-1 hover:shadow-[0_12px_24px_rgba(0,0,0,0.1)]">
+        <div className="relative aspect-[3/2] overflow-hidden bg-muted flex items-center justify-center">
           {item.image ? (
             <img
               src={item.image}
               alt={item.name}
-              className="h-full w-full object-cover"
+              className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-[1.02]"
               loading="lazy"
               onError={(e) => { (e.target as HTMLImageElement).style.display = "none"; }}
             />
@@ -67,7 +67,7 @@ const EquipmentCard = ({ item }: { item: EquipmentItem }) => {
             <span className="ml-2 text-sm text-muted-foreground">{t("equipmentListing.forDays")}</span>
           </div>
 
-          <Button variant="outline" className="mt-2 w-full rounded-xl" tabIndex={-1}>
+          <Button variant="outline" className="mt-2 w-full rounded-xl transition-colors duration-200 group-hover:bg-primary group-hover:text-primary-foreground group-hover:border-primary" tabIndex={-1}>
             {t("equipmentListing.viewDetails")}
           </Button>
         </CardContent>
