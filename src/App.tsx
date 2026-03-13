@@ -41,6 +41,7 @@ const App = () => (
       <CartProvider>
         <TooltipProvider>
           <BrowserRouter>
+            <ScrollToTop />
             <Toaster />
             <Sonner />
             <Routes>
