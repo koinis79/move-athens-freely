@@ -1,6 +1,5 @@
 import { useParams, Link } from "react-router-dom";
 import { Badge } from "@/components/ui/badge";
-import { Skeleton } from "@/components/ui/skeleton";
 import { CheckCircle2 } from "lucide-react";
 import { categoryFilterLabels } from "@/data/equipment";
 import { useEquipmentDetail, useRelatedEquipment } from "@/hooks/useEquipment";
