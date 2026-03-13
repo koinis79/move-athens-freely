@@ -1,7 +1,6 @@
 import { useState, useEffect } from "react";
 import { Link, useLocation } from "react-router-dom";
-import { Menu, X, ChevronDown, User, LogOut, LayoutDashboard, Sun, Moon, ShoppingCart } from "lucide-react";
-import { useTheme } from "next-themes";
+import { Menu, X, ChevronDown, User, LogOut, LayoutDashboard, ShoppingCart } from "lucide-react";
 import { useAuth } from "@/context/AuthContext";
 import { useCart } from "@/context/CartContext";
 import {
@@ -26,7 +25,6 @@ const Header = () => {
   const [lang, setLang] = useState<"EN" | "GR">("EN");
   const location = useLocation();
   const { user, signOut } = useAuth();
-  const { theme, setTheme } = useTheme();
   const { itemCount } = useCart();
 
   const displayName =
@@ -71,13 +69,6 @@ const Header = () => {
 
         {/* Desktop right */}
         <div className="hidden lg:flex items-center gap-2">
-          <button
-            onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
-            className="p-2 rounded-lg border border-border hover:bg-muted transition-colors"
-            aria-label={`Switch to ${theme === "dark" ? "light" : "dark"} mode`}
-          >
-            {theme === "dark" ? <Sun className="h-4 w-4" /> : <Moon className="h-4 w-4" />}
-          </button>
           <button
             onClick={() => setLang(lang === "EN" ? "GR" : "EN")}
             className="px-3 py-1.5 text-sm font-medium rounded-lg border border-border hover:bg-muted transition-colors"
@@ -194,13 +185,6 @@ const Header = () => {
             className="px-3 py-3 text-left rounded-lg font-medium hover:bg-muted transition-colors"
           >
             Language: {lang}
-          </button>
-          <button
-            onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
-            className="px-3 py-3 text-left rounded-lg font-medium hover:bg-muted transition-colors flex items-center gap-2"
-          >
-            {theme === "dark" ? <Sun className="h-4 w-4" /> : <Moon className="h-4 w-4" />}
-            {theme === "dark" ? "Light Mode" : "Dark Mode"}
           </button>
 
           <Link to="/cart" className="px-3 py-3 rounded-lg font-medium hover:bg-muted transition-colors flex items-center gap-2">
