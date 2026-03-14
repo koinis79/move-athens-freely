@@ -431,6 +431,7 @@ const AdminCalendarPage = () => {
           <Button
             size="sm"
             className="bg-secondary text-secondary-foreground hover:bg-secondary/90 h-8 text-xs"
+            onClick={() => setNewBookingOpen(true)}
           >
             <Plus className="h-3.5 w-3.5 mr-1" /> New Booking
           </Button>

@@ -354,17 +354,7 @@ const AdminBookingsPage = () => {
       {/* ── Detail Slide-over ── */}
       <BookingSlideOver booking={detailBooking} onClose={() => setDetailBooking(null)} />
 
-      {/* ── New Booking Modal Placeholder ── */}
-      <Dialog open={newBookingOpen} onOpenChange={setNewBookingOpen}>
-        <DialogContent className="sm:max-w-[500px]">
-          <DialogHeader>
-            <DialogTitle>New Booking</DialogTitle>
-          </DialogHeader>
-          <div className="py-12 text-center text-[#A0AEC0]">
-            <p className="text-sm">New booking form coming soon.</p>
-          </div>
-        </DialogContent>
-      </Dialog>
+      <NewBookingModal open={newBookingOpen} onOpenChange={setNewBookingOpen} />
     </div>
   );
 };
