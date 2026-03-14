@@ -415,7 +415,7 @@ const AdminInventoryPage = () => {
 
             <DialogFooter className="gap-2 sm:gap-0">
               {selectedItem.status === "available" && (
-                <Button variant="outline" className="text-red-600 border-red-200 hover:bg-red-50">
+                <Button variant="outline" className="text-destructive border-destructive/30 hover:bg-destructive/10">
                   <Wrench className="h-4 w-4 mr-1.5" /> Set Maintenance
                 </Button>
               )}
