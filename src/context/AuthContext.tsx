@@ -6,6 +6,7 @@ interface AuthContextType {
   session: Session | null;
   user: User | null;
   loading: boolean;
+  isAdmin: boolean;
   signOut: () => Promise<void>;
 }
 
@@ -15,8 +16,10 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const [session, setSession] = useState<Session | null>(null);
   const [loading, setLoading] = useState(true);
 
+  // TODO: Replace with Supabase RLS check (e.g. supabase.rpc("is_admin"))
+  const isAdmin = true;
+
   useEffect(() => {
-    // Set up listener BEFORE getting session
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       (_event, session) => {
         setSession(session);
@@ -38,7 +41,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
   return (
     <AuthContext.Provider
-      value={{ session, user: session?.user ?? null, loading, signOut }}
+      value={{ session, user: session?.user ?? null, loading, isAdmin, signOut }}
     >
       {children}
     </AuthContext.Provider>

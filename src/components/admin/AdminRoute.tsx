@@ -1,37 +1,19 @@
 import { Navigate } from "react-router-dom";
 import { useAuth } from "@/context/AuthContext";
-import { useEffect, useState } from "react";
-import { supabase } from "@/integrations/supabase/client";
 
 const AdminRoute = ({ children }: { children: React.ReactNode }) => {
-  const { user, loading } = useAuth();
-  const [isAdmin, setIsAdmin] = useState<boolean | null>(null);
+  const { isAdmin, loading } = useAuth();
 
-  useEffect(() => {
-    if (!user) return;
-
-    const checkAdmin = async () => {
-      const { data, error } = await supabase.rpc("is_admin");
-      setIsAdmin(error ? false : data === true);
-    };
-
-    checkAdmin();
-  }, [user]);
-
-  if (loading || (user && isAdmin === null)) {
+  if (loading) {
     return (
-      <div className="flex items-center justify-center min-h-[60vh]">
-        <div className="h-8 w-8 animate-spin rounded-full border-4 border-primary border-t-transparent" />
+      <div className="flex items-center justify-center min-h-screen bg-[#F4F5F7]">
+        <div className="h-8 w-8 animate-spin rounded-full border-4 border-[#1B4965] border-t-transparent" />
       </div>
     );
   }
 
-  if (!user) {
-    return <Navigate to="/login" replace />;
-  }
-
-  if (isAdmin === false) {
-    return <Navigate to="/dashboard" replace />;
+  if (!isAdmin) {
+    return <Navigate to="/" replace />;
   }
 
   return <>{children}</>;
