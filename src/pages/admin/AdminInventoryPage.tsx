@@ -94,7 +94,7 @@ const AdminInventoryPage = () => {
       >
         {/* Photo placeholder */}
         <div className="h-36 bg-muted rounded-t-lg flex items-center justify-center">
-          <Wheelchair className="h-12 w-12 text-muted-foreground/40" />
+          <Armchair className="h-12 w-12 text-muted-foreground/40" />
         </div>
         <CardContent className="p-4 space-y-3">
           <div className="flex items-start justify-between gap-2">
