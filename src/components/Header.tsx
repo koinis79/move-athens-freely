@@ -60,9 +60,14 @@ const Header = () => {
       <div className="container flex h-[var(--header-height)] items-center justify-between">
         <Link to="/" aria-label="Moveability — Home" className="flex-shrink-0 mr-3">
           <img
-            src="https://lmgpuqgwkiapgpdsxvmb.supabase.co/storage/v1/object/public/assets/Gemini_Generated_Image_at7c4zat7c4zat7c.png"
+            src="https://lmgpuqgwkiapgpdsxvmb.supabase.co/storage/v1/object/public/assets/logo-light.png"
             alt="Moveability"
-            className="h-11 lg:h-14 w-auto"
+            className="h-11 lg:h-14 w-auto block dark:hidden"
+          />
+          <img
+            src="https://lmgpuqgwkiapgpdsxvmb.supabase.co/storage/v1/object/public/assets/logo-dark.png"
+            alt="Moveability"
+            className="h-11 lg:h-14 w-auto hidden dark:block"
           />
         </Link>
 
