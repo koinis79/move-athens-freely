@@ -10,6 +10,7 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Checkbox } from "@/components/ui/checkbox";
+import { Skeleton } from "@/components/ui/skeleton";
 import {
   Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
 } from "@/components/ui/select";
@@ -22,16 +23,14 @@ import {
   DropdownMenuSeparator, DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { cn } from "@/lib/utils";
-import {
-  bookingDetails, getFlag, type BookingDetail,
-} from "@/data/adminBookingsMockData";
-import type { BookingStatus } from "@/data/adminDashboardMockData";
+import { useAdminBookings, type AdminBooking } from "@/hooks/useAdminBookings";
 import BookingSlideOver from "@/components/admin/BookingSlideOver";
 
 /* ── Status config ── */
-const statusConfig: Record<BookingStatus, { label: string; cls: string }> = {
+const statusConfig: Record<string, { label: string; cls: string }> = {
   pending:   { label: "Pending",   cls: "bg-amber-100 text-amber-800 border-amber-200" },
   confirmed: { label: "Confirmed", cls: "bg-blue-100 text-blue-800 border-blue-200" },
+  active:    { label: "Active",    cls: "bg-orange-100 text-orange-800 border-orange-200" },
   delivered: { label: "Delivered", cls: "bg-orange-100 text-orange-800 border-orange-200" },
   completed: { label: "Completed", cls: "bg-emerald-100 text-emerald-800 border-emerald-200" },
   cancelled: { label: "Cancelled", cls: "bg-red-100 text-red-800 border-red-200" },
@@ -42,63 +41,39 @@ const fmtShort = (d: string) => {
   return format(dt, "dd MMM");
 };
 
-const daysBetween = (a: string, b: string) => {
-  const msA = new Date(a + "T00:00:00").getTime();
-  const msB = new Date(b + "T00:00:00").getTime();
-  return Math.round((msB - msA) / 86400000);
-};
-
-type SortKey = "bookingId" | "customerName" | "startDate" | "status" | "amount";
+type SortKey = "booking_number" | "customer_name" | "rental_start" | "status" | "total_amount";
 type SortDir = "asc" | "desc";
 
 const AdminBookingsPage = () => {
-  /* State */
   const [search, setSearch] = useState("");
   const [statusFilter, setStatusFilter] = useState<string>("all");
   const [dateRange, setDateRange] = useState<{ from?: Date; to?: Date }>({});
-  const [sortKey, setSortKey] = useState<SortKey>("bookingId");
+  const [sortKey, setSortKey] = useState<SortKey>("booking_number");
   const [sortDir, setSortDir] = useState<SortDir>("desc");
   const [page, setPage] = useState(1);
   const [perPage, setPerPage] = useState(10);
   const [selected, setSelected] = useState<Set<string>>(new Set());
-  const [detailBooking, setDetailBooking] = useState<BookingDetail | null>(null);
+  const [detailBooking, setDetailBooking] = useState<AdminBooking | null>(null);
   const [newBookingOpen, setNewBookingOpen] = useState(false);
 
-  /* Filtering */
-  const filtered = useMemo(() => {
-    let list = [...bookingDetails];
-    const q = search.toLowerCase();
-    if (q) {
-      list = list.filter(
-        (b) =>
-          b.bookingId.toLowerCase().includes(q) ||
-          b.customerName.toLowerCase().includes(q) ||
-          b.equipment.toLowerCase().includes(q)
-      );
-    }
-    if (statusFilter !== "all") {
-      list = list.filter((b) => b.status === statusFilter);
-    }
-    if (dateRange.from) {
-      const from = dateRange.from.getTime();
-      list = list.filter((b) => new Date(b.startDate).getTime() >= from);
-    }
-    if (dateRange.to) {
-      const to = dateRange.to.getTime() + 86400000;
-      list = list.filter((b) => new Date(b.startDate).getTime() < to);
-    }
-    return list;
-  }, [search, statusFilter, dateRange]);
+  const { bookings, loading, updateBookingStatus, refetch } = useAdminBookings({
+    search: search || undefined,
+    status: statusFilter,
+    dateFrom: dateRange.from,
+    dateTo: dateRange.to,
+  });
 
   /* Sorting */
   const sorted = useMemo(() => {
     const m = sortDir === "asc" ? 1 : -1;
-    return [...filtered].sort((a, b) => {
-      if (sortKey === "amount") return (a.amount - b.amount) * m;
-      if (sortKey === "startDate") return (a.startDate.localeCompare(b.startDate)) * m;
-      return String(a[sortKey]).localeCompare(String(b[sortKey])) * m;
+    return [...bookings].sort((a, b) => {
+      if (sortKey === "total_amount") return (Number(a.total_amount) - Number(b.total_amount)) * m;
+      if (sortKey === "rental_start") return (a.rental_start.localeCompare(b.rental_start)) * m;
+      const aVal = String(a[sortKey] ?? "");
+      const bVal = String(b[sortKey] ?? "");
+      return aVal.localeCompare(bVal) * m;
     });
-  }, [filtered, sortKey, sortDir]);
+  }, [bookings, sortKey, sortDir]);
 
   /* Pagination */
   const totalPages = Math.max(1, Math.ceil(sorted.length / perPage));
@@ -125,11 +100,11 @@ const AdminBookingsPage = () => {
     <div className="space-y-5">
       <div className="flex items-center justify-between flex-wrap gap-3">
         <div>
-          <h1 className="text-2xl font-bold text-[#1A202C]">Bookings</h1>
-          <p className="text-sm text-[#718096] mt-0.5">{filtered.length} total bookings</p>
+          <h1 className="text-2xl font-bold text-foreground">Bookings</h1>
+          <p className="text-sm text-muted-foreground mt-0.5">{bookings.length} total bookings</p>
         </div>
         <Button
-          className="bg-[#FF6B35] hover:bg-[#e55a2b] text-white"
+          className="bg-secondary hover:bg-secondary/90 text-secondary-foreground"
           onClick={() => setNewBookingOpen(true)}
         >
           <Plus className="h-4 w-4 mr-1.5" /> New Booking
@@ -137,27 +112,28 @@ const AdminBookingsPage = () => {
       </div>
 
       {/* ── Filters ── */}
-      <Card className="border border-[#E2E4E9] shadow-sm">
+      <Card className="border border-border shadow-sm">
         <CardContent className="p-4 flex flex-wrap items-center gap-3">
           <div className="relative flex-1 min-w-[200px]">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-[#A0AEC0]" />
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
             <Input
               placeholder="Search bookings…"
               value={search}
               onChange={(e) => { setSearch(e.target.value); setPage(1); }}
-              className="pl-9 border-[#E2E4E9]"
+              className="pl-9"
             />
           </div>
 
           <Select value={statusFilter} onValueChange={(v) => { setStatusFilter(v); setPage(1); }}>
-            <SelectTrigger className="w-[150px] border-[#E2E4E9]">
-              <SlidersHorizontal className="h-3.5 w-3.5 mr-1.5 text-[#718096]" />
+            <SelectTrigger className="w-[150px]">
+              <SlidersHorizontal className="h-3.5 w-3.5 mr-1.5 text-muted-foreground" />
               <SelectValue placeholder="Status" />
             </SelectTrigger>
             <SelectContent>
               <SelectItem value="all">All Statuses</SelectItem>
               <SelectItem value="pending">Pending</SelectItem>
               <SelectItem value="confirmed">Confirmed</SelectItem>
+              <SelectItem value="active">Active</SelectItem>
               <SelectItem value="delivered">Delivered</SelectItem>
               <SelectItem value="completed">Completed</SelectItem>
               <SelectItem value="cancelled">Cancelled</SelectItem>
@@ -166,7 +142,7 @@ const AdminBookingsPage = () => {
 
           <Popover>
             <PopoverTrigger asChild>
-              <Button variant="outline" className="border-[#E2E4E9] text-sm text-[#4A5568]">
+              <Button variant="outline" className="text-sm text-muted-foreground">
                 {dateRange.from
                   ? `${format(dateRange.from, "dd MMM")}${dateRange.to ? ` – ${format(dateRange.to, "dd MMM")}` : ""}`
                   : "Date range"}
@@ -187,7 +163,7 @@ const AdminBookingsPage = () => {
             <Button
               variant="ghost"
               size="sm"
-              className="text-[#718096]"
+              className="text-muted-foreground"
               onClick={() => { setSearch(""); setStatusFilter("all"); setDateRange({}); setPage(1); }}
             >
               Clear filters
@@ -197,11 +173,11 @@ const AdminBookingsPage = () => {
       </Card>
 
       {/* ── Table ── */}
-      <Card className="border border-[#E2E4E9] shadow-sm overflow-hidden">
+      <Card className="border border-border shadow-sm overflow-hidden">
         <div className="overflow-x-auto">
           <table className="w-full text-sm">
             <thead>
-              <tr className="border-b border-[#E2E4E9] bg-[#F9FAFB]">
+              <tr className="border-b border-border bg-muted/30">
                 <th className="w-10 px-4 py-3">
                   <Checkbox
                     checked={paginated.length > 0 && selected.size === paginated.length}
@@ -209,51 +185,60 @@ const AdminBookingsPage = () => {
                   />
                 </th>
                 {[
-                  { key: "bookingId" as SortKey, label: "Booking ID" },
-                  { key: "customerName" as SortKey, label: "Customer" },
+                  { key: "booking_number" as SortKey, label: "Booking ID" },
+                  { key: "customer_name" as SortKey, label: "Customer" },
                 ].map((c) => (
                   <th
                     key={c.key}
-                    className="text-left px-4 py-3 font-medium text-[#718096] whitespace-nowrap cursor-pointer select-none hover:text-[#1A202C]"
+                    className="text-left px-4 py-3 font-medium text-muted-foreground whitespace-nowrap cursor-pointer select-none hover:text-foreground"
                     onClick={() => toggleSort(c.key)}
                   >
                     <span className="inline-flex items-center gap-1">{c.label} <SortIcon col={c.key} /></span>
                   </th>
                 ))}
-                <th className="text-left px-4 py-3 font-medium text-[#718096] whitespace-nowrap hidden lg:table-cell">Equipment</th>
+                <th className="text-left px-4 py-3 font-medium text-muted-foreground whitespace-nowrap hidden lg:table-cell">Equipment</th>
                 <th
-                  className="text-left px-4 py-3 font-medium text-[#718096] whitespace-nowrap cursor-pointer select-none hover:text-[#1A202C] hidden md:table-cell"
-                  onClick={() => toggleSort("startDate")}
+                  className="text-left px-4 py-3 font-medium text-muted-foreground whitespace-nowrap cursor-pointer select-none hover:text-foreground hidden md:table-cell"
+                  onClick={() => toggleSort("rental_start")}
                 >
-                  <span className="inline-flex items-center gap-1">Rental Period <SortIcon col="startDate" /></span>
+                  <span className="inline-flex items-center gap-1">Rental Period <SortIcon col="rental_start" /></span>
                 </th>
-                <th className="text-left px-4 py-3 font-medium text-[#718096] whitespace-nowrap hidden xl:table-cell">Delivery</th>
                 <th
-                  className="text-left px-4 py-3 font-medium text-[#718096] whitespace-nowrap cursor-pointer select-none hover:text-[#1A202C]"
+                  className="text-left px-4 py-3 font-medium text-muted-foreground whitespace-nowrap cursor-pointer select-none hover:text-foreground"
                   onClick={() => toggleSort("status")}
                 >
                   <span className="inline-flex items-center gap-1">Status <SortIcon col="status" /></span>
                 </th>
                 <th
-                  className="text-right px-4 py-3 font-medium text-[#718096] whitespace-nowrap cursor-pointer select-none hover:text-[#1A202C]"
-                  onClick={() => toggleSort("amount")}
+                  className="text-right px-4 py-3 font-medium text-muted-foreground whitespace-nowrap cursor-pointer select-none hover:text-foreground"
+                  onClick={() => toggleSort("total_amount")}
                 >
-                  <span className="inline-flex items-center gap-1">Amount <SortIcon col="amount" /></span>
+                  <span className="inline-flex items-center gap-1">Amount <SortIcon col="total_amount" /></span>
                 </th>
                 <th className="w-10 px-4 py-3" />
               </tr>
             </thead>
             <tbody>
-              {paginated.length === 0 && (
-                <tr><td colSpan={9} className="text-center py-12 text-[#A0AEC0]">No bookings match your filters.</td></tr>
+              {loading && (
+                Array.from({ length: 5 }).map((_, i) => (
+                  <tr key={i} className="border-b border-border">
+                    {Array.from({ length: 8 }).map((_, j) => (
+                      <td key={j} className="px-4 py-3"><Skeleton className="h-4 w-full max-w-[120px]" /></td>
+                    ))}
+                  </tr>
+                ))
               )}
-              {paginated.map((b) => {
-                const sc = statusConfig[b.status];
-                const days = daysBetween(b.startDate, b.endDate);
+              {!loading && paginated.length === 0 && (
+                <tr><td colSpan={8} className="text-center py-12 text-muted-foreground">No bookings match your filters.</td></tr>
+              )}
+              {!loading && paginated.map((b) => {
+                const sc = statusConfig[b.status] ?? statusConfig.pending;
+                const equipmentName = b.booking_items?.[0]?.equipment?.name_en ?? "—";
+                const days = b.num_days;
                 return (
                   <tr
                     key={b.id}
-                    className="border-b border-[#F0F0F0] last:border-0 hover:bg-[#F9FAFB] transition-colors cursor-pointer"
+                    className="border-b border-border last:border-0 hover:bg-muted/30 transition-colors cursor-pointer"
                     onClick={() => setDetailBooking(b)}
                   >
                     <td className="px-4 py-3" onClick={(e) => e.stopPropagation()}>
@@ -266,52 +251,49 @@ const AdminBookingsPage = () => {
                         }}
                       />
                     </td>
-                    <td className="px-4 py-3 font-mono text-xs text-[#1B4965] font-semibold whitespace-nowrap">
-                      {b.bookingId}
+                    <td className="px-4 py-3 font-mono text-xs text-primary font-semibold whitespace-nowrap">
+                      {b.booking_number}
                     </td>
                     <td className="px-4 py-3 whitespace-nowrap">
-                      <span className="font-medium text-[#1A202C]">{getFlag(b.countryCode)} {b.customerName}</span>
+                      <span className="font-medium text-foreground">{b.customer_name}</span>
                     </td>
-                    <td className="px-4 py-3 text-[#4A5568] whitespace-nowrap hidden lg:table-cell">
-                      <div className="flex items-center gap-2">
-                        <div className="h-8 w-8 rounded bg-[#F4F5F7] flex items-center justify-center text-[10px] text-[#A0AEC0] shrink-0">IMG</div>
-                        <span className="truncate max-w-[180px]">{b.equipment}</span>
-                      </div>
+                    <td className="px-4 py-3 text-muted-foreground whitespace-nowrap hidden lg:table-cell">
+                      <span className="truncate max-w-[180px] inline-block">{equipmentName}</span>
                     </td>
                     <td className="px-4 py-3 hidden md:table-cell">
-                      <div className="text-[#1A202C]">{fmtShort(b.startDate)} – {fmtShort(b.endDate)}</div>
-                      <div className="text-[10px] text-[#A0AEC0]">{days} day{days !== 1 ? "s" : ""}</div>
-                    </td>
-                    <td className="px-4 py-3 text-[#718096] whitespace-nowrap hidden xl:table-cell">
-                      <div className="truncate max-w-[160px]">{b.hotel}</div>
-                      <div className="text-[10px] text-[#A0AEC0]">{b.deliveryArea}</div>
+                      <div className="text-foreground">{fmtShort(b.rental_start)} – {fmtShort(b.rental_end)}</div>
+                      <div className="text-[10px] text-muted-foreground">{days} day{days !== 1 ? "s" : ""}</div>
                     </td>
                     <td className="px-4 py-3">
                       <Badge variant="outline" className={cn("text-[11px] font-semibold border", sc.cls)}>
                         {sc.label}
                       </Badge>
                     </td>
-                    <td className="px-4 py-3 text-right font-semibold text-[#1A202C] whitespace-nowrap">
-                      €{b.amount}
+                    <td className="px-4 py-3 text-right font-semibold text-foreground whitespace-nowrap">
+                      €{Number(b.total_amount).toFixed(0)}
                     </td>
                     <td className="px-4 py-3" onClick={(e) => e.stopPropagation()}>
                       <DropdownMenu>
                         <DropdownMenuTrigger asChild>
                           <Button variant="ghost" size="icon" className="h-8 w-8">
-                            <MoreHorizontal className="h-4 w-4 text-[#718096]" />
+                            <MoreHorizontal className="h-4 w-4 text-muted-foreground" />
                           </Button>
                         </DropdownMenuTrigger>
                         <DropdownMenuContent align="end">
                           <DropdownMenuItem onClick={() => setDetailBooking(b)}>
                             <Eye className="h-3.5 w-3.5 mr-2" /> View Details
                           </DropdownMenuItem>
-                          <DropdownMenuItem><Pencil className="h-3.5 w-3.5 mr-2" /> Edit</DropdownMenuItem>
                           <DropdownMenuSeparator />
-                          <DropdownMenuItem><Truck className="h-3.5 w-3.5 mr-2" /> Mark as Delivered</DropdownMenuItem>
-                          <DropdownMenuItem><PackageCheck className="h-3.5 w-3.5 mr-2" /> Mark as Picked Up</DropdownMenuItem>
+                          <DropdownMenuItem onClick={() => updateBookingStatus(b.id, "delivered")}>
+                            <Truck className="h-3.5 w-3.5 mr-2" /> Mark as Delivered
+                          </DropdownMenuItem>
+                          <DropdownMenuItem onClick={() => updateBookingStatus(b.id, "completed")}>
+                            <PackageCheck className="h-3.5 w-3.5 mr-2" /> Mark as Completed
+                          </DropdownMenuItem>
                           <DropdownMenuSeparator />
-                          <DropdownMenuItem><Phone className="h-3.5 w-3.5 mr-2" /> Contact Customer</DropdownMenuItem>
-                          <DropdownMenuItem className="text-red-600"><XCircle className="h-3.5 w-3.5 mr-2" /> Cancel</DropdownMenuItem>
+                          <DropdownMenuItem className="text-destructive" onClick={() => updateBookingStatus(b.id, "cancelled")}>
+                            <XCircle className="h-3.5 w-3.5 mr-2" /> Cancel
+                          </DropdownMenuItem>
                         </DropdownMenuContent>
                       </DropdownMenu>
                     </td>
@@ -323,11 +305,11 @@ const AdminBookingsPage = () => {
         </div>
 
         {/* Pagination */}
-        <div className="flex items-center justify-between px-4 py-3 border-t border-[#E2E4E9] bg-[#F9FAFB]">
-          <div className="flex items-center gap-2 text-sm text-[#718096]">
+        <div className="flex items-center justify-between px-4 py-3 border-t border-border bg-muted/30">
+          <div className="flex items-center gap-2 text-sm text-muted-foreground">
             Rows per page
             <Select value={String(perPage)} onValueChange={(v) => { setPerPage(Number(v)); setPage(1); }}>
-              <SelectTrigger className="w-[70px] h-8 border-[#E2E4E9] text-xs">
+              <SelectTrigger className="w-[70px] h-8 text-xs">
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>
@@ -337,7 +319,7 @@ const AdminBookingsPage = () => {
               </SelectContent>
             </Select>
           </div>
-          <div className="flex items-center gap-2 text-sm text-[#718096]">
+          <div className="flex items-center gap-2 text-sm text-muted-foreground">
             Page {page} of {totalPages}
             <Button variant="outline" size="icon" className="h-8 w-8" disabled={page <= 1} onClick={() => setPage(page - 1)}>
               <ChevronUp className="h-4 w-4 -rotate-90" />
@@ -350,9 +332,9 @@ const AdminBookingsPage = () => {
       </Card>
 
       {/* ── Detail Slide-over ── */}
-      <BookingSlideOver booking={detailBooking} onClose={() => setDetailBooking(null)} />
+      <BookingSlideOver booking={detailBooking} onClose={() => { setDetailBooking(null); refetch(); }} />
 
-      <NewBookingModal open={newBookingOpen} onOpenChange={setNewBookingOpen} />
+      <NewBookingModal open={newBookingOpen} onOpenChange={(v) => { setNewBookingOpen(v); if (!v) refetch(); }} />
     </div>
   );
 };
