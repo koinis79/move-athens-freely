@@ -31,11 +31,16 @@ const Footer = () => {
           {/* Brand */}
           <div className="space-y-4">
             <Link to="/" aria-label="Moveability — Home">
-              <img
-                src="https://lmgpuqgwkiapgpdsxvmb.supabase.co/storage/v1/object/public/assets/Gemini_Generated_Image_at7c4zat7c4zat7c.png"
-                alt="Moveability"
-                className="h-14 w-auto"
-              />
+                <img
+                  src="https://lmgpuqgwkiapgpdsxvmb.supabase.co/storage/v1/object/public/assets/logo-light.png"
+                  alt="Moveability"
+                  className="h-14 w-auto block dark:hidden"
+                />
+                <img
+                  src="https://lmgpuqgwkiapgpdsxvmb.supabase.co/storage/v1/object/public/assets/logo-dark.png"
+                  alt="Moveability"
+                  className="h-14 w-auto hidden dark:block"
+                />
             </Link>
             <p className="text-sm leading-relaxed" style={{ color: footerFg70 }}>
               {t("footer.tagline")}
