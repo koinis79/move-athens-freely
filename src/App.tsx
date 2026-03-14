@@ -7,6 +7,7 @@ import { CartProvider } from "@/context/CartContext";
 import { AuthProvider } from "@/context/AuthContext";
 import ProtectedRoute from "@/components/ProtectedRoute";
 import AdminRoute from "@/components/admin/AdminRoute";
+import AdminLayout from "@/components/admin/AdminLayout";
 import Layout from "./components/Layout";
 import ScrollToTop from "./components/ScrollToTop";
 import Index from "./pages/Index";
@@ -28,6 +29,10 @@ import ForgotPassword from "./pages/ForgotPassword";
 import ResetPassword from "./pages/ResetPassword";
 import Dashboard from "./pages/Dashboard";
 import Admin from "./pages/Admin";
+import AdminBookingsPage from "./pages/admin/AdminBookingsPage";
+import AdminInventoryPage from "./pages/admin/AdminInventoryPage";
+import AdminCalendarPage from "./pages/admin/AdminCalendarPage";
+import AdminCustomersPage from "./pages/admin/AdminCustomersPage";
 import Blog from "./pages/Blog";
 import BlogPost from "./pages/BlogPost";
 import PrivacyPolicy from "./pages/PrivacyPolicy";
@@ -46,6 +51,7 @@ const App = () => (
             <Toaster />
             <Sonner />
             <Routes>
+              {/* Public site */}
               <Route element={<Layout />}>
                 <Route path="/" element={<Index />} />
                 <Route path="/equipment" element={<Equipment />} />
@@ -65,12 +71,21 @@ const App = () => (
                 <Route path="/forgot-password" element={<ForgotPassword />} />
                 <Route path="/reset-password" element={<ResetPassword />} />
                 <Route path="/dashboard" element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
-                <Route path="/admin" element={<AdminRoute><Admin /></AdminRoute>} />
                 <Route path="/blog" element={<Blog />} />
                 <Route path="/blog/:slug" element={<BlogPost />} />
                 <Route path="/privacy-policy" element={<PrivacyPolicy />} />
                 <Route path="/terms-of-service" element={<TermsOfService />} />
               </Route>
+
+              {/* Admin panel — separate layout, no header/footer */}
+              <Route element={<AdminRoute><AdminLayout /></AdminRoute>}>
+                <Route path="/admin" element={<Admin />} />
+                <Route path="/admin/bookings" element={<AdminBookingsPage />} />
+                <Route path="/admin/inventory" element={<AdminInventoryPage />} />
+                <Route path="/admin/calendar" element={<AdminCalendarPage />} />
+                <Route path="/admin/customers" element={<AdminCustomersPage />} />
+              </Route>
+
               <Route path="*" element={<NotFound />} />
             </Routes>
           </BrowserRouter>
