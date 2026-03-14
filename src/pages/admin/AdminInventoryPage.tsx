@@ -307,7 +307,7 @@ const AdminInventoryPage = () => {
             <div className="space-y-5 text-sm">
               {/* Photo placeholder */}
               <div className="h-40 bg-muted rounded-lg flex items-center justify-center">
-                <Wheelchair className="h-16 w-16 text-muted-foreground/30" />
+                <Armchair className="h-16 w-16 text-muted-foreground/30" />
                 <span className="ml-3 text-muted-foreground text-xs">Photo upload placeholder</span>
               </div>
 
