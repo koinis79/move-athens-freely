@@ -14,6 +14,33 @@ export type Database = {
   }
   public: {
     Tables: {
+      admin_notifications: {
+        Row: {
+          created_at: string
+          id: string
+          is_read: boolean
+          link: string | null
+          message: string
+          type: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          is_read?: boolean
+          link?: string | null
+          message: string
+          type?: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          is_read?: boolean
+          link?: string | null
+          message?: string
+          type?: string
+        }
+        Relationships: []
+      }
       blog_posts: {
         Row: {
           category: string | null
@@ -567,7 +594,16 @@ export type Database = {
       }
     }
     Views: {
-      [_ in never]: never
+      admin_dashboard_stats: {
+        Row: {
+          active_rentals: number | null
+          pending_requests: number | null
+          todays_deliveries: number | null
+          todays_revenue: number | null
+          upcoming_pickups: number | null
+        }
+        Relationships: []
+      }
     }
     Functions: {
       create_booking: {
