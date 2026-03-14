@@ -11,6 +11,7 @@ import { mockBookings, type MockBooking, type BookingStatus } from "@/data/admin
 import { bookingDetails, getFlag } from "@/data/adminBookingsMockData";
 import BookingSlideOver from "@/components/admin/BookingSlideOver";
 import type { BookingDetail } from "@/data/adminBookingsMockData";
+import NewBookingModal from "@/components/admin/NewBookingModal";
 
 type ViewMode = "month" | "week" | "day";
 
