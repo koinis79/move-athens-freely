@@ -1,6 +1,8 @@
+import { useState, useEffect } from "react";
 import { Activity, Truck, Clock, Euro, ArrowUpRight, ArrowDownRight, MapPin, ChevronRight, Calendar } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import { Skeleton } from "@/components/ui/skeleton";
 import {
   mockBookings,
   todaySchedule,
@@ -8,7 +10,7 @@ import {
   dashboardStats,
   type BookingStatus,
 } from "@/data/adminDashboardMockData";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 
 /* ── Status badge config ── */
 const statusConfig: Record<BookingStatus, { label: string; className: string }> = {
@@ -27,21 +29,31 @@ interface StatCardProps {
   icon: React.ElementType;
   accentColor: string;
   accentBg: string;
+  loading?: boolean;
 }
 
-const StatCard = ({ title, value, change, icon: Icon, accentColor, accentBg }: StatCardProps) => {
+const StatCard = ({ title, value, change, icon: Icon, accentColor, accentBg, loading }: StatCardProps) => {
   const positive = change >= 0;
   return (
-    <Card className="border border-[#E2E4E9] shadow-sm hover:shadow-md transition-shadow">
+    <Card className="border border-border shadow-sm hover:shadow-md transition-shadow">
       <CardContent className="p-5">
         <div className="flex items-start justify-between">
           <div className="space-y-2">
-            <p className="text-sm font-medium text-[#718096]">{title}</p>
-            <p className="text-3xl font-bold text-[#1A202C] tracking-tight">{value}</p>
-            <div className={`inline-flex items-center gap-1 text-xs font-semibold ${positive ? "text-emerald-600" : "text-red-500"}`}>
-              {positive ? <ArrowUpRight className="h-3 w-3" /> : <ArrowDownRight className="h-3 w-3" />}
-              {Math.abs(change)}% vs yesterday
-            </div>
+            <p className="text-sm font-medium text-muted-foreground">{title}</p>
+            {loading ? (
+              <>
+                <Skeleton className="h-9 w-16" />
+                <Skeleton className="h-4 w-24" />
+              </>
+            ) : (
+              <>
+                <p className="text-3xl font-bold text-foreground tracking-tight">{value}</p>
+                <div className={`inline-flex items-center gap-1 text-xs font-semibold ${positive ? "text-emerald-600" : "text-red-500"}`}>
+                  {positive ? <ArrowUpRight className="h-3 w-3" /> : <ArrowDownRight className="h-3 w-3" />}
+                  {Math.abs(change)}% vs yesterday
+                </div>
+              </>
+            )}
           </div>
           <div className={`rounded-xl p-3 ${accentBg}`}>
             <Icon className={`h-5 w-5 ${accentColor}`} />
@@ -68,8 +80,31 @@ const fmtDateFull = (dateStr: string) => {
   return d.toLocaleDateString("en-GB", { weekday: "short", day: "numeric", month: "short" });
 };
 
+/* ── Skeleton rows ── */
+const TableSkeleton = ({ rows = 5, cols = 6 }: { rows?: number; cols?: number }) => (
+  <tbody>
+    {Array.from({ length: rows }).map((_, i) => (
+      <tr key={i} className="border-b border-border last:border-0">
+        {Array.from({ length: cols }).map((_, j) => (
+          <td key={j} className="px-4 py-3">
+            <Skeleton className="h-4 w-full max-w-[120px]" />
+          </td>
+        ))}
+      </tr>
+    ))}
+  </tbody>
+);
+
 /* ── Main Dashboard ── */
 const AdminDashboard = () => {
+  const [loading, setLoading] = useState(true);
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    const t = setTimeout(() => setLoading(false), 600);
+    return () => clearTimeout(t);
+  }, []);
+
   const recentBookings = [...mockBookings]
     .sort((a, b) => b.bookingId.localeCompare(a.bookingId))
     .slice(0, 10);
@@ -77,58 +112,27 @@ const AdminDashboard = () => {
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="text-2xl font-bold text-[#1A202C]">Dashboard</h1>
-        <p className="text-sm text-[#718096] mt-1">Welcome back — here's what's happening today.</p>
+        <h1 className="text-2xl font-bold text-foreground">Dashboard</h1>
+        <p className="text-sm text-muted-foreground mt-1">Welcome back — here's what's happening today.</p>
       </div>
 
       {/* ── Top Row: Stat Cards ── */}
       <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4">
-        <StatCard
-          title="Active Rentals"
-          value={String(dashboardStats.activeRentals.value)}
-          change={dashboardStats.activeRentals.change}
-          icon={Activity}
-          accentColor="text-[#1B4965]"
-          accentBg="bg-[#1B4965]/10"
-        />
-        <StatCard
-          title="Today's Deliveries"
-          value={String(dashboardStats.todaysDeliveries.value)}
-          change={dashboardStats.todaysDeliveries.change}
-          icon={Truck}
-          accentColor="text-[#FF6B35]"
-          accentBg="bg-[#FF6B35]/10"
-        />
-        <StatCard
-          title="Pending Requests"
-          value={String(dashboardStats.pendingRequests.value)}
-          change={dashboardStats.pendingRequests.change}
-          icon={Clock}
-          accentColor="text-amber-600"
-          accentBg="bg-amber-50"
-        />
-        <StatCard
-          title="Today's Revenue"
-          value={`€${dashboardStats.todaysRevenue.value.toLocaleString()}`}
-          change={dashboardStats.todaysRevenue.change}
-          icon={Euro}
-          accentColor="text-[#6B8F71]"
-          accentBg="bg-[#6B8F71]/10"
-        />
+        <StatCard title="Active Rentals" value={String(dashboardStats.activeRentals.value)} change={dashboardStats.activeRentals.change} icon={Activity} accentColor="text-primary" accentBg="bg-primary/10" loading={loading} />
+        <StatCard title="Today's Deliveries" value={String(dashboardStats.todaysDeliveries.value)} change={dashboardStats.todaysDeliveries.change} icon={Truck} accentColor="text-secondary" accentBg="bg-secondary/10" loading={loading} />
+        <StatCard title="Pending Requests" value={String(dashboardStats.pendingRequests.value)} change={dashboardStats.pendingRequests.change} icon={Clock} accentColor="text-amber-600" accentBg="bg-amber-50" loading={loading} />
+        <StatCard title="Today's Revenue" value={`€${dashboardStats.todaysRevenue.value.toLocaleString()}`} change={dashboardStats.todaysRevenue.change} icon={Euro} accentColor="text-accent" accentBg="bg-accent/10" loading={loading} />
       </div>
 
       {/* ── Middle Row ── */}
       <div className="grid grid-cols-1 xl:grid-cols-5 gap-6">
 
-        {/* Recent Bookings — 3/5 width on xl */}
-        <Card className="xl:col-span-3 border border-[#E2E4E9] shadow-sm">
+        {/* Recent Bookings */}
+        <Card className="xl:col-span-3 border border-border shadow-sm">
           <CardHeader className="pb-3">
             <div className="flex items-center justify-between">
-              <CardTitle className="text-base font-semibold text-[#1A202C]">Recent Bookings</CardTitle>
-              <Link
-                to="/admin/bookings"
-                className="text-xs font-medium text-[#1B4965] hover:underline flex items-center gap-0.5"
-              >
+              <CardTitle className="text-base font-semibold text-foreground">Recent Bookings</CardTitle>
+              <Link to="/admin/bookings" className="text-xs font-medium text-primary hover:underline flex items-center gap-0.5">
                 View all <ChevronRight className="h-3 w-3" />
               </Link>
             </div>
@@ -137,97 +141,113 @@ const AdminDashboard = () => {
             <div className="overflow-x-auto">
               <table className="w-full text-sm">
                 <thead>
-                  <tr className="border-b border-[#E2E4E9] bg-[#F9FAFB]">
-                    <th className="text-left px-4 py-2.5 font-medium text-[#718096] whitespace-nowrap">Booking ID</th>
-                    <th className="text-left px-4 py-2.5 font-medium text-[#718096] whitespace-nowrap">Customer</th>
-                    <th className="text-left px-4 py-2.5 font-medium text-[#718096] whitespace-nowrap hidden md:table-cell">Equipment</th>
-                    <th className="text-left px-4 py-2.5 font-medium text-[#718096] whitespace-nowrap hidden lg:table-cell">Dates</th>
-                    <th className="text-left px-4 py-2.5 font-medium text-[#718096] whitespace-nowrap">Status</th>
-                    <th className="text-right px-4 py-2.5 font-medium text-[#718096] whitespace-nowrap">Amount</th>
+                  <tr className="border-b border-border bg-muted/30">
+                    <th className="text-left px-4 py-2.5 font-medium text-muted-foreground whitespace-nowrap">Booking ID</th>
+                    <th className="text-left px-4 py-2.5 font-medium text-muted-foreground whitespace-nowrap">Customer</th>
+                    <th className="text-left px-4 py-2.5 font-medium text-muted-foreground whitespace-nowrap hidden md:table-cell">Equipment</th>
+                    <th className="text-left px-4 py-2.5 font-medium text-muted-foreground whitespace-nowrap hidden lg:table-cell">Dates</th>
+                    <th className="text-left px-4 py-2.5 font-medium text-muted-foreground whitespace-nowrap">Status</th>
+                    <th className="text-right px-4 py-2.5 font-medium text-muted-foreground whitespace-nowrap">Amount</th>
                   </tr>
                 </thead>
-                <tbody>
-                  {recentBookings.map((b) => {
-                    const sc = statusConfig[b.status];
-                    return (
-                      <tr
-                        key={b.id}
-                        className="border-b border-[#F0F0F0] last:border-0 hover:bg-[#F9FAFB] transition-colors cursor-pointer"
-                      >
-                        <td className="px-4 py-3 font-mono text-xs text-[#1B4965] font-semibold whitespace-nowrap">
-                          {b.bookingId}
-                        </td>
-                        <td className="px-4 py-3 text-[#1A202C] font-medium whitespace-nowrap">{b.customerName}</td>
-                        <td className="px-4 py-3 text-[#4A5568] whitespace-nowrap hidden md:table-cell">{b.equipment}</td>
-                        <td className="px-4 py-3 text-[#718096] whitespace-nowrap hidden lg:table-cell">
-                          {fmtDate(b.startDate)} – {fmtDate(b.endDate)}
-                        </td>
-                        <td className="px-4 py-3">
-                          <Badge variant="outline" className={`text-[11px] font-semibold border ${sc.className}`}>
-                            {sc.label}
-                          </Badge>
-                        </td>
-                        <td className="px-4 py-3 text-right font-semibold text-[#1A202C] whitespace-nowrap">
-                          €{b.amount}
-                        </td>
-                      </tr>
-                    );
-                  })}
-                </tbody>
+                {loading ? (
+                  <TableSkeleton />
+                ) : (
+                  <tbody>
+                    {recentBookings.map((b) => {
+                      const sc = statusConfig[b.status];
+                      return (
+                        <tr
+                          key={b.id}
+                          onClick={() => navigate("/admin/bookings")}
+                          className="border-b border-border last:border-0 hover:bg-muted/30 transition-colors cursor-pointer"
+                        >
+                          <td className="px-4 py-3 font-mono text-xs text-primary font-semibold whitespace-nowrap">{b.bookingId}</td>
+                          <td className="px-4 py-3 text-foreground font-medium whitespace-nowrap">{b.customerName}</td>
+                          <td className="px-4 py-3 text-muted-foreground whitespace-nowrap hidden md:table-cell">{b.equipment}</td>
+                          <td className="px-4 py-3 text-muted-foreground whitespace-nowrap hidden lg:table-cell">{fmtDate(b.startDate)} – {fmtDate(b.endDate)}</td>
+                          <td className="px-4 py-3">
+                            <Badge variant="outline" className={`text-[11px] font-semibold border ${sc.className}`}>{sc.label}</Badge>
+                          </td>
+                          <td className="px-4 py-3 text-right font-semibold text-foreground whitespace-nowrap">€{b.amount}</td>
+                        </tr>
+                      );
+                    })}
+                  </tbody>
+                )}
               </table>
             </div>
           </CardContent>
         </Card>
 
-        {/* Today's Schedule — 2/5 width on xl */}
-        <Card className="xl:col-span-2 border border-[#E2E4E9] shadow-sm">
+        {/* Today's Schedule */}
+        <Card className="xl:col-span-2 border border-border shadow-sm">
           <CardHeader className="pb-3">
-            <CardTitle className="text-base font-semibold text-[#1A202C]">Today's Schedule</CardTitle>
+            <div className="flex items-center justify-between">
+              <CardTitle className="text-base font-semibold text-foreground">Today's Schedule</CardTitle>
+              <Link to="/admin/calendar" className="text-xs font-medium text-primary hover:underline flex items-center gap-0.5">
+                Calendar <ChevronRight className="h-3 w-3" />
+              </Link>
+            </div>
           </CardHeader>
           <CardContent className="px-4 pb-4">
-            <div className="relative space-y-0">
-              {todaySchedule.map((evt, i) => {
-                const isDelivery = evt.type === "delivery";
-                const dotColor = isDelivery ? "bg-[#FF6B35]" : "bg-[#1B4965]";
-                const labelColor = isDelivery ? "text-[#FF6B35]" : "text-[#1B4965]";
-                const bgColor = isDelivery ? "bg-[#FF6B35]/5" : "bg-[#1B4965]/5";
-                return (
-                  <div key={evt.id} className="relative flex gap-3">
-                    {/* timeline line */}
-                    <div className="flex flex-col items-center">
-                      <div className={`mt-1.5 h-2.5 w-2.5 rounded-full ${dotColor} shrink-0 ring-2 ring-white`} />
-                      {i < todaySchedule.length - 1 && (
-                        <div className="w-px flex-1 bg-[#E2E4E9] min-h-[20px]" />
-                      )}
-                    </div>
-                    <div className={`flex-1 rounded-lg p-3 mb-2 ${bgColor}`}>
-                      <div className="flex items-center gap-2 mb-1">
-                        <span className="text-xs font-bold text-[#1A202C]">{evt.time}</span>
-                        <Badge variant="outline" className={`text-[10px] font-semibold uppercase tracking-wider border-0 ${labelColor} ${bgColor}`}>
-                          {evt.type}
-                        </Badge>
-                      </div>
-                      <p className="text-sm font-medium text-[#1A202C]">{evt.customerName}</p>
-                      <p className="text-xs text-[#718096]">{evt.equipment}</p>
-                      <div className="flex items-center gap-1 mt-1">
-                        <MapPin className="h-3 w-3 text-[#A0AEC0]" />
-                        <span className="text-xs text-[#A0AEC0]">{evt.address}</span>
-                      </div>
+            {loading ? (
+              <div className="space-y-3">
+                {Array.from({ length: 4 }).map((_, i) => (
+                  <div key={i} className="flex gap-3">
+                    <Skeleton className="h-3 w-3 rounded-full mt-1.5 shrink-0" />
+                    <div className="flex-1 space-y-2">
+                      <Skeleton className="h-4 w-24" />
+                      <Skeleton className="h-3 w-full" />
+                      <Skeleton className="h-3 w-3/4" />
                     </div>
                   </div>
-                );
-              })}
-            </div>
+                ))}
+              </div>
+            ) : (
+              <div className="relative space-y-0">
+                {todaySchedule.map((evt, i) => {
+                  const isDelivery = evt.type === "delivery";
+                  const dotColor = isDelivery ? "bg-secondary" : "bg-primary";
+                  const labelColor = isDelivery ? "text-secondary" : "text-primary";
+                  const bgColor = isDelivery ? "bg-secondary/5" : "bg-primary/5";
+                  return (
+                    <div key={evt.id} className="relative flex gap-3">
+                      <div className="flex flex-col items-center">
+                        <div className={`mt-1.5 h-2.5 w-2.5 rounded-full ${dotColor} shrink-0 ring-2 ring-card`} />
+                        {i < todaySchedule.length - 1 && (
+                          <div className="w-px flex-1 bg-border min-h-[20px]" />
+                        )}
+                      </div>
+                      <div className={`flex-1 rounded-lg p-3 mb-2 ${bgColor}`}>
+                        <div className="flex items-center gap-2 mb-1">
+                          <span className="text-xs font-bold text-foreground">{evt.time}</span>
+                          <Badge variant="outline" className={`text-[10px] font-semibold uppercase tracking-wider border-0 ${labelColor} ${bgColor}`}>
+                            {evt.type}
+                          </Badge>
+                        </div>
+                        <p className="text-sm font-medium text-foreground">{evt.customerName}</p>
+                        <p className="text-xs text-muted-foreground">{evt.equipment}</p>
+                        <div className="flex items-center gap-1 mt-1">
+                          <MapPin className="h-3 w-3 text-muted-foreground" />
+                          <span className="text-xs text-muted-foreground">{evt.address}</span>
+                        </div>
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            )}
           </CardContent>
         </Card>
       </div>
 
       {/* ── Bottom Row: Upcoming Pickups ── */}
-      <Card className="border border-[#E2E4E9] shadow-sm">
+      <Card className="border border-border shadow-sm">
         <CardHeader className="pb-3">
           <div className="flex items-center justify-between">
-            <CardTitle className="text-base font-semibold text-[#1A202C]">Upcoming Pickups — Next 3 Days</CardTitle>
-            <Badge variant="outline" className="text-xs font-medium border-[#E2E4E9] text-[#718096]">
+            <CardTitle className="text-base font-semibold text-foreground">Upcoming Pickups — Next 3 Days</CardTitle>
+            <Badge variant="outline" className="text-xs font-medium border-border text-muted-foreground">
               {upcomingPickups.length} returns
             </Badge>
           </div>
@@ -236,33 +256,37 @@ const AdminDashboard = () => {
           <div className="overflow-x-auto">
             <table className="w-full text-sm">
               <thead>
-                <tr className="border-b border-[#E2E4E9] bg-[#F9FAFB]">
-                  <th className="text-left px-4 py-2.5 font-medium text-[#718096]">Customer</th>
-                  <th className="text-left px-4 py-2.5 font-medium text-[#718096]">Equipment</th>
-                  <th className="text-left px-4 py-2.5 font-medium text-[#718096]">Return Date</th>
-                  <th className="text-left px-4 py-2.5 font-medium text-[#718096] hidden sm:table-cell">Hotel</th>
+                <tr className="border-b border-border bg-muted/30">
+                  <th className="text-left px-4 py-2.5 font-medium text-muted-foreground">Customer</th>
+                  <th className="text-left px-4 py-2.5 font-medium text-muted-foreground">Equipment</th>
+                  <th className="text-left px-4 py-2.5 font-medium text-muted-foreground">Return Date</th>
+                  <th className="text-left px-4 py-2.5 font-medium text-muted-foreground hidden sm:table-cell">Hotel</th>
                 </tr>
               </thead>
-              <tbody>
-                {upcomingPickups.map((p) => (
-                  <tr key={p.id} className="border-b border-[#F0F0F0] last:border-0 hover:bg-[#F9FAFB] transition-colors">
-                    <td className="px-4 py-3 font-medium text-[#1A202C]">{p.customerName}</td>
-                    <td className="px-4 py-3 text-[#4A5568]">{p.equipment}</td>
-                    <td className="px-4 py-3">
-                      <div className="flex items-center gap-1.5">
-                        <Calendar className="h-3.5 w-3.5 text-[#A0AEC0]" />
-                        <span className="text-[#1A202C] font-medium">{fmtDateFull(p.returnDate)}</span>
-                      </div>
-                    </td>
-                    <td className="px-4 py-3 text-[#718096] hidden sm:table-cell">
-                      <div className="flex items-center gap-1">
-                        <MapPin className="h-3 w-3 text-[#A0AEC0]" />
-                        {p.hotel}
-                      </div>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
+              {loading ? (
+                <TableSkeleton rows={4} cols={4} />
+              ) : (
+                <tbody>
+                  {upcomingPickups.map((p) => (
+                    <tr key={p.id} className="border-b border-border last:border-0 hover:bg-muted/30 transition-colors">
+                      <td className="px-4 py-3 font-medium text-foreground">{p.customerName}</td>
+                      <td className="px-4 py-3 text-muted-foreground">{p.equipment}</td>
+                      <td className="px-4 py-3">
+                        <div className="flex items-center gap-1.5">
+                          <Calendar className="h-3.5 w-3.5 text-muted-foreground" />
+                          <span className="text-foreground font-medium">{fmtDateFull(p.returnDate)}</span>
+                        </div>
+                      </td>
+                      <td className="px-4 py-3 text-muted-foreground hidden sm:table-cell">
+                        <div className="flex items-center gap-1">
+                          <MapPin className="h-3 w-3 text-muted-foreground" />
+                          {p.hotel}
+                        </div>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              )}
             </table>
           </div>
         </CardContent>
