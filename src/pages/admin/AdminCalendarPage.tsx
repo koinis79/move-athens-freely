@@ -11,6 +11,7 @@ import { mockBookings, type MockBooking, type BookingStatus } from "@/data/admin
 import { bookingDetails, getFlag } from "@/data/adminBookingsMockData";
 import BookingSlideOver from "@/components/admin/BookingSlideOver";
 import type { BookingDetail } from "@/data/adminBookingsMockData";
+import NewBookingModal from "@/components/admin/NewBookingModal";
 
 type ViewMode = "month" | "week" | "day";
 
@@ -200,6 +201,7 @@ const AdminCalendarPage = () => {
   const [viewMode, setViewMode] = useState<ViewMode>("month");
   const [selectedDate, setSelectedDate] = useState<Date>(new Date());
   const [selectedBookingId, setSelectedBookingId] = useState<string | null>(null);
+  const [newBookingOpen, setNewBookingOpen] = useState(false);
 
   const today = useMemo(() => new Date(), []);
 
@@ -431,6 +433,7 @@ const AdminCalendarPage = () => {
           <Button
             size="sm"
             className="bg-secondary text-secondary-foreground hover:bg-secondary/90 h-8 text-xs"
+            onClick={() => setNewBookingOpen(true)}
           >
             <Plus className="h-3.5 w-3.5 mr-1" /> New Booking
           </Button>
@@ -492,6 +495,8 @@ const AdminCalendarPage = () => {
         booking={selectedBookingDetail}
         onClose={() => setSelectedBookingId(null)}
       />
+
+      <NewBookingModal open={newBookingOpen} onOpenChange={setNewBookingOpen} />
     </div>
   );
 };

@@ -4,6 +4,7 @@ import {
   Search, SlidersHorizontal, Plus, MoreHorizontal, Eye, Pencil,
   Truck, PackageCheck, XCircle, Phone, ChevronUp, ChevronDown,
 } from "lucide-react";
+import NewBookingModal from "@/components/admin/NewBookingModal";
 import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
@@ -20,9 +21,6 @@ import {
   DropdownMenu, DropdownMenuContent, DropdownMenuItem,
   DropdownMenuSeparator, DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import {
-  Dialog, DialogContent, DialogHeader, DialogTitle,
-} from "@/components/ui/dialog";
 import { cn } from "@/lib/utils";
 import {
   bookingDetails, getFlag, type BookingDetail,
@@ -354,17 +352,7 @@ const AdminBookingsPage = () => {
       {/* ── Detail Slide-over ── */}
       <BookingSlideOver booking={detailBooking} onClose={() => setDetailBooking(null)} />
 
-      {/* ── New Booking Modal Placeholder ── */}
-      <Dialog open={newBookingOpen} onOpenChange={setNewBookingOpen}>
-        <DialogContent className="sm:max-w-[500px]">
-          <DialogHeader>
-            <DialogTitle>New Booking</DialogTitle>
-          </DialogHeader>
-          <div className="py-12 text-center text-[#A0AEC0]">
-            <p className="text-sm">New booking form coming soon.</p>
-          </div>
-        </DialogContent>
-      </Dialog>
+      <NewBookingModal open={newBookingOpen} onOpenChange={setNewBookingOpen} />
     </div>
   );
 };
