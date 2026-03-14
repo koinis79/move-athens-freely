@@ -490,7 +490,6 @@ const AdminCalendarPage = () => {
       {/* Booking slide-over (reused) */}
       <BookingSlideOver
         booking={selectedBookingDetail}
-        open={!!selectedBookingDetail}
         onClose={() => setSelectedBookingId(null)}
       />
     </div>
