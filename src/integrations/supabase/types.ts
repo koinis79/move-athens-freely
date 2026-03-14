@@ -567,7 +567,16 @@ export type Database = {
       }
     }
     Views: {
-      [_ in never]: never
+      admin_dashboard_stats: {
+        Row: {
+          active_rentals: number | null
+          pending_requests: number | null
+          todays_deliveries: number | null
+          todays_revenue: number | null
+          upcoming_pickups: number | null
+        }
+        Relationships: []
+      }
     }
     Functions: {
       create_booking: {
