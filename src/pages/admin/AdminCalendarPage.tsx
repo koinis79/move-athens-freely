@@ -495,6 +495,8 @@ const AdminCalendarPage = () => {
         booking={selectedBookingDetail}
         onClose={() => setSelectedBookingId(null)}
       />
+
+      <NewBookingModal open={newBookingOpen} onOpenChange={setNewBookingOpen} />
     </div>
   );
 };
