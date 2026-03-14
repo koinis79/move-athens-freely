@@ -4,6 +4,7 @@ import {
   Search, SlidersHorizontal, Plus, MoreHorizontal, Eye, Pencil,
   Truck, PackageCheck, XCircle, Phone, ChevronUp, ChevronDown,
 } from "lucide-react";
+import NewBookingModal from "@/components/admin/NewBookingModal";
 import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";

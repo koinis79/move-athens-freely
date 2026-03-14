@@ -201,6 +201,7 @@ const AdminCalendarPage = () => {
   const [viewMode, setViewMode] = useState<ViewMode>("month");
   const [selectedDate, setSelectedDate] = useState<Date>(new Date());
   const [selectedBookingId, setSelectedBookingId] = useState<string | null>(null);
+  const [newBookingOpen, setNewBookingOpen] = useState(false);
 
   const today = useMemo(() => new Date(), []);
 
