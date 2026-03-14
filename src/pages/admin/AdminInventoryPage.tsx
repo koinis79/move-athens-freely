@@ -349,8 +349,8 @@ const AdminInventoryPage = () => {
 
               {/* Current renter */}
               {selectedItem.currentRenter && (
-                <div className="rounded-lg border border-orange-200 bg-orange-50 p-3">
-                  <p className="font-semibold text-orange-800 text-xs mb-1">Currently Rented</p>
+                <div className="rounded-lg border border-secondary/30 bg-secondary/10 p-3">
+                  <p className="font-semibold text-secondary text-xs mb-1">Currently Rented</p>
                   <p className="text-sm">{selectedItem.currentRenter}</p>
                   {selectedItem.returnDate && (
                     <p className="text-xs text-muted-foreground">Returns {formatDate(selectedItem.returnDate)}</p>
