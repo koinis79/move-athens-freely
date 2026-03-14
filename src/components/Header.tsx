@@ -65,7 +65,7 @@ const Header = () => {
             className="h-11 lg:h-14 w-auto block dark:hidden"
           />
           <img
-            src="https://lmgpuqgwkiapgpdsxvmb.supabase.co/storage/v1/object/public/assets/logo-dark.png"
+            src="https://lmgpuqgwkiapgpdsxvmb.supabase.co/storage/v1/object/public/assets/logo-dark-clean2.png"
             alt="Moveability"
             className="h-11 lg:h-14 w-auto hidden dark:block"
           />
