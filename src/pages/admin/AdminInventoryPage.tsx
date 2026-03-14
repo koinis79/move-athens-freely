@@ -17,7 +17,7 @@ import {
   DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import {
-  Search, Plus, LayoutGrid, List, Wheelchair, MoreVertical,
+  Search, Plus, LayoutGrid, List, Armchair, MoreVertical,
   Pencil, History, Wrench, Star, ChevronLeft, ChevronRight,
 } from "lucide-react";
 import {
