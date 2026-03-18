@@ -30,8 +30,9 @@ function enableGA() {
   s.async = true;
   s.src = "https://www.googletagmanager.com/gtag/js?id=G-8RD4VHF74X";
   document.head.appendChild(s);
-  window.gtag?.("js", new Date());
-  window.gtag?.("config", "G-8RD4VHF74X");
+  const w = window as unknown as Record<string, (...args: unknown[]) => void>;
+  w.gtag?.("js", new Date());
+  w.gtag?.("config", "G-8RD4VHF74X");
 }
 
 const CookieConsent = () => {
