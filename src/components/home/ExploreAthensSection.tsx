@@ -1,21 +1,21 @@
 const spots = [
   {
-    src: "https://images.unsplash.com/photo-1573497019940-1c28c88b4f3e?w=600&h=400&fit=crop",
+    src: "https://images.unsplash.com/photo-1544027993-37dbfe43562a?w=800",
     caption: "Independence at every landmark",
     alt: "Person in wheelchair exploring outdoors",
   },
   {
-    src: "https://images.unsplash.com/photo-1541480601022-2308c0f02487?w=600&h=400&fit=crop",
+    src: "https://images.unsplash.com/photo-1529156069898-49953e39b3ac?w=800",
     caption: "Quality time with loved ones",
     alt: "Senior couple enjoying outdoors together",
   },
   {
-    src: "https://images.unsplash.com/photo-1502920514313-52581002a659?w=600&h=400&fit=crop",
+    src: "https://images.unsplash.com/photo-1555993539-1732b0258235?w=800",
     caption: "The Acropolis awaits",
     alt: "View of the Parthenon in Athens",
   },
   {
-    src: "https://images.unsplash.com/photo-1555993539-1732b0258235?w=600&h=400&fit=crop",
+    src: "https://images.unsplash.com/photo-1533587851505-d119e13fa0d7?w=800",
     caption: "Stroll through Plaka's charm",
     alt: "Charming Athens street scene",
   },
