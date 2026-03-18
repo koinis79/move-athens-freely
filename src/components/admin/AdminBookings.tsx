@@ -12,14 +12,17 @@ import {
   Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter,
 } from "@/components/ui/dialog";
 import {
+  DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import {
   Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
 } from "@/components/ui/select";
-import { Search } from "lucide-react";
+import { MoreHorizontal, Search } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { cn } from "@/lib/utils";
 import { useToast } from "@/hooks/use-toast";
 
-const STATUSES = ["pending", "confirmed", "active", "completed", "cancelled"];
+const STATUSES = ["pending", "confirmed", "preparing", "out_for_delivery", "delivered", "active", "completed", "cancelled"];
 
 const statusColor: Record<string, string> = {
   pending:   "bg-secondary/15 text-secondary border-secondary/30",
@@ -62,6 +65,7 @@ const AdminBookings = () => {
   const [editStatus, setEditStatus] = useState("");
   const [editNotes, setEditNotes] = useState("");
   const [saving, setSaving] = useState(false);
+  const [cancelTarget, setCancelTarget] = useState<Booking | null>(null);
 
   const fetchBookings = async () => {
     const { data } = await supabase
@@ -97,6 +101,23 @@ const AdminBookings = () => {
     setSelected(b);
     setEditStatus(b.status);
     setEditNotes(b.internal_notes ?? "");
+  };
+
+  const updateBookingStatus = async (bookingId: string, newStatus: string) => {
+    const { error } = await supabase
+      .from("bookings")
+      .update({ status: newStatus, updated_at: new Date().toISOString() })
+      .eq("id", bookingId);
+    if (error) {
+      toast({ title: "Error", description: "Failed to update booking status", variant: "destructive" });
+      console.error(error);
+      return;
+    }
+    const label = newStatus.replace(/_/g, " ");
+    toast({ title: "Status updated", description: `Booking marked as ${label}` });
+    setBookings((prev) =>
+      prev.map((b) => (b.id === bookingId ? { ...b, status: newStatus } : b))
+    );
   };
 
   const handleSave = async () => {
@@ -157,13 +178,14 @@ const AdminBookings = () => {
               <TableHead>Payment</TableHead>
               <TableHead>Status</TableHead>
               <TableHead className="text-right">Amount</TableHead>
+              <TableHead className="w-10" />
             </TableRow>
           </TableHeader>
           <TableBody>
             {loading
               ? Array.from({ length: 5 }).map((_, i) => (
                   <TableRow key={i}>
-                    {Array.from({ length: 8 }).map((__, j) => (
+                    {Array.from({ length: 9 }).map((__, j) => (
                       <TableCell key={j}><Skeleton className="h-4 w-full" /></TableCell>
                     ))}
                   </TableRow>
@@ -189,15 +211,48 @@ const AdminBookings = () => {
                     </TableCell>
                     <TableCell>
                       <Badge variant="outline" className={cn("text-xs capitalize", statusColor[b.status])}>
-                        {b.status}
+                        {b.status.replace(/_/g, " ")}
                       </Badge>
                     </TableCell>
                     <TableCell className="text-right font-medium">€{Number(b.total_amount).toFixed(0)}</TableCell>
+                    <TableCell onClick={(e) => { e.stopPropagation(); }}>
+                      <DropdownMenu>
+                        <DropdownMenuTrigger asChild>
+                          <Button variant="ghost" size="icon" className="h-8 w-8">
+                            <MoreHorizontal className="h-4 w-4" />
+                          </Button>
+                        </DropdownMenuTrigger>
+                        <DropdownMenuContent align="end">
+                          <DropdownMenuItem onClick={() => updateBookingStatus(b.id, "confirmed")}>
+                            Mark as Confirmed
+                          </DropdownMenuItem>
+                          <DropdownMenuItem onClick={() => updateBookingStatus(b.id, "preparing")}>
+                            Mark as Preparing
+                          </DropdownMenuItem>
+                          <DropdownMenuItem onClick={() => updateBookingStatus(b.id, "out_for_delivery")}>
+                            Mark as Out for Delivery
+                          </DropdownMenuItem>
+                          <DropdownMenuItem onClick={() => updateBookingStatus(b.id, "delivered")}>
+                            Mark as Delivered
+                          </DropdownMenuItem>
+                          <DropdownMenuItem onClick={() => updateBookingStatus(b.id, "completed")}>
+                            Mark as Completed
+                          </DropdownMenuItem>
+                          <DropdownMenuSeparator />
+                          <DropdownMenuItem
+                            className="text-destructive focus:text-destructive"
+                            onClick={() => setCancelTarget(b)}
+                          >
+                            Cancel Booking
+                          </DropdownMenuItem>
+                        </DropdownMenuContent>
+                      </DropdownMenu>
+                    </TableCell>
                   </TableRow>
                 ))}
             {!loading && filtered.length === 0 && (
               <TableRow>
-                <TableCell colSpan={8} className="text-center text-muted-foreground py-8">
+                <TableCell colSpan={9} className="text-center text-muted-foreground py-8">
                   No bookings found.
                 </TableCell>
               </TableRow>
@@ -205,6 +260,32 @@ const AdminBookings = () => {
           </TableBody>
         </Table>
       </Card>
+
+      {/* Cancel confirmation dialog */}
+      <Dialog open={!!cancelTarget} onOpenChange={() => setCancelTarget(null)}>
+        <DialogContent className="max-w-sm">
+          <DialogHeader>
+            <DialogTitle>Cancel booking?</DialogTitle>
+            <DialogDescription>
+              This will mark <span className="font-mono font-semibold">{cancelTarget?.booking_number}</span> as cancelled. This cannot be undone.
+            </DialogDescription>
+          </DialogHeader>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setCancelTarget(null)}>Keep Booking</Button>
+            <Button
+              variant="destructive"
+              onClick={() => {
+                if (cancelTarget) {
+                  updateBookingStatus(cancelTarget.id, "cancelled");
+                  setCancelTarget(null);
+                }
+              }}
+            >
+              Yes, Cancel
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
 
       {/* Detail modal */}
       <Dialog open={!!selected} onOpenChange={() => setSelected(null)}>
