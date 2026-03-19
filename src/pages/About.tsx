@@ -2,6 +2,7 @@ import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Accessibility, MapPin, Heart } from "lucide-react";
+import aboutHeroImg from "@/assets/about-hero.png";
 
 const values = [
   {
@@ -62,7 +63,11 @@ const About = () => (
 
         <div className="overflow-hidden rounded-2xl border border-border bg-muted/50">
           <div className="flex aspect-[4/3] items-center justify-center text-sm text-muted-foreground">
-            Our Story
+            <img
+              src={aboutHeroImg}
+              alt="Mobility scooter on a stone pathway with the Acropolis and Parthenon in the background"
+              className="h-full w-full object-cover"
+            />
           </div>
         </div>
       </div>

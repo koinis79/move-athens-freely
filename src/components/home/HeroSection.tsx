@@ -2,7 +2,9 @@ import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { CheckCircle } from "lucide-react";
 import { useTranslation } from "react-i18next";
-import heroImg from "@/assets/about-hero.png";
+
+const HERO_LIGHT = "https://images.unsplash.com/photo-1555993539-1732b0258235?w=1920&h=800&fit=crop&q=80";
+const HERO_DARK = "https://images.unsplash.com/photo-1603565816030-6b389eeb23cb?w=1920&h=800&fit=crop&q=80";
 
 const HeroSection = () => {
   const { t } = useTranslation();
@@ -15,23 +17,29 @@ const HeroSection = () => {
 
   return (
     <section className="relative overflow-hidden py-20 md:py-28 lg:py-32">
-      {/* Background image */}
+      {/* Light-mode background */}
       <div
-        className="absolute inset-0 bg-cover bg-center"
-        style={{ backgroundImage: `url(${heroImg})` }}
+        className="absolute inset-0 bg-cover bg-center dark:hidden"
+        style={{ backgroundImage: `url(${HERO_LIGHT})` }}
       />
-      {/* Dark gradient overlay — left to right for text readability */}
-      <div className="absolute inset-0 bg-gradient-to-r from-black/75 via-black/50 to-black/30" />
+      <div className="absolute inset-0 bg-white/70 dark:hidden" />
+
+      {/* Dark-mode background */}
+      <div
+        className="absolute inset-0 hidden bg-cover bg-center dark:block"
+        style={{ backgroundImage: `url(${HERO_DARK})` }}
+      />
+      <div className="absolute inset-0 hidden bg-black/50 dark:block" />
 
       {/* Decorative blurs */}
       <div className="pointer-events-none absolute -right-32 -top-32 h-96 w-96 rounded-full bg-primary/5 blur-3xl" />
       <div className="pointer-events-none absolute -bottom-24 -left-24 h-72 w-72 rounded-full bg-secondary/10 blur-3xl" />
 
       <div className="container relative z-10 flex flex-col items-center text-center">
-        <h1 className="max-w-3xl text-4xl font-heading font-extrabold tracking-tight text-white md:text-5xl lg:text-6xl [text-shadow:_0_2px_12px_rgb(0_0_0_/_60%)]">
+        <h1 className="max-w-3xl text-4xl font-heading font-extrabold tracking-tight text-foreground dark:text-white md:text-5xl lg:text-6xl [text-shadow:_0_1px_8px_rgb(0_0_0_/_15%)] dark:[text-shadow:_0_2px_12px_rgb(0_0_0_/_60%)]">
           {t("hero.title")}
         </h1>
-        <p className="mt-6 max-w-2xl text-lg text-white/90 md:text-xl [text-shadow:_0_1px_6px_rgb(0_0_0_/_50%)]">
+        <p className="mt-6 max-w-2xl text-lg text-muted-foreground dark:text-white/85 md:text-xl [text-shadow:_0_1px_4px_rgb(0_0_0_/_10%)] dark:[text-shadow:_0_1px_6px_rgb(0_0_0_/_50%)]">
           {t("hero.subtitle")}
         </p>
 
@@ -39,12 +47,12 @@ const HeroSection = () => {
           <Button asChild size="lg" className="rounded-xl px-8 text-base font-semibold">
             <Link to="/equipment">{t("hero.browseEquipment")}</Link>
           </Button>
-          <Button asChild variant="outline" size="lg" className="rounded-xl px-8 text-base font-semibold border-white/40 text-white hover:bg-white/10">
+          <Button asChild variant="outline" size="lg" className="rounded-xl px-8 text-base font-semibold dark:border-white/40 dark:text-white dark:hover:bg-white/10">
             <Link to="/how-it-works">{t("hero.howItWorks")}</Link>
           </Button>
         </div>
 
-        <div className="mt-10 flex flex-wrap items-center justify-center gap-x-6 gap-y-3 text-sm text-white/80">
+        <div className="mt-10 flex flex-wrap items-center justify-center gap-x-6 gap-y-3 text-sm text-muted-foreground dark:text-white/80">
           {trustItems.map((item) => (
             <span key={item} className="flex items-center gap-1.5">
               <CheckCircle className="h-4 w-4 text-accent" />
