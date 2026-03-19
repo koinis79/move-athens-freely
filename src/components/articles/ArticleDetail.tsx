@@ -10,7 +10,7 @@ import {
   BreadcrumbPage,
   BreadcrumbSeparator,
 } from "@/components/ui/breadcrumb";
-import { Facebook, Twitter, LinkIcon, ArrowRight, Clock } from "lucide-react";
+import { Facebook, Twitter, LinkIcon, ArrowRight, Clock, Lightbulb } from "lucide-react";
 import { toast } from "@/hooks/use-toast";
 import type { Article } from "@/data/articles";
 
@@ -58,6 +58,7 @@ const ArticleDetail = ({
   const shareUrl = encodeURIComponent(window.location.href);
   const shareTitle = encodeURIComponent(article.title);
   const mins = readingTime(article.body);
+  const takeaways = article.takeaways ?? [];
 
   return (
     <>
@@ -126,6 +127,41 @@ const ArticleDetail = ({
               alt={article.title}
               className="aspect-[16/9] w-full object-cover"
             />
+          </div>
+
+          {/* Quick Takeaway box */}
+          <div className="mx-auto mt-8 max-w-prose">
+            <div className="rounded-r-xl border-l-4 border-primary bg-primary/10 px-5 py-4">
+              <div className="flex items-center gap-2 text-primary">
+                <Lightbulb className="h-5 w-5 shrink-0" />
+                <span className="font-semibold">Quick Takeaway</span>
+              </div>
+              <ul className="mt-3 space-y-1.5">
+                {takeaways.length > 0 ? (
+                  takeaways.map((point, i) => (
+                    <li key={i} className="flex items-start gap-2 text-sm text-foreground/80">
+                      <span className="mt-1.5 h-1.5 w-1.5 shrink-0 rounded-full bg-primary" />
+                      {point}
+                    </li>
+                  ))
+                ) : (
+                  <>
+                    <li className="flex items-start gap-2 text-sm text-foreground/80">
+                      <span className="mt-1.5 h-1.5 w-1.5 shrink-0 rounded-full bg-primary" />
+                      Key points from this guide will appear here.
+                    </li>
+                    <li className="flex items-start gap-2 text-sm text-foreground/80">
+                      <span className="mt-1.5 h-1.5 w-1.5 shrink-0 rounded-full bg-primary" />
+                      Practical tips and accessibility highlights will be listed here.
+                    </li>
+                    <li className="flex items-start gap-2 text-sm text-foreground/80">
+                      <span className="mt-1.5 h-1.5 w-1.5 shrink-0 rounded-full bg-primary" />
+                      What to expect and how to prepare for your visit.
+                    </li>
+                  </>
+                )}
+              </ul>
+            </div>
           </div>
 
           {/* Body — max-w-prose for optimal line length (~65 chars) */}
