@@ -88,36 +88,39 @@ const ArticleDetail = ({
 
       {/* Article */}
       <article className="bg-background py-12 md:py-20">
-        <div className="container mx-auto max-w-3xl">
-          {article.category && (
-            <Badge
-              variant="outline"
-              className={`mb-4 text-xs font-medium ${categoryColors[article.category] ?? "bg-muted text-muted-foreground border-border"}`}
-            >
-              {article.category}
-            </Badge>
-          )}
-          <h1 className="text-3xl font-heading font-extrabold tracking-tight text-foreground md:text-4xl lg:text-5xl">
-            {article.title}
-          </h1>
-
-          <div className="mt-4 flex flex-wrap items-center gap-3 text-sm text-muted-foreground">
-            <span>{formattedDate}</span>
-            {article.author && (
-              <>
-                <span>·</span>
-                <span>{article.author}</span>
-              </>
+        <div className="container">
+          {/* Header — constrained to max-w-prose */}
+          <div className="mx-auto max-w-prose">
+            {article.category && (
+              <Badge
+                variant="outline"
+                className={`mb-4 text-xs font-medium ${categoryColors[article.category] ?? "bg-muted text-muted-foreground border-border"}`}
+              >
+                {article.category}
+              </Badge>
             )}
-            <span>·</span>
-            <span className="inline-flex items-center gap-1">
-              <Clock className="h-3.5 w-3.5" />
-              {mins} min read
-            </span>
+            <h1 className="text-3xl font-heading font-extrabold tracking-tight text-foreground md:text-4xl lg:text-5xl">
+              {article.title}
+            </h1>
+
+            <div className="mt-4 flex flex-wrap items-center gap-3 text-sm text-muted-foreground">
+              <span>{formattedDate}</span>
+              {article.author && (
+                <>
+                  <span>·</span>
+                  <span>{article.author}</span>
+                </>
+              )}
+              <span>·</span>
+              <span className="inline-flex items-center gap-1">
+                <Clock className="h-3.5 w-3.5" />
+                {mins} min read
+              </span>
+            </div>
           </div>
 
-          {/* Featured image */}
-          <div className="mt-8 overflow-hidden rounded-xl border border-border bg-muted">
+          {/* Featured image — slightly wider than prose for visual breathing room */}
+          <div className="mx-auto mt-8 max-w-3xl overflow-hidden rounded-xl border border-border bg-muted">
             <img
               src={article.image}
               alt={article.title}
@@ -125,10 +128,10 @@ const ArticleDetail = ({
             />
           </div>
 
-          {/* Body */}
-          <div className="mt-10 space-y-6">
+          {/* Body — max-w-prose for optimal line length (~65 chars) */}
+          <div className="mx-auto mt-10 max-w-prose space-y-6">
             {article.body.map((p, i) => (
-              <p key={i} className="leading-relaxed text-muted-foreground">
+              <p key={i} className="text-lg leading-8 text-muted-foreground">
                 {p}
               </p>
             ))}
@@ -136,7 +139,7 @@ const ArticleDetail = ({
 
           {/* Share */}
           {showShare && (
-            <div className="mt-10 flex items-center gap-3 border-t border-border pt-6">
+            <div className="mx-auto mt-10 flex max-w-prose items-center gap-3 border-t border-border pt-6">
               <span className="text-sm font-medium text-foreground">Share:</span>
               <Button variant="outline" size="icon" asChild>
                 <a
