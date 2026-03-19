@@ -165,9 +165,11 @@ const ArticleDetail = ({
           </div>
 
           {/* Body — max-w-prose for optimal line length (~65 chars) */}
-          <div className="mx-auto mt-10 max-w-prose space-y-6">
+          <div className="mx-auto mt-10 max-w-prose space-y-6
+            [&>h2]:mt-10 [&>h2]:mb-4 [&>h2]:text-2xl [&>h2]:font-heading [&>h2]:font-bold [&>h2]:text-foreground
+            [&>h3]:mt-8 [&>h3]:mb-3 [&>h3]:text-xl [&>h3]:font-heading [&>h3]:font-semibold [&>h3]:text-foreground">
             {article.body.map((p, i) => (
-              <p key={i} className="text-lg leading-8 text-muted-foreground">
+              <p key={i} className="text-lg leading-relaxed text-muted-foreground">
                 {p}
               </p>
             ))}
