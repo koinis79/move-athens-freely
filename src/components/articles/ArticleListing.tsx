@@ -36,7 +36,7 @@ const ArticleListing = ({
       <div className="container mx-auto grid max-w-5xl gap-8 sm:grid-cols-2">
         {articles.map((a) => (
           <Link key={a.slug} to={`${basePath}/${a.slug}`} className="group">
-            <Card className="h-full overflow-hidden border border-border bg-card shadow-sm transition-shadow group-hover:shadow-md">
+            <Card className="h-full overflow-hidden border border-border bg-card shadow-sm transition-all duration-200 ease-out hover:-translate-y-0.5 hover:shadow-[0_8px_24px_rgba(0,0,0,0.10)] dark:hover:shadow-[0_8px_24px_rgba(0,0,0,0.35)]">
               <div className="aspect-[16/9] bg-muted">
                 <img
                   src={a.image}
