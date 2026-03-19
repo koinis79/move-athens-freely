@@ -65,7 +65,7 @@ const About = () => (
           <div className="flex aspect-[4/3] items-center justify-center text-sm text-muted-foreground">
             <img
               src={aboutHeroImg}
-              alt="Someone exploring Athens with mobility equipment"
+              alt="Mobility scooter on a stone pathway with the Acropolis and Parthenon in the background"
               className="h-full w-full object-cover"
             />
           </div>
