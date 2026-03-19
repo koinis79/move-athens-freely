@@ -3,7 +3,6 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Accessibility, MapPin, Heart } from "lucide-react";
 
-
 const values = [
   {
     Icon: Accessibility,
