@@ -33,7 +33,7 @@ const EquipmentCard = ({ item }: { item: EquipmentItem }) => {
   return (
     <Link to={`/equipment/${item.categorySlug}/${item.slug}`} className="group block">
       <Card className="h-full overflow-hidden transition-all duration-200 hover:-translate-y-1 hover:shadow-[0_12px_24px_rgba(0,0,0,0.1)]">
-        <div className="relative aspect-[3/2] overflow-hidden bg-muted flex items-center justify-center">
+        <div className="relative aspect-[16/10] overflow-hidden bg-muted flex items-center justify-center">
           {item.image ? (
             <img
               src={item.image}
