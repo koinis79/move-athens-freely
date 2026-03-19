@@ -14,6 +14,7 @@ interface EquipmentRow {
   price_tier4: number;
   availability: string;
   is_popular: boolean;
+  thumbnail_url: string | null;
   images: string[] | null;
   specifications: Record<string, string> | null;
   equipment_categories: {
@@ -44,8 +45,7 @@ function mapRow(row: EquipmentRow): EquipmentItem {
         ? "Limited"
         : "Unavailable",
     popular: row.is_popular ?? false,
-    // Use first DB image URL, fall back to empty string (card handles missing gracefully)
-    image: row.images?.[0] ?? "",
+    image: row.thumbnail_url ?? row.images?.[0] ?? "",
   };
 }
 
@@ -143,7 +143,7 @@ export function useEquipmentDetail(slug: string | undefined) {
 
       setData({
         item: mapRow(typed),
-        images: typed.images?.length ? typed.images : [],
+        images: typed.images?.length ? typed.images : (typed.thumbnail_url ? [typed.thumbnail_url] : []),
         specifications: typed.specifications ?? {},
         longDescription: typed.description_en ?? "",
       });
