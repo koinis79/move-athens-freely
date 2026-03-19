@@ -12,11 +12,11 @@ const ImageGallery = ({ images, alt }: Props) => {
   return (
     <div className="flex flex-col gap-3">
       {/* Main image */}
-      <div className="relative aspect-[4/3] overflow-hidden rounded-xl bg-muted">
+      <div className="relative w-full max-h-[400px] overflow-hidden rounded-xl bg-muted flex items-center justify-center">
         <img
           src={images[active] ?? "/placeholder.svg"}
           alt={alt}
-          className="h-full w-full object-cover"
+          className="max-h-[400px] w-full object-contain"
           onError={(e) => { (e.target as HTMLImageElement).src = "/placeholder.svg"; }}
         />
       </div>
