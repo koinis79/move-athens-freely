@@ -33,12 +33,12 @@ const EquipmentCard = ({ item }: { item: EquipmentItem }) => {
   return (
     <Link to={`/equipment/${item.categorySlug}/${item.slug}`} className="group block">
       <Card className="h-full overflow-hidden transition-all duration-200 hover:-translate-y-1 hover:shadow-[0_12px_24px_rgba(0,0,0,0.1)]">
-        <div className="relative h-40 overflow-hidden bg-muted flex items-center justify-center">
+        <div className="relative h-40 bg-gray-100 dark:bg-gray-800 flex items-center justify-center p-3">
           {item.image ? (
             <img
               src={item.image}
               alt={item.name}
-              className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-[1.02]"
+              className="h-full w-full object-contain"
               loading="lazy"
               onError={(e) => { (e.target as HTMLImageElement).src = "/placeholder.svg"; }}
             />
