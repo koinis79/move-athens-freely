@@ -40,7 +40,7 @@ const EquipmentCard = ({ item }: { item: EquipmentItem }) => {
               alt={item.name}
               className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-[1.02]"
               loading="lazy"
-              onError={(e) => { (e.target as HTMLImageElement).style.display = "none"; }}
+              onError={(e) => { (e.target as HTMLImageElement).src = "/placeholder.svg"; }}
             />
           ) : (
             <span className="text-6xl select-none" aria-hidden="true">{categoryEmoji[item.category] ?? "♿"}</span>
