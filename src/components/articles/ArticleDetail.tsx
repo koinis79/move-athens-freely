@@ -148,7 +148,7 @@ const ArticleDetail = ({
             <div className="mx-auto mt-10 grid max-w-5xl gap-6 sm:grid-cols-3">
               {related.map((r) => (
                 <Link key={r.slug} to={`${basePath}/${r.slug}`} className="group">
-                  <Card className="h-full overflow-hidden border border-border bg-card shadow-sm transition-shadow group-hover:shadow-md">
+                  <Card className="h-full overflow-hidden border border-border bg-card shadow-sm transition-all duration-200 ease-out hover:-translate-y-0.5 hover:shadow-[0_8px_24px_rgba(0,0,0,0.10)] dark:hover:shadow-[0_8px_24px_rgba(0,0,0,0.35)]">
                     <div className="aspect-[16/9] bg-muted">
                       <img
                         src={r.image}
