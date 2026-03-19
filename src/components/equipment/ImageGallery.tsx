@@ -14,9 +14,10 @@ const ImageGallery = ({ images, alt }: Props) => {
       {/* Main image */}
       <div className="relative aspect-[4/3] overflow-hidden rounded-xl bg-muted">
         <img
-          src={images[active]}
+          src={images[active] ?? "/placeholder.svg"}
           alt={alt}
           className="h-full w-full object-cover"
+          onError={(e) => { (e.target as HTMLImageElement).src = "/placeholder.svg"; }}
         />
       </div>
 
@@ -37,6 +38,7 @@ const ImageGallery = ({ images, alt }: Props) => {
               src={src}
               alt={`${alt} thumbnail ${i + 1}`}
               className="h-full w-full object-cover"
+              onError={(e) => { (e.target as HTMLImageElement).src = "/placeholder.svg"; }}
             />
           </button>
         ))}
