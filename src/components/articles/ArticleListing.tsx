@@ -1,7 +1,21 @@
 import { Link } from "react-router-dom";
 import { Card, CardContent } from "@/components/ui/card";
-import { ArrowRight } from "lucide-react";
+import { Badge } from "@/components/ui/badge";
+import { ArrowRight, Clock } from "lucide-react";
 import type { Article } from "@/data/articles";
+
+const categoryColors: Record<string, string> = {
+  Attractions: "bg-primary/15 text-primary border-primary/30",
+  Dining:      "bg-orange-500/15 text-orange-600 border-orange-500/30",
+  Transport:   "bg-blue-500/15 text-blue-600 border-blue-500/30",
+  Outdoors:    "bg-green-500/15 text-green-600 border-green-500/30",
+  Tips:        "bg-violet-500/15 text-violet-600 border-violet-500/30",
+  Athens:      "bg-secondary/15 text-secondary border-secondary/30",
+};
+
+function readingTime(body: string[]): number {
+  return Math.max(1, Math.ceil(body.join(" ").split(/\s+/).length / 200));
+}
 
 interface ArticleListingProps {
   heading: string;
@@ -37,22 +51,37 @@ const ArticleListing = ({
         {articles.map((a) => (
           <Link key={a.slug} to={`${basePath}/${a.slug}`} className="group">
             <Card className="h-full overflow-hidden border border-border bg-card shadow-sm transition-all duration-200 ease-out hover:-translate-y-0.5 hover:shadow-[0_8px_24px_rgba(0,0,0,0.10)] dark:hover:shadow-[0_8px_24px_rgba(0,0,0,0.35)]">
-              <div className="aspect-[16/9] bg-muted">
+              <div className="relative aspect-[16/9] bg-muted">
                 <img
                   src={a.image}
                   alt={a.title}
                   className="h-full w-full object-cover"
                 />
+                {a.category && (
+                  <Badge
+                    variant="outline"
+                    className={`absolute left-3 top-3 text-xs font-medium ${categoryColors[a.category] ?? "bg-muted text-muted-foreground border-border"}`}
+                  >
+                    {a.category}
+                  </Badge>
+                )}
               </div>
               <CardContent className="p-6">
-                <p className="text-xs font-medium text-muted-foreground">
-                  {new Date(a.date).toLocaleDateString("en-GB", {
-                    day: "numeric",
-                    month: "long",
-                    year: "numeric",
-                  })}
-                  {a.author && ` · ${a.author}`}
-                </p>
+                <div className="flex items-center gap-2 text-xs text-muted-foreground">
+                  <span>
+                    {new Date(a.date).toLocaleDateString("en-GB", {
+                      day: "numeric",
+                      month: "long",
+                      year: "numeric",
+                    })}
+                    {a.author && ` · ${a.author}`}
+                  </span>
+                  <span>·</span>
+                  <span className="inline-flex items-center gap-1">
+                    <Clock className="h-3 w-3" />
+                    {readingTime(a.body)} min read
+                  </span>
+                </div>
                 <h2 className="mt-2 text-lg font-heading font-semibold text-foreground group-hover:text-primary">
                   {a.title}
                 </h2>
