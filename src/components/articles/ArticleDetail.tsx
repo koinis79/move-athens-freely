@@ -23,8 +23,90 @@ const categoryColors: Record<string, string> = {
   Athens:      "bg-secondary/15 text-secondary border-secondary/30",
 };
 
-function readingTime(body: string[]): number {
-  return Math.max(1, Math.ceil(body.join(" ").split(/\s+/).length / 200));
+function readingTime(article: Article): number {
+  const text = article.content ?? article.body.join(" ");
+  return Math.max(1, Math.ceil(text.split(/\s+/).length / 200));
+}
+
+/** Convert **bold** and *italic* to HTML */
+function inlineMd(text: string): string {
+  return text
+    .replace(/\*\*(.+?)\*\*/g, "<strong>$1</strong>")
+    .replace(/\*([^*]+?)\*/g, "<em>$1</em>");
+}
+
+/** Render a markdown string into JSX nodes */
+function renderMarkdown(md: string): React.ReactNode[] {
+  const lines = md.split("\n");
+  const nodes: React.ReactNode[] = [];
+  let listType: "ul" | "ol" | null = null;
+  let listItems: string[] = [];
+  let key = 0;
+
+  const flushList = () => {
+    if (!listType || listItems.length === 0) return;
+    const Tag = listType;
+    nodes.push(
+      <Tag
+        key={key++}
+        className={
+          listType === "ul"
+            ? "my-4 ml-6 list-disc space-y-2"
+            : "my-4 ml-6 list-decimal space-y-2"
+        }
+      >
+        {listItems.map((item, i) => (
+          <li
+            key={i}
+            className="text-lg leading-relaxed text-muted-foreground"
+            dangerouslySetInnerHTML={{ __html: inlineMd(item) }}
+          />
+        ))}
+      </Tag>
+    );
+    listType = null;
+    listItems = [];
+  };
+
+  for (const raw of lines) {
+    const line = raw.trimEnd();
+
+    if (line.startsWith("## ")) {
+      flushList();
+      nodes.push(
+        <h2 key={key++} className="mt-10 mb-4 text-2xl font-heading font-bold text-foreground">
+          {line.slice(3)}
+        </h2>
+      );
+    } else if (line.startsWith("### ")) {
+      flushList();
+      nodes.push(
+        <h3 key={key++} className="mt-8 mb-3 text-xl font-heading font-semibold text-foreground">
+          {line.slice(4)}
+        </h3>
+      );
+    } else if (/^- /.test(line)) {
+      if (listType !== "ul") { flushList(); listType = "ul"; }
+      listItems.push(line.slice(2));
+    } else if (/^\d+\. /.test(line)) {
+      if (listType !== "ol") { flushList(); listType = "ol"; }
+      listItems.push(line.replace(/^\d+\.\s/, ""));
+    } else if (line === "") {
+      flushList();
+    } else {
+      flushList();
+      nodes.push(
+        <p
+          key={key++}
+          className="text-lg leading-relaxed text-muted-foreground"
+          dangerouslySetInnerHTML={{ __html: inlineMd(line) }}
+        />
+      );
+    }
+  }
+
+  flushList();
+  return nodes;
 }
 
 interface ArticleDetailProps {
@@ -57,7 +139,7 @@ const ArticleDetail = ({
 
   const shareUrl = encodeURIComponent(window.location.href);
   const shareTitle = encodeURIComponent(article.title);
-  const mins = readingTime(article.body);
+  const mins = readingTime(article);
   const takeaways = article.takeaways ?? [];
 
   return (
@@ -90,7 +172,7 @@ const ArticleDetail = ({
       {/* Article */}
       <article className="bg-background py-12 md:py-20">
         <div className="container">
-          {/* Header — constrained to max-w-prose */}
+          {/* Header */}
           <div className="mx-auto max-w-prose">
             {article.category && (
               <Badge
@@ -103,7 +185,6 @@ const ArticleDetail = ({
             <h1 className="text-3xl font-heading font-extrabold tracking-tight text-foreground md:text-4xl lg:text-5xl">
               {article.title}
             </h1>
-
             <div className="mt-4 flex flex-wrap items-center gap-3 text-sm text-muted-foreground">
               <span>{formattedDate}</span>
               {article.author && (
@@ -120,7 +201,7 @@ const ArticleDetail = ({
             </div>
           </div>
 
-          {/* Featured image — slightly wider than prose for visual breathing room */}
+          {/* Featured image */}
           <div className="mx-auto mt-8 max-w-3xl overflow-hidden rounded-xl border border-border bg-muted">
             <img
               src={article.image}
@@ -164,15 +245,15 @@ const ArticleDetail = ({
             </div>
           </div>
 
-          {/* Body — max-w-prose for optimal line length (~65 chars) */}
-          <div className="mx-auto mt-10 max-w-prose space-y-6
-            [&>h2]:mt-10 [&>h2]:mb-4 [&>h2]:text-2xl [&>h2]:font-heading [&>h2]:font-bold [&>h2]:text-foreground
-            [&>h3]:mt-8 [&>h3]:mb-3 [&>h3]:text-xl [&>h3]:font-heading [&>h3]:font-semibold [&>h3]:text-foreground">
-            {article.body.map((p, i) => (
-              <p key={i} className="text-lg leading-relaxed text-muted-foreground">
-                {p}
-              </p>
-            ))}
+          {/* Body — markdown or plain paragraphs */}
+          <div className="mx-auto mt-10 max-w-prose space-y-6">
+            {article.content
+              ? renderMarkdown(article.content)
+              : article.body.map((p, i) => (
+                  <p key={i} className="text-lg leading-relaxed text-muted-foreground">
+                    {p}
+                  </p>
+                ))}
           </div>
 
           {/* Share */}
@@ -239,7 +320,7 @@ const ArticleDetail = ({
                       </h3>
                       <div className="mt-1 flex items-center gap-1 text-xs text-muted-foreground">
                         <Clock className="h-3 w-3" />
-                        {readingTime(r.body)} min read
+                        {readingTime(r)} min read
                       </div>
                       <span className="mt-2 inline-flex items-center gap-1 text-sm font-medium text-primary">
                         Read more <ArrowRight className="h-3 w-3" />
