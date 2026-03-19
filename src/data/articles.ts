@@ -18,6 +18,7 @@ export interface Article {
   author?: string;
   image: string;
   body: string[];
+  category: string;
 }
 
 /* ── Accessible Athens guides ───────────────────────────── */
@@ -29,6 +30,7 @@ export const guides: Article[] = [
       "Everything you need to know about visiting the Acropolis with a wheelchair or mobility aid — ramps, elevators, and what to expect.",
     date: "2026-01-15",
     image: acropolisImg,
+    category: "Attractions",
     body: [
       "The Acropolis of Athens has undergone significant accessibility improvements in recent years. A cement pathway and an elevator now provide step-free access from the base to the summit, allowing wheelchair users and those with limited mobility to reach the Parthenon plateau.",
       "The elevator is located on the north slope and operates during regular visiting hours. It can accommodate standard manual and power wheelchairs. Staff are available to assist, and we recommend arriving early to avoid peak crowds, especially between 10:00 and 14:00 during summer months.",
@@ -43,6 +45,7 @@ export const guides: Article[] = [
       "A curated list of Athens' most wheelchair-friendly museums, including the National Archaeological Museum and the Benaki.",
     date: "2026-01-28",
     image: museumsImg,
+    category: "Attractions",
     body: [
       "Athens is home to some of the world's greatest museums, and many have made impressive strides in accessibility. Whether you're interested in ancient artifacts, modern art, or Greek history, there's an accessible museum experience waiting for you.",
       "The Acropolis Museum is the gold standard — fully step-free with elevators, wide corridors, accessible restrooms, and even tactile exhibits for visually impaired visitors. The National Archaeological Museum has ramp access and an elevator covering all floors, though some galleries have narrower passages.",
@@ -57,6 +60,7 @@ export const guides: Article[] = [
       "Where to eat in Athens' most popular neighborhoods if you use a wheelchair, rollator, or mobility scooter.",
     date: "2026-02-10",
     image: restaurantsImg,
+    category: "Dining",
     body: [
       "Plaka and Monastiraki are Athens' most charming and popular dining neighborhoods — but cobblestone streets and narrow alleys can be challenging for mobility equipment users. The good news is that many restaurants in these areas are making accessibility a priority.",
       "Several restaurants on Adrianou Street (the main pedestrian thoroughfare) offer step-free entrances and spacious outdoor seating ideal for wheelchairs and scooters. Look for places with smooth patio areas rather than raised terraces.",
@@ -71,6 +75,7 @@ export const guides: Article[] = [
       "Discover beaches along the Athenian Riviera with ramps, accessible changing rooms, and Seatrac systems.",
     date: "2026-02-20",
     image: beachesImg,
+    category: "Outdoors",
     body: [
       "The Athenian Riviera stretches along the Saronic Gulf south of the city center, offering beautiful beaches that are increasingly wheelchair accessible. Several beaches now feature Seatrac systems — motorized ramps that allow wheelchair users to enter the sea independently.",
       "Voula Beach (A' and B') is one of the best-equipped accessible beaches near Athens. It has paved pathways to the waterline, a Seatrac system, accessible changing rooms, and adapted shower facilities. The beach is easily reached by tram from Syntagma Square.",
@@ -85,6 +90,7 @@ export const guides: Article[] = [
       "Metro, tram, and bus accessibility in Athens — which lines are step-free, how to navigate, and tips for a smooth ride.",
     date: "2026-03-01",
     image: publicTransportImg,
+    category: "Transport",
     body: [
       "Athens' public transport system has come a long way in terms of accessibility. The metro, in particular, is one of the most wheelchair-friendly in Europe — all three lines and every station are fully step-free with elevators, tactile paving, and audio announcements.",
       "The tram connecting Syntagma to the southern coast (Voula, Glyfada) is also fully accessible. All tram stops have level boarding, and there's designated wheelchair space inside each car. The tram is a great option for reaching the Athenian Riviera beaches.",
@@ -99,6 +105,7 @@ export const guides: Article[] = [
       "How to arrange an accessible transfer from Athens International Airport to your hotel — options, costs, and tips.",
     date: "2026-03-05",
     image: airportTransferImg,
+    category: "Transport",
     body: [
       "Athens International Airport (Eleftherios Venizelos) is fully wheelchair accessible. From the moment you land, you'll find elevators, accessible restrooms, and assistance desks throughout the terminal. Airlines provide wheelchair assistance through the airport — request this when booking your flight.",
       "For getting to your hotel, you have several accessible options. The metro Line 3 runs directly from the airport to the city center (Syntagma, Monastiraki) in about 40 minutes, and all stations are fully step-free.",
@@ -118,6 +125,7 @@ export const blogPosts: Article[] = [
     date: "2026-02-05",
     author: "Moveability Team",
     image: wheelchairTravelImg,
+    category: "Tips",
     body: [
       "Traveling to Greece with a wheelchair doesn't have to be daunting. With a bit of planning and the right local knowledge, you can enjoy everything this incredible country has to offer. Here are our top five tips.",
       "First, book your mobility equipment in advance. Peak season (April–October) means high demand. Reserving your wheelchair, scooter, or rollator at least 48 hours ahead guarantees availability and gives us time to deliver to your accommodation.",
@@ -133,6 +141,7 @@ export const blogPosts: Article[] = [
     date: "2026-02-18",
     author: "Moveability Team",
     image: packingImg,
+    category: "Tips",
     body: [
       "Packing for an accessible trip to Athens requires a few extra considerations beyond the usual sunscreen and camera. Here's what our team recommends based on years of helping travelers navigate the city.",
       "Sun protection is essential — Athens gets very hot in summer. Pack a wide-brimmed hat, high-SPF sunscreen, and a reusable water bottle. If you're using a wheelchair or scooter, consider a clip-on umbrella for shade during long outdoor explorations.",
@@ -148,6 +157,7 @@ export const blogPosts: Article[] = [
     date: "2026-03-02",
     author: "Moveability Team",
     image: athensAccessibleImg,
+    category: "Athens",
     body: [
       "Athens has historically been a challenging city for visitors with mobility needs. Steep hills, ancient cobblestone streets, and older infrastructure created real barriers. But over the past decade, the city has made remarkable progress.",
       "The installation of an elevator at the Acropolis was a landmark moment — literally and figuratively. For the first time, wheelchair users could independently access one of the world's most important archaeological sites. The adjacent Acropolis Museum was built from the ground up with universal design principles.",
