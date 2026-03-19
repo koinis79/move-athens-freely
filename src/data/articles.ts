@@ -20,6 +20,8 @@ export interface Article {
   body: string[];
   category: string;
   takeaways?: string[];
+  /** Raw markdown — rendered instead of body[] when present */
+  content?: string;
 }
 
 /* ── Accessible Athens guides ───────────────────────────── */
@@ -32,12 +34,51 @@ export const guides: Article[] = [
     date: "2026-01-15",
     image: acropolisImg,
     category: "Attractions",
-    body: [
-      "The Acropolis of Athens has undergone significant accessibility improvements in recent years. A cement pathway and an elevator now provide step-free access from the base to the summit, allowing wheelchair users and those with limited mobility to reach the Parthenon plateau.",
-      "The elevator is located on the north slope and operates during regular visiting hours. It can accommodate standard manual and power wheelchairs. Staff are available to assist, and we recommend arriving early to avoid peak crowds, especially between 10:00 and 14:00 during summer months.",
-      "The pathways on top are mostly smooth stone, though some areas can be uneven. A companion is recommended for power wheelchair users due to occasional inclines. The Acropolis Museum, located nearby, is fully wheelchair accessible with ramps, elevators, and accessible restrooms on every floor.",
-      "We recommend renting a lightweight manual wheelchair or a compact mobility scooter for your Acropolis visit. Our team can advise on the best equipment based on your specific needs — just reach out when booking.",
+    takeaways: [
+      "Use the elevator at the North Slope entrance — it's free and fits wheelchairs and scooters",
+      "Arrive before 10am to avoid crowds on the accessible concrete pathways",
+      "The original marble surfaces are uneven — stick to the modern paved routes",
     ],
+    body: [],
+    content: `
+## Getting There: The Accessible Entrance
+
+Forget the main tourist entrance with its steep, marble steps. Head to the **North Slope entrance** near the Acropolis Museum instead.
+
+- **Dedicated pathway**: A smooth, paved route leads directly to the elevator
+- **Glass elevator**: Free to use, fits standard wheelchairs and most mobility scooters
+- **Operating hours**: Same as the site — opens 8am in summer, 8:30am in winter
+
+## Navigating the Top
+
+Once you're up, the Greek Ministry of Culture has installed **wide concrete pathways** that loop around the major monuments.
+
+### What's Accessible
+
+- **The Parthenon**: Full loop around the exterior on paved paths
+- **The Erechtheion**: Accessible viewing area with the famous Caryatid porch
+- **The Propylaea**: Partial access to the monumental gateway
+
+### What to Avoid
+
+- **Original marble surfaces**: Extremely uneven and slippery — do not leave the concrete paths
+- **The south slope**: Steeper grades, better suited for walking visitors
+
+## Recommended Equipment
+
+Standard small-wheeled manual wheelchairs will struggle here. We recommend:
+
+1. **4-Wheel Mobility Scooter**: Best stability over gaps in the ancient paving
+2. **Heavy-duty wheelchair**: Larger wheels handle the terrain better
+3. **Power-assist attachment**: If using a manual chair, a front-wheel motor helps with inclines
+
+## Practical Tips
+
+- **Tickets**: Free entry for visitors with disabilities + one companion
+- **Restrooms**: Accessible facilities near the elevator entrance
+- **Water**: Bring your own — the cafe at the top has steps
+- **Best time**: Early morning or late afternoon for cooler temperatures and fewer crowds
+`,
   },
   {
     slug: "museums",
@@ -47,12 +88,54 @@ export const guides: Article[] = [
     date: "2026-01-28",
     image: museumsImg,
     category: "Attractions",
-    body: [
-      "Athens is home to some of the world's greatest museums, and many have made impressive strides in accessibility. Whether you're interested in ancient artifacts, modern art, or Greek history, there's an accessible museum experience waiting for you.",
-      "The Acropolis Museum is the gold standard — fully step-free with elevators, wide corridors, accessible restrooms, and even tactile exhibits for visually impaired visitors. The National Archaeological Museum has ramp access and an elevator covering all floors, though some galleries have narrower passages.",
-      "The Benaki Museum of Greek Culture offers step-free access to most floors and has an accessible entrance on the side of the building. The Museum of Cycladic Art is similarly well-equipped, with a modern elevator and spacious galleries perfect for wheelchair navigation.",
-      "We suggest visiting during weekday mornings for a quieter, more comfortable experience. If you need a wheelchair or scooter for your museum day, we deliver directly to your hotel so you're ready to go.",
+    takeaways: [
+      "The Acropolis Museum is fully step-free with tactile exhibits and wheelchair loans",
+      "Most major museums offer free entry for visitors with disabilities",
+      "Call ahead to confirm elevator access — some historic buildings have limitations",
     ],
+    body: [],
+    content: `
+## Acropolis Museum
+
+The **Acropolis Museum** is Athens' most accessible cultural venue, purpose-built in 2009 with universal design principles.
+
+- **Entrance**: Fully step-free from street level
+- **Elevators**: Glass lifts to all three floors
+- **Wheelchairs**: Free loan at the ticket desk
+- **Tactile exhibits**: Scale models you can touch on the ground floor
+- **Tickets**: Free for visitors with disabilities + one companion
+
+## National Archaeological Museum
+
+Greece's largest museum has made significant accessibility improvements:
+
+- **Main entrance**: Ramped access from the street
+- **Ground floor**: Fully accessible, includes the famous Mycenaean gold
+- **Upper floors**: Elevator access, though some galleries have narrow passages
+- **Wheelchairs**: Available at reception
+
+## Benaki Museum
+
+The main Benaki building on Vasilissis Sofias Avenue:
+
+- **Entrance**: Step-free via the side entrance (ask security)
+- **Elevator**: Serves all floors
+- **Café terrace**: Accessible with views of the National Garden
+
+## Museum of Cycladic Art
+
+A beautifully renovated neoclassical building:
+
+- **Entrance**: Ramped access on the side
+- **Elevators**: Modern lifts to all exhibition floors
+- **Note**: The glass walkway to the Stathatos Mansion annex is step-free
+
+## Tips for Museum Visits
+
+- **Book ahead**: Many museums offer priority entry for wheelchair users
+- **Timing**: Tuesday-Thursday mornings are quietest
+- **Ask staff**: Guards are generally helpful and can unlock accessible routes
+`,
   },
   {
     slug: "restaurants",
@@ -62,12 +145,55 @@ export const guides: Article[] = [
     date: "2026-02-10",
     image: restaurantsImg,
     category: "Dining",
-    body: [
-      "Plaka and Monastiraki are Athens' most charming and popular dining neighborhoods — but cobblestone streets and narrow alleys can be challenging for mobility equipment users. The good news is that many restaurants in these areas are making accessibility a priority.",
-      "Several restaurants on Adrianou Street (the main pedestrian thoroughfare) offer step-free entrances and spacious outdoor seating ideal for wheelchairs and scooters. Look for places with smooth patio areas rather than raised terraces.",
-      "In Monastiraki Square, many cafés and tavernas have ground-level entrances. The area around the Monastiraki metro station is relatively flat and navigable. For Plaka, stick to the lower streets closer to Ermou — the upper Plaka streets become steep and cobbled.",
-      "We maintain a growing list of verified accessible restaurants and are happy to share personalized recommendations based on your location and cuisine preferences. Just ask when you book your equipment!",
+    takeaways: [
+      "Plaka's pedestrian streets are mostly flat cobblestone — manageable with larger wheels",
+      "Rooftop restaurants rarely have elevators — call ahead to confirm",
+      "Monastiraki Square has several fully accessible tavernas with street-level entry",
     ],
+    body: [],
+    content: `
+## Plaka: The Historic Quarter
+
+Plaka's car-free streets are charming but challenging. Here's how to navigate:
+
+### Accessible Picks
+
+- **Scholarchio**: Ground-floor taverna on Tripodon Street, wide entrance, traditional Greek cuisine
+- **Café Avissinia**: In Monastiraki Square, step-free patio seating, great meze
+- **Yiasemi**: On Mnisikleous steps — but they have a **ground-level patio** section (confirm when booking)
+
+### Streets to Target
+
+- **Adrianou Street**: The main drag, relatively flat, most restaurants have outdoor seating
+- **Kydathineon Street**: Pedestrianized, gentle slope, several accessible patios
+
+### Streets to Avoid
+
+- **Mnisikleous Street**: Famous stepped street — beautiful but impossible for wheels
+- **Upper Plaka**: Steep inclines toward Anafiotika
+
+## Monastiraki Square
+
+The flattest, most accessible dining area in central Athens:
+
+- **Ground-level restaurants**: Multiple options around the square
+- **Accessible restrooms**: Available at the metro station
+- **Surface**: Smooth paving, easy for all mobility equipment
+
+## Rooftop Dining
+
+Many famous Acropolis-view rooftops **lack elevator access**. Exceptions:
+
+- **A for Athens**: Rooftop bar with elevator
+- **Hotel Grande Bretagne Roof Garden**: Fully accessible via hotel elevators
+- **360 Cocktail Bar**: Has a lift — call to confirm availability
+
+## Booking Tips
+
+- **Always call ahead**: Ask specifically about steps at the entrance
+- **Request ground floor**: Many restaurants have multiple levels
+- **Outdoor seating**: Often more accessible than navigating interior layouts
+`,
   },
   {
     slug: "beaches",
@@ -77,12 +203,53 @@ export const guides: Article[] = [
     date: "2026-02-20",
     image: beachesImg,
     category: "Outdoors",
-    body: [
-      "The Athenian Riviera stretches along the Saronic Gulf south of the city center, offering beautiful beaches that are increasingly wheelchair accessible. Several beaches now feature Seatrac systems — motorized ramps that allow wheelchair users to enter the sea independently.",
-      "Voula Beach (A' and B') is one of the best-equipped accessible beaches near Athens. It has paved pathways to the waterline, a Seatrac system, accessible changing rooms, and adapted shower facilities. The beach is easily reached by tram from Syntagma Square.",
-      "Alimos Beach and parts of Glyfada Beach also offer accessible facilities including ramps and adapted restrooms. In the summer months, many organized beaches along the coast provide beach wheelchairs available free of charge.",
-      "If you're planning a beach day, we can deliver a beach-friendly wheelchair or a compact scooter to your hotel the morning of your trip. The coastal tram line is fully accessible, making it easy to hop between beaches.",
+    takeaways: [
+      "Seatrac autonomous beach access systems are installed at several Athens-area beaches",
+      "Voula A' and Alimos beaches have accessible changing rooms and paved paths to the water",
+      "Visit in the morning — Seatrac systems can have queues on summer afternoons",
     ],
+    body: [],
+    content: `
+## What is Seatrac?
+
+Greece has installed **Seatrac systems** at beaches across the country — autonomous chair lifts that let wheelchair users enter the sea independently.
+
+- **How it works**: Transfer to the Seatrac chair, use the remote control to descend into the water
+- **Cost**: Free to use
+- **Availability**: Typically 9am-7pm in summer season (June-September)
+
+## Best Accessible Beaches Near Athens
+
+### Voula A' Beach (Organized)
+
+- **Distance**: 18km from city center
+- **Seatrac**: Yes
+- **Facilities**: Accessible changing rooms, showers, paved paths, sunbed service
+- **Entry fee**: Small fee for organized section
+- **How to get there**: Tram to Voula + short taxi, or accessible taxi direct
+
+### Alimos Beach
+
+- **Distance**: 10km from city center
+- **Seatrac**: Yes
+- **Facilities**: Accessible parking, paved boardwalk, cafeteria
+- **Entry fee**: Free
+- **How to get there**: Bus A2 or B2 from Syntagma (low-floor buses)
+
+### Kavouri Beach
+
+- **Distance**: 20km from city center
+- **Seatrac**: At the organized section
+- **Facilities**: Quieter than Voula, accessible taverna nearby
+- **Entry fee**: Free beach + paid organized section
+
+## Beach Equipment Tips
+
+- **Leave power chairs behind**: Sand and saltwater don't mix with electronics
+- **Manual beach wheelchair**: Some beaches have these for loan — call ahead
+- **Bring a companion**: For transfers and navigating softer sand
+- **Timing**: Morning is best — fewer crowds, calmer seas, Seatrac availability
+`,
   },
   {
     slug: "public-transport",
@@ -92,12 +259,56 @@ export const guides: Article[] = [
     date: "2026-03-01",
     image: publicTransportImg,
     category: "Transport",
-    body: [
-      "Athens' public transport system has come a long way in terms of accessibility. The metro, in particular, is one of the most wheelchair-friendly in Europe — all three lines and every station are fully step-free with elevators, tactile paving, and audio announcements.",
-      "The tram connecting Syntagma to the southern coast (Voula, Glyfada) is also fully accessible. All tram stops have level boarding, and there's designated wheelchair space inside each car. The tram is a great option for reaching the Athenian Riviera beaches.",
-      "City buses are more variable. Newer buses (particularly on major routes) are low-floor with ramps, but older vehicles on some routes may not be accessible. The Athens Urban Transport Organisation (OASA) website lists which routes use accessible buses.",
-      "Our top tip: use the metro and tram as your primary transport. They're reliable, air-conditioned, and consistently accessible. If you need to reach somewhere off the rail network, we recommend accessible taxi services — ask us for recommendations when you book.",
+    takeaways: [
+      "All metro stations have elevators — use the OASA app to check real-time lift status",
+      "Request the ramp when boarding buses — drivers deploy it from the middle door",
+      "Taxis are not required to be accessible — book an accessible van through Beat or Welcome",
     ],
+    body: [],
+    content: `
+## Athens Metro
+
+The Athens Metro is **one of the most accessible in Europe** — built for the 2004 Olympics with universal design.
+
+### Accessibility Features
+
+- **Elevators**: Every station has at least one lift from street to platform
+- **Gap fillers**: Platform-to-train gaps are minimal
+- **Audio announcements**: Station names announced in Greek and English
+- **Tactile paths**: Guide strips throughout stations
+
+### Tips
+
+- **Check lift status**: The OASA app shows real-time elevator outages
+- **Avoid rush hour**: 8-9am and 5-7pm are extremely crowded
+- **Best lines**: Lines 2 (red) and 3 (blue) are newest and most spacious
+
+## Buses
+
+Athens buses have **low-floor accessible vehicles** on major routes, but coverage is inconsistent.
+
+- **Request the ramp**: Press the wheelchair button or call to the driver — ramp deploys from middle door
+- **Routes to trust**: Airport Express X95, coastal routes along the tram line
+- **Routes to avoid**: Older routes to suburbs often have step-entry buses
+
+## Trams
+
+The Athens Tram runs from Syntagma to the coast (Voula) and is **fully accessible**:
+
+- **Level boarding**: Platforms match tram floor height
+- **Wheelchair space**: Designated areas in each carriage
+- **Useful for**: Reaching southern beaches and the Flisvos Marina
+
+## Taxis
+
+Standard Athens taxis are **not accessible** — they're small sedans.
+
+### Accessible Alternatives
+
+- **Welcome Pickups**: Pre-book accessible vans, fixed prices, meets you at the airport
+- **Beat app**: Has a "wheelchair accessible" filter (limited availability)
+- **Hotel concierge**: Can often arrange accessible transport with notice
+`,
   },
   {
     slug: "airport-transfer",
@@ -107,12 +318,66 @@ export const guides: Article[] = [
     date: "2026-03-05",
     image: airportTransferImg,
     category: "Transport",
-    body: [
-      "Athens International Airport (Eleftherios Venizelos) is fully wheelchair accessible. From the moment you land, you'll find elevators, accessible restrooms, and assistance desks throughout the terminal. Airlines provide wheelchair assistance through the airport — request this when booking your flight.",
-      "For getting to your hotel, you have several accessible options. The metro Line 3 runs directly from the airport to the city center (Syntagma, Monastiraki) in about 40 minutes, and all stations are fully step-free.",
-      "If you prefer a private transfer, several Athens taxi companies operate wheelchair-accessible vehicles (WAVs). We can recommend trusted partners who offer reliable airport-to-hotel transfers with vehicles that accommodate wheelchairs and scooters.",
-      "We also offer direct airport delivery — we can meet you at arrivals with your rental equipment so you're set from the moment you land. Just select 'Athens Airport' as your delivery zone when booking. The delivery fee is €30 and includes equipment demonstration on the spot.",
+    takeaways: [
+      "Athens Airport is fully accessible — request assistance at check-in or via your airline 48h ahead",
+      "The metro to the city center is step-free but takes 40 minutes and has no restroom",
+      "Pre-book an accessible van for the most comfortable, direct transfer to your hotel",
     ],
+    body: [],
+    content: `
+## Athens International Airport (ATH)
+
+Eleftherios Venizelos Airport is **modern and fully accessible**, built in 2001.
+
+### At the Airport
+
+- **Assistance**: Request PRM (Persons with Reduced Mobility) service through your airline at least 48 hours before travel
+- **Wheelchairs**: Available at arrivals — staff will meet you at the aircraft door
+- **Accessible restrooms**: Throughout all terminals
+- **Elevators**: Connect all levels of the terminal
+
+## Transfer Options to Athens
+
+### Option 1: Pre-Booked Accessible Van (Recommended)
+
+The most comfortable option, especially after a long flight:
+
+- **Price**: €50-70 to city center hotels
+- **Providers**: Welcome Pickups, Moveability partner transfers
+- **Benefits**: Door-to-door, space for equipment, fixed price, driver meets you at arrivals
+
+### Option 2: Metro (Line 3)
+
+Direct train to Syntagma Square in the city center:
+
+- **Price**: €9 one-way
+- **Duration**: 40 minutes
+- **Accessibility**: Elevators at all stations, level boarding, wheelchair spaces
+- **Downside**: No restroom on train, crowded with luggage at peak times
+
+### Option 3: Bus X95
+
+Express bus to Syntagma Square:
+
+- **Price**: €6 one-way
+- **Duration**: 60-90 minutes depending on traffic
+- **Accessibility**: Low-floor buses with ramp, but luggage space is limited
+- **Runs**: 24 hours
+
+## Arriving with Your Own Equipment
+
+If you're bringing your own wheelchair or scooter:
+
+- **Battery rules**: Lithium batteries must be under 300Wh (check airline policy)
+- **Gate-check**: Request gate-check so your chair arrives at the aircraft door
+- **Damage claims**: Inspect equipment immediately and report any damage before leaving the airport
+
+## Tips
+
+- **Book assistance early**: Airlines require 48-hour notice for PRM services
+- **Charge batteries**: Top up before you fly — you'll need mobility at arrival
+- **Have hotel address ready**: Written in Greek helps taxi/van drivers
+`,
   },
 ];
 
