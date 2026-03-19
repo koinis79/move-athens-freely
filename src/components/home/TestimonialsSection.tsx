@@ -51,7 +51,7 @@ const TestimonialsSection = () => {
   const { t } = useTranslation();
 
   return (
-    <section className="bg-background py-16 md:py-20">
+    <section className="bg-primary/5 py-16 md:py-20">
       <div className="container">
         <h2 className="text-center text-3xl font-heading font-bold text-foreground md:text-4xl">
           {t("testimonials.title")}
