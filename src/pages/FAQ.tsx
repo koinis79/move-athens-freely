@@ -56,7 +56,7 @@ const sections = [
       },
       {
         q: "How does pickup work?",
-        a: "On your last rental day, we collect the equipment from your accommodation. You can leave it at reception if you're heading out early. We coordinate the details with you in advance.",
+        a: "On your last rental day, we collect the equipment from your accommodation. You can leave it at reception if you’re heading out early. We coordinate the details with you in advance.",
       },
       {
         q: "What are your delivery hours?",
@@ -73,11 +73,11 @@ const sections = [
       },
       {
         q: "What if the equipment breaks during my trip?",
-        a: "Contact us immediately via WhatsApp (+30 210 95 11 750) or phone. We'll arrange a free replacement within hours — no extra charge.",
+        a: "Contact us immediately via WhatsApp (+30 210 95 11 750) or phone. We’ll arrange a free replacement within hours — no extra charge.",
       },
       {
         q: "Can I try the equipment before renting?",
-        a: "Our team demonstrates the equipment when delivering. If it's not the right fit, we'll swap it for a better option.",
+        a: "Our team demonstrates the equipment when delivering. If it’s not the right fit, we’ll swap it for a better option.",
       },
       {
         q: "Do you offer insurance?",
@@ -94,7 +94,7 @@ const sections = [
       },
       {
         q: "Can you help me plan an accessible trip?",
-        a: "We'd love to. Contact us with your travel dates and interests and we'll share personalized recommendations for accessible attractions, restaurants, and routes in Athens.",
+        a: "We’d love to. Contact us with your travel dates and interests and we’ll share personalized recommendations for accessible attractions, restaurants, and routes in Athens.",
       },
     ],
   },
@@ -114,28 +114,34 @@ const FAQ = () => (
       </div>
     </section>
 
-    {/* FAQ sections */}
+    {/* FAQ accordion — single global instance so only one answer is open at a time */}
     <section className="bg-background py-16 md:py-24">
-      <div className="container mx-auto max-w-3xl space-y-12">
-        {sections.map((section, si) => (
-          <div key={si}>
-            <h2 className="mb-4 text-xl font-heading font-bold text-foreground md:text-2xl">
-              {section.title}
-            </h2>
-            <Accordion type="single" collapsible>
-              {section.items.map((faq, fi) => (
-                <AccordionItem key={fi} value={`s${si}-q${fi}`}>
-                  <AccordionTrigger className="text-left text-base font-medium text-foreground">
-                    {faq.q}
-                  </AccordionTrigger>
-                  <AccordionContent className="text-muted-foreground">
-                    {faq.a}
-                  </AccordionContent>
-                </AccordionItem>
-              ))}
-            </Accordion>
-          </div>
-        ))}
+      <div className="container mx-auto max-w-3xl">
+        <Accordion type="single" collapsible className="space-y-10">
+          {sections.map((section, si) => (
+            <div key={si}>
+              <h2 className="mb-2 text-xl font-heading font-bold text-foreground md:text-2xl">
+                {section.title}
+              </h2>
+              <div className="rounded-xl border bg-card">
+                {section.items.map((faq, fi) => (
+                  <AccordionItem
+                    key={fi}
+                    value={`s${si}-q${fi}`}
+                    className="px-5 last:border-b-0"
+                  >
+                    <AccordionTrigger className="text-left text-base font-medium text-foreground hover:no-underline hover:text-primary">
+                      {faq.q}
+                    </AccordionTrigger>
+                    <AccordionContent className="text-muted-foreground leading-relaxed">
+                      {faq.a}
+                    </AccordionContent>
+                  </AccordionItem>
+                ))}
+              </div>
+            </div>
+          ))}
+        </Accordion>
       </div>
     </section>
 
