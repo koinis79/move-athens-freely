@@ -196,21 +196,6 @@ const BookingPanel = ({ item }: Props) => {
           </Popover>
         </div>
 
-        {/* Active tier indicator */}
-        {numDays > 0 && (
-          <p className="text-xs text-primary font-medium">
-            {numDays} day{numDays !== 1 ? "s" : ""} selected →{" "}
-            {numDays <= 3
-              ? "1–3 day rate"
-              : numDays <= 7
-              ? "4–7 day rate"
-              : numDays <= 14
-              ? "8–14 day rate"
-              : "15–30 day rate"}{" "}
-            applies
-          </p>
-        )}
-
         {/* Quantity */}
         <div className="space-y-1.5">
           <label className="text-sm font-medium text-foreground">
@@ -261,26 +246,39 @@ const BookingPanel = ({ item }: Props) => {
           </Select>
         </div>
 
-        {/* Price breakdown */}
+        {/* Price summary — shown as soon as dates are picked */}
         {numDays > 0 && (
-          <div className="space-y-2 rounded-lg bg-muted/50 p-4 text-sm">
-            <div className="flex justify-between">
-              <span className="text-muted-foreground">
-                Equipment{qty > 1 ? ` × ${qty}` : ""}
+          <div className="rounded-lg border border-primary/20 bg-primary/5 p-4 text-sm space-y-2.5">
+            {/* Days + tier */}
+            <div className="flex items-center justify-between">
+              <span className="font-medium text-foreground">
+                {numDays} day{numDays !== 1 ? "s" : ""}
+                {qty > 1 && <span className="text-muted-foreground font-normal"> × {qty}</span>}
               </span>
-              <span className="text-foreground">€{subtotal}</span>
-            </div>
-            {zoneId && (
-              <div className="flex justify-between">
-                <span className="text-muted-foreground">Delivery fee</span>
-                <span className="text-foreground">
-                  {deliveryFee === 0 ? "Free" : `€${deliveryFee}`}
+              <div className="text-right">
+                <span className="font-semibold text-foreground">€{subtotal}</span>
+                <span className="ml-2 text-xs text-primary font-medium">
+                  ({numDays <= 3 ? "1–3" : numDays <= 7 ? "4–7" : numDays <= 14 ? "8–14" : "15–30"} day rate)
                 </span>
               </div>
-            )}
-            <div className="flex justify-between border-t pt-2">
+            </div>
+
+            {/* Delivery fee */}
+            <div className="flex items-center justify-between">
+              <span className="text-muted-foreground">Delivery fee</span>
+              {zoneId ? (
+                <span className="font-medium text-foreground">
+                  {deliveryFee === 0 ? "Free" : `€${deliveryFee}`}
+                </span>
+              ) : (
+                <span className="text-xs italic text-muted-foreground">Select delivery zone</span>
+              )}
+            </div>
+
+            {/* Total */}
+            <div className="flex items-center justify-between border-t border-primary/20 pt-2.5">
               <span className="font-semibold text-foreground">Total</span>
-              <span className="text-xl font-bold text-primary">€{total}</span>
+              <span className="text-2xl font-bold text-primary">€{total}</span>
             </div>
           </div>
         )}
