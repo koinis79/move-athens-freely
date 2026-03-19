@@ -1,6 +1,7 @@
 import { useState, useEffect, useMemo } from "react";
 import { Link } from "react-router-dom";
 import { format, differenceInDays } from "date-fns";
+import type { DateRange } from "react-day-picker";
 import { CalendarIcon, Minus, Plus, ShieldCheck, ShoppingCart } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
@@ -43,15 +44,18 @@ const TIER_LABELS = [
 const BookingPanel = ({ item }: Props) => {
   const { addItem } = useCart();
   const { toast } = useToast();
-  const [startDate, setStartDate] = useState<Date>();
-  const [endDate, setEndDate] = useState<Date>();
+  const [dateRange, setDateRange] = useState<DateRange | undefined>();
   const [qty, setQty] = useState(1);
   const [zoneId, setZoneId] = useState<string>();
   const [zones, setZones] = useState<DeliveryZone[]>([]);
   const [added, setAdded] = useState(false);
+  const [calOpen, setCalOpen] = useState(false);
 
   const today = new Date();
   today.setHours(0, 0, 0, 0);
+
+  const startDate = dateRange?.from;
+  const endDate = dateRange?.to;
 
   // Fetch delivery zones from Supabase
   useEffect(() => {
@@ -80,12 +84,14 @@ const BookingPanel = ({ item }: Props) => {
   const deliveryFee = selectedZone?.delivery_fee ?? 0;
   const total = subtotal + deliveryFee;
 
-  // Savings % vs buying all days at tier1 rate
-  const savingsLabel = (tierPrice: number, tier: keyof EquipmentItem) => {
-    const base = item.priceTier1;
-    if (tier === "priceTier1" || tierPrice <= base) return null;
-    const saving = Math.round(((base - tierPrice / 7) / base) * 100);
-    return saving > 0 ? `Save ~${saving}%` : null;
+  const dateRangeLabel = () => {
+    if (startDate && endDate) {
+      return `${format(startDate, "MMM d")} – ${format(endDate, "MMM d")}`;
+    }
+    if (startDate) {
+      return `${format(startDate, "MMM d")} – ...`;
+    }
+    return "Select dates";
   };
 
   const handleAddToCart = () => {
@@ -154,67 +160,40 @@ const BookingPanel = ({ item }: Props) => {
           Book this equipment
         </h3>
 
-        {/* Dates */}
-        <div className="grid grid-cols-2 gap-3">
-          <div className="space-y-1.5">
-            <label className="text-sm font-medium text-foreground">
-              Start Date
-            </label>
-            <Popover>
-              <PopoverTrigger asChild>
-                <Button
-                  variant="outline"
-                  className={cn(
-                    "w-full justify-start text-left font-normal",
-                    !startDate && "text-muted-foreground"
-                  )}
-                >
-                  <CalendarIcon className="mr-2 h-4 w-4" />
-                  {startDate ? format(startDate, "dd MMM yyyy") : "Select"}
-                </Button>
-              </PopoverTrigger>
-              <PopoverContent className="w-auto p-0" align="start">
-                <Calendar
-                  mode="single"
-                  selected={startDate}
-                  onSelect={setStartDate}
-                  disabled={(d) => d < today}
-                  initialFocus
-                  className="p-3 pointer-events-auto"
-                />
-              </PopoverContent>
-            </Popover>
-          </div>
-
-          <div className="space-y-1.5">
-            <label className="text-sm font-medium text-foreground">
-              End Date
-            </label>
-            <Popover>
-              <PopoverTrigger asChild>
-                <Button
-                  variant="outline"
-                  className={cn(
-                    "w-full justify-start text-left font-normal",
-                    !endDate && "text-muted-foreground"
-                  )}
-                >
-                  <CalendarIcon className="mr-2 h-4 w-4" />
-                  {endDate ? format(endDate, "dd MMM yyyy") : "Select"}
-                </Button>
-              </PopoverTrigger>
-              <PopoverContent className="w-auto p-0" align="start">
-                <Calendar
-                  mode="single"
-                  selected={endDate}
-                  onSelect={setEndDate}
-                  disabled={(d) => d < (startDate ?? today)}
-                  initialFocus
-                  className="p-3 pointer-events-auto"
-                />
-              </PopoverContent>
-            </Popover>
-          </div>
+        {/* Date range picker */}
+        <div className="space-y-1.5">
+          <label className="text-sm font-medium text-foreground">
+            Rental Dates
+          </label>
+          <Popover open={calOpen} onOpenChange={setCalOpen}>
+            <PopoverTrigger asChild>
+              <Button
+                variant="outline"
+                className={cn(
+                  "w-full justify-start text-left font-normal",
+                  !startDate && "text-muted-foreground"
+                )}
+              >
+                <CalendarIcon className="mr-2 h-4 w-4 shrink-0" />
+                {dateRangeLabel()}
+              </Button>
+            </PopoverTrigger>
+            <PopoverContent className="w-auto p-0" align="start">
+              <Calendar
+                mode="range"
+                selected={dateRange}
+                onSelect={(range) => {
+                  setDateRange(range);
+                  // Close popover once both dates are chosen
+                  if (range?.from && range?.to) setCalOpen(false);
+                }}
+                disabled={(d) => d < today}
+                numberOfMonths={1}
+                initialFocus
+                className="p-3 pointer-events-auto"
+              />
+            </PopoverContent>
+          </Popover>
         </div>
 
         {/* Active tier indicator */}
