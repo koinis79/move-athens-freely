@@ -2,7 +2,11 @@ import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Accessibility, MapPin, Heart } from "lucide-react";
-import aboutHeroImg from "@/assets/about-hero.png";
+
+const STORY_IMAGE = {
+  src: "https://lmgpuqgwkiapgpdsxvmb.supabase.co/storage/v1/object/public/assets/manual_wheelchair_plaka_1773960710836.png",
+  alt: "Woman in wheelchair enjoying coffee in Plaka with Acropolis view",
+};
 
 const values = [
   {
@@ -61,14 +65,13 @@ const About = () => (
           </p>
         </div>
 
-        <div className="overflow-hidden rounded-2xl border border-border bg-muted/50">
-          <div className="flex aspect-[4/3] items-center justify-center text-sm text-muted-foreground">
-            <img
-              src={aboutHeroImg}
-              alt="Mobility scooter on a stone pathway with the Acropolis and Parthenon in the background"
-              className="h-full w-full object-cover"
-            />
-          </div>
+        <div className="overflow-hidden rounded-2xl border border-border shadow-md">
+          <img
+            src={STORY_IMAGE.src}
+            alt={STORY_IMAGE.alt}
+            className="h-full w-full object-cover"
+            loading="eager"
+          />
         </div>
       </div>
     </section>
