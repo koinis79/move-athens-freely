@@ -19,6 +19,7 @@ export interface Article {
   image: string;
   body: string[];
   category: string;
+  takeaways?: string[];
 }
 
 /* ── Accessible Athens guides ───────────────────────────── */
