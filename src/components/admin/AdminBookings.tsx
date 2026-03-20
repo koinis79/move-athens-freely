@@ -17,7 +17,7 @@ import {
 import {
   Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
 } from "@/components/ui/select";
-import { MoreHorizontal, Search } from "lucide-react";
+import { MoreHorizontal, Search, Star } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { cn } from "@/lib/utils";
 import { useToast } from "@/hooks/use-toast";
@@ -46,6 +46,7 @@ interface Booking {
   payment_status: string;
   status: string;
   internal_notes: string | null;
+  review_requested_at: string | null;
   delivery_zones: { name_en: string; delivery_fee: number } | null;
   booking_items: {
     quantity: number;
@@ -66,6 +67,7 @@ const AdminBookings = () => {
   const [editNotes, setEditNotes] = useState("");
   const [saving, setSaving] = useState(false);
   const [cancelTarget, setCancelTarget] = useState<Booking | null>(null);
+  const [reviewSending, setReviewSending] = useState<Set<string>>(new Set());
 
   const fetchBookings = async () => {
     const { data } = await supabase
@@ -73,7 +75,7 @@ const AdminBookings = () => {
       .select(`
         id, booking_number, customer_name, customer_email, customer_phone,
         delivery_address, delivery_notes, rental_start, rental_end,
-        total_amount, payment_status, status, internal_notes,
+        total_amount, payment_status, status, internal_notes, review_requested_at,
         delivery_zones ( name_en, delivery_fee ),
         booking_items ( quantity, num_days, subtotal, equipment ( name_en ) )
       `)
@@ -118,6 +120,48 @@ const AdminBookings = () => {
     setBookings((prev) =>
       prev.map((b) => (b.id === bookingId ? { ...b, status: newStatus } : b))
     );
+  };
+
+  const sendReviewRequest = async (booking: Booking) => {
+    setReviewSending((prev) => new Set(prev).add(booking.id));
+    try {
+      const { data: { session } } = await supabase.auth.getSession();
+      const res = await fetch(
+        `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/send-review-request`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            "apikey": import.meta.env.VITE_SUPABASE_ANON_KEY,
+            ...(session?.access_token ? { Authorization: `Bearer ${session.access_token}` } : {}),
+          },
+          body: JSON.stringify({ booking_id: booking.id }),
+        }
+      );
+      if (res.status === 409) {
+        toast({ title: "Already sent", description: "A review request was already sent for this booking." });
+        return;
+      }
+      if (!res.ok) {
+        const err = await res.json().catch(() => ({}));
+        throw new Error(err.error ?? "Unknown error");
+      }
+      toast({ title: "Review request sent", description: `Email sent to ${booking.customer_email}` });
+      setBookings((prev) =>
+        prev.map((b) =>
+          b.id === booking.id ? { ...b, review_requested_at: new Date().toISOString() } : b
+        )
+      );
+    } catch (err: unknown) {
+      const message = err instanceof Error ? err.message : "Failed to send review request";
+      toast({ title: "Error", description: message, variant: "destructive" });
+    } finally {
+      setReviewSending((prev) => {
+        const next = new Set(prev);
+        next.delete(booking.id);
+        return next;
+      });
+    }
   };
 
   const handleSave = async () => {
@@ -238,6 +282,21 @@ const AdminBookings = () => {
                           <DropdownMenuItem onClick={() => updateBookingStatus(b.id, "completed")}>
                             Mark as Completed
                           </DropdownMenuItem>
+                          <DropdownMenuSeparator />
+                          {(b.status === "completed" || b.status === "delivered") && (
+                            <DropdownMenuItem
+                              disabled={!!b.review_requested_at || reviewSending.has(b.id)}
+                              onClick={() => sendReviewRequest(b)}
+                              className="gap-2"
+                            >
+                              <Star className="h-3.5 w-3.5" />
+                              {b.review_requested_at
+                                ? "Review Sent ✓"
+                                : reviewSending.has(b.id)
+                                ? "Sending…"
+                                : "Request Review"}
+                            </DropdownMenuItem>
+                          )}
                           <DropdownMenuSeparator />
                           <DropdownMenuItem
                             className="text-destructive focus:text-destructive"
