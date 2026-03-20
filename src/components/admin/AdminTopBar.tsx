@@ -36,7 +36,7 @@ const AdminTopBar = ({ onToggleSidebar, onOpenCommand }: AdminTopBarProps) => {
           <Menu className="h-5 w-5 text-foreground" />
         </button>
         <span className="text-lg font-semibold text-foreground tracking-tight">
-          MoveAbility <span className="font-normal text-accent">Admin</span>
+          Movability <span className="font-normal text-accent">Admin</span>
         </span>
       </div>
 
