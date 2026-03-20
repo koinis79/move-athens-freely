@@ -17,10 +17,16 @@ import {
 import {
   Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
 } from "@/components/ui/select";
-import { MoreHorizontal, Search, Star } from "lucide-react";
+import { MoreHorizontal, Search, Star, MessageCircle } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { cn } from "@/lib/utils";
 import { useToast } from "@/hooks/use-toast";
+
+
+/** Convert any phone string to a wa.me number (digits only, no leading +) */
+function toWhatsAppNumber(phone: string): string {
+  return phone.replace(/[^\d]/g, "");
+}
 
 const STATUSES = ["pending", "confirmed", "preparing", "out_for_delivery", "delivered", "active", "completed", "cancelled"];
 
@@ -367,7 +373,20 @@ const AdminBookings = () => {
                 </div>
                 <div>
                   <p className="text-muted-foreground">Phone</p>
-                  <p className="font-medium">{selected.customer_phone ?? "—"}</p>
+                  <div className="flex items-center gap-2">
+                    <p className="font-medium">{selected.customer_phone ?? "—"}</p>
+                    {selected.customer_phone && (
+                      <a
+                        href={`https://wa.me/${toWhatsAppNumber(selected.customer_phone)}`}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        title="Chat on WhatsApp"
+                        className="inline-flex items-center justify-center h-6 w-6 rounded-full bg-[#25D366] text-white hover:bg-[#1ebe5d] transition-colors"
+                      >
+                        <MessageCircle className="h-3.5 w-3.5" />
+                      </a>
+                    )}
+                  </div>
                 </div>
                 <div>
                   <p className="text-muted-foreground">Payment</p>
