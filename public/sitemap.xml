@@ -4,7 +4,7 @@
   <!-- Homepage -->
   <url>
     <loc>https://movability.gr/</loc>
-    <lastmod>2026-03-18</lastmod>
+    <lastmod>2026-03-20</lastmod>
     <changefreq>weekly</changefreq>
     <priority>1.0</priority>
   </url>
@@ -12,31 +12,31 @@
   <!-- Equipment pages -->
   <url>
     <loc>https://movability.gr/equipment</loc>
-    <lastmod>2026-03-18</lastmod>
+    <lastmod>2026-03-20</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
     <loc>https://movability.gr/equipment/wheelchairs</loc>
-    <lastmod>2026-03-18</lastmod>
+    <lastmod>2026-03-20</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
     <loc>https://movability.gr/equipment/power-wheelchairs</loc>
-    <lastmod>2026-03-18</lastmod>
+    <lastmod>2026-03-20</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
     <loc>https://movability.gr/equipment/mobility-scooters</loc>
-    <lastmod>2026-03-18</lastmod>
+    <lastmod>2026-03-20</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
-    <loc>https://movability.gr/equipment/rollators</loc>
-    <lastmod>2026-03-18</lastmod>
+    <loc>https://movability.gr/equipment/walking-aids</loc>
+    <lastmod>2026-03-20</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
   </url>
@@ -44,55 +44,55 @@
   <!-- Other pages -->
   <url>
     <loc>https://movability.gr/how-it-works</loc>
-    <lastmod>2026-03-18</lastmod>
+    <lastmod>2026-03-20</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.6</priority>
   </url>
   <url>
     <loc>https://movability.gr/accessible-athens</loc>
-    <lastmod>2026-03-18</lastmod>
+    <lastmod>2026-03-20</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.6</priority>
   </url>
   <url>
     <loc>https://movability.gr/about</loc>
-    <lastmod>2026-03-18</lastmod>
+    <lastmod>2026-03-20</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.6</priority>
   </url>
   <url>
     <loc>https://movability.gr/contact</loc>
-    <lastmod>2026-03-18</lastmod>
+    <lastmod>2026-03-20</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.6</priority>
   </url>
   <url>
     <loc>https://movability.gr/faq</loc>
-    <lastmod>2026-03-18</lastmod>
+    <lastmod>2026-03-20</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.6</priority>
   </url>
   <url>
     <loc>https://movability.gr/blog</loc>
-    <lastmod>2026-03-18</lastmod>
+    <lastmod>2026-03-20</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.6</priority>
   </url>
   <url>
     <loc>https://movability.gr/cart</loc>
-    <lastmod>2026-03-18</lastmod>
+    <lastmod>2026-03-20</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.6</priority>
   </url>
   <url>
     <loc>https://movability.gr/privacy-policy</loc>
-    <lastmod>2026-03-18</lastmod>
+    <lastmod>2026-03-20</lastmod>
     <changefreq>yearly</changefreq>
     <priority>0.6</priority>
   </url>
   <url>
     <loc>https://movability.gr/terms-of-service</loc>
-    <lastmod>2026-03-18</lastmod>
+    <lastmod>2026-03-20</lastmod>
     <changefreq>yearly</changefreq>
     <priority>0.6</priority>
   </url>
