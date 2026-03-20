@@ -30,15 +30,15 @@ const Footer = () => {
         <div className="grid grid-cols-1 gap-10 sm:grid-cols-2 lg:grid-cols-4">
           {/* Brand */}
           <div className="space-y-4">
-            <Link to="/" aria-label="Moveability — Home">
+            <Link to="/" aria-label="Movability — Home">
                 <img
                   src="https://lmgpuqgwkiapgpdsxvmb.supabase.co/storage/v1/object/public/assets/logo-light.png"
-                  alt="Moveability"
+                  alt="Movability"
                   className="h-14 w-auto block dark:hidden"
                 />
                 <img
                   src="https://lmgpuqgwkiapgpdsxvmb.supabase.co/storage/v1/object/public/assets/logo-dark.png"
-                  alt="Moveability"
+                  alt="Movability"
                   className="h-14 w-auto hidden dark:block"
                 />
             </Link>
@@ -108,7 +108,7 @@ const Footer = () => {
 
         {/* Bottom bar */}
         <div className="mt-12 pt-8 flex flex-col sm:flex-row items-center justify-between gap-4 text-xs" style={{ borderTop: `1px solid ${footerFg10}`, color: footerFg50 }}>
-          <p>© 2026 Moveability</p>
+          <p>© 2026 Movability</p>
           <div className="flex gap-6">
             <Link to="/privacy-policy" className="hover:opacity-100 transition-colors">{t("footer.privacyPolicy")}</Link>
             <Link to="/terms-of-service" className="hover:opacity-100 transition-colors">{t("footer.termsOfService")}</Link>
