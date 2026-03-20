@@ -7,19 +7,19 @@ const validSlugs = Object.keys(categorySlugMap);
 
 const categoryMeta: Record<string, { title: string; description: string }> = {
   wheelchairs: {
-    title: "Wheelchair Rental Athens – Delivery to Your Hotel | Moveability",
+    title: "Wheelchair Rental Athens – Delivery to Your Hotel | Movability",
     description: "Rent lightweight folding wheelchairs in Athens from €35/day. Free delivery in city center. Airport pickup available.",
   },
   "power-wheelchairs": {
-    title: "Electric Wheelchair Hire Athens | Moveability",
+    title: "Electric Wheelchair Hire Athens | Movability",
     description: "Rent power wheelchairs in Athens from €150/day. Joystick control, all-day battery. Delivered to your hotel.",
   },
   "mobility-scooters": {
-    title: "Mobility Scooter Rental Athens Greece | Moveability",
+    title: "Mobility Scooter Rental Athens Greece | Movability",
     description: "Rent 4-wheel mobility scooters in Athens from €100/day. 35km range. Hotel delivery included.",
   },
   "walking-aids": {
-    title: "Rollator Rental Athens | Moveability",
+    title: "Rollator Rental Athens | Movability",
     description: "Rent rollators and walking aids in Athens. Lightweight, foldable options. Delivered to your hotel.",
   },
 };
