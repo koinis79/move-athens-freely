@@ -1,3 +1,4 @@
+import SEOHead from "@/components/SEOHead";
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
@@ -55,6 +56,10 @@ const HowItWorks = () => {
 
   return (
     <>
+      <SEOHead
+        title="How It Works – Rent Mobility Equipment in Athens | Moveability"
+        description="Book online, we deliver to your hotel, enjoy Athens, we pick up. Simple wheelchair &amp; scooter rental in 3 steps."
+      />
       {/* Hero */}
       <section className="relative overflow-hidden bg-gradient-to-br from-primary/10 via-background to-background py-20 md:py-28">
         <div className="container relative z-10 flex flex-col items-center text-center">
