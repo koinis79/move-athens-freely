@@ -58,15 +58,15 @@ const Header = () => {
       } ${scrolled ? "shadow-md" : "shadow-none"}`}
     >
       <div className="container flex h-[var(--header-height)] items-center justify-between">
-        <Link to="/" aria-label="Moveability — Home" className="flex-shrink-0 mr-3">
+        <Link to="/" aria-label="Movability — Home" className="flex-shrink-0 mr-3">
           <img
             src="https://lmgpuqgwkiapgpdsxvmb.supabase.co/storage/v1/object/public/assets/logo-light-mode.png"
-            alt="Moveability"
+            alt="Movability"
             className="h-11 lg:h-14 w-auto block dark:hidden"
           />
           <img
             src="https://lmgpuqgwkiapgpdsxvmb.supabase.co/storage/v1/object/public/assets/logo-dark-clean2.png"
-            alt="Moveability"
+            alt="Movability"
             className="h-11 lg:h-14 w-auto hidden dark:block"
           />
         </Link>
