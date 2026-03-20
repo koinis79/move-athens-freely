@@ -14,7 +14,7 @@ export function LocalBusiness() {
       data={{
         "@context": "https://schema.org",
         "@type": "LocalBusiness",
-        name: "Moveability",
+        name: "Movability",
         description: "Wheelchair and mobility equipment rental in Athens, Greece",
         url: "https://moveability.gr",
         telephone: "+30-210-951-1750",
@@ -61,13 +61,13 @@ export function Product({ name, description, image, price, availability }: Produ
         name,
         description,
         ...(image ? { image } : {}),
-        brand: { "@type": "Brand", name: "Moveability" },
+        brand: { "@type": "Brand", name: "Movability" },
         offers: {
           "@type": "Offer",
           priceCurrency: "EUR",
           price: price.toFixed(2),
           availability: availabilityUrl[availability] ?? "https://schema.org/InStock",
-          seller: { "@type": "Organization", name: "Moveability" },
+          seller: { "@type": "Organization", name: "Movability" },
         },
       }}
     />
@@ -114,10 +114,10 @@ export function Article({ title, description, datePublished, image }: ArticlePro
         description,
         datePublished,
         image: imageUrl,
-        author: { "@type": "Organization", name: "Moveability" },
+        author: { "@type": "Organization", name: "Movability" },
         publisher: {
           "@type": "Organization",
-          name: "Moveability",
+          name: "Movability",
           logo: {
             "@type": "ImageObject",
             url: "https://moveability.gr/og-image.png",
