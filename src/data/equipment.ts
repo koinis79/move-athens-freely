@@ -54,7 +54,7 @@ export const categoryFilterLabels = [
   { label: "Wheelchairs", slug: "wheelchairs" },
   { label: "Power Wheelchairs", slug: "power-wheelchairs" },
   { label: "Mobility Scooters", slug: "mobility-scooters" },
-  { label: "Rollators & Walkers", slug: "rollators-walkers" },
+  { label: "Rollators", slug: "rollators-walkers" },
 ];
 
 export const equipmentItems: EquipmentItem[] = [
