@@ -34,6 +34,10 @@ const categoryHeroImages: Record<string, { src: string; alt: string }> = {
     src: "https://lmgpuqgwkiapgpdsxvmb.supabase.co/storage/v1/object/public/assets/realistic_rollator_athens_1773961139410.png",
     alt: "Rollator on Athens street",
   },
+  "mobility-scooters": {
+    src: "https://lmgpuqgwkiapgpdsxvmb.supabase.co/storage/v1/object/public/assets/scooter-acropolis-athens.png",
+    alt: "Mobility scooter at the Acropolis in Athens",
+  },
 };
 
 const EquipmentListing = ({ categorySlug }: Props) => {
@@ -64,24 +68,10 @@ const EquipmentListing = ({ categorySlug }: Props) => {
     ? categoryFilterLabels.find((c) => c.slug === categorySlug)?.label ?? t("nav.equipment")
     : t("equipmentListing.title");
 
-  const hero = categorySlug ? categoryHeroImages[categorySlug] : null;
+  const hero = categorySlug ? (categoryHeroImages[categorySlug] ?? null) : null;
 
   return (
     <>
-      {/* Category hero banner */}
-      {hero && (
-        <div className="relative h-48 w-full overflow-hidden sm:h-56 md:h-64 lg:h-72">
-          <img
-            src={hero.src}
-            alt={hero.alt}
-            className="h-full w-full object-cover"
-            loading="eager"
-          />
-          {/* Gradient overlay so the content below doesn't collide */}
-          <div className="absolute inset-0 bg-gradient-to-t from-background/70 via-transparent to-transparent" />
-        </div>
-      )}
-
       <div className="container py-10 md:py-16">
         {/* Breadcrumb */}
         <nav aria-label="Breadcrumb" className="mb-4 text-sm text-muted-foreground">
@@ -106,8 +96,34 @@ const EquipmentListing = ({ categorySlug }: Props) => {
           </ol>
         </nav>
 
-        <h1 className="text-3xl font-heading font-bold text-foreground md:text-4xl">{heading}</h1>
-        <p className="mt-2 max-w-2xl text-muted-foreground">{t("equipmentListing.subtitle")}</p>
+        {/* Heading row — decorative image floats right on md+ screens */}
+        <div className="flex items-start justify-between gap-6">
+          <div className="flex-1">
+            <h1 className="text-3xl font-heading font-bold text-foreground md:text-4xl">{heading}</h1>
+            <p className="mt-2 max-w-2xl text-muted-foreground">{t("equipmentListing.subtitle")}</p>
+          </div>
+          {hero && (
+            <div className="hidden md:block shrink-0">
+              <img
+                src={hero.src}
+                alt={hero.alt}
+                className="w-64 max-w-[280px] rounded-xl object-cover shadow-md"
+                loading="eager"
+              />
+            </div>
+          )}
+        </div>
+        {/* Mobile: show image centered below heading */}
+        {hero && (
+          <div className="mt-4 flex justify-center md:hidden">
+            <img
+              src={hero.src}
+              alt={hero.alt}
+              className="w-40 rounded-xl object-cover shadow-md"
+              loading="eager"
+            />
+          </div>
+        )}
 
         {/* Filter + Sort bar */}
         <div className="mt-8 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
