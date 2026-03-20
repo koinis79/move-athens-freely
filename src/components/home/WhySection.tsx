@@ -27,7 +27,7 @@ const WhySection = () => (
   <section className="bg-blue-50 dark:bg-blue-950/20 py-16 md:py-20">
     <div className="container">
       <h2 className="text-center text-3xl font-heading font-bold text-foreground md:text-4xl">
-        Why Choose Moveability?
+        Why Choose Movability?
       </h2>
       <p className="mx-auto mt-3 max-w-xl text-center text-muted-foreground">
         Everything you need for a worry-free trip — delivered.
