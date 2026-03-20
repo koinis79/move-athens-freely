@@ -42,7 +42,7 @@
     "fromPrice": "From €{{price}}/day"
   },
   "whySection": {
-    "title": "Why Moveability?",
+    "title": "Why Movability?",
     "athensBased": "Athens-Based",
     "athensBasedDesc": "We're local. We know every ramp, every route, every accessible gem in Athens.",
     "qualityGuaranteed": "Quality Guaranteed",
@@ -110,7 +110,7 @@
     "addToCart": "Add to Cart"
   },
   "howItWorksPage": {
-    "title": "How Moveability Works",
+    "title": "How Movability Works",
     "subtitle": "Renting mobility equipment in Athens is simple. Here's how it works in 5 easy steps.",
     "step1Title": "Browse & Choose",
     "step1Desc": "Explore our range of wheelchairs, scooters, and rollators. Filter by type, compare specifications, and find the perfect fit for your needs.",
