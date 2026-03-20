@@ -343,7 +343,7 @@ Eleftherios Venizelos Airport is **modern and fully accessible**, built in 2001.
 The most comfortable option, especially after a long flight:
 
 - **Price**: €50-70 to city center hotels
-- **Providers**: Welcome Pickups, Moveability partner transfers
+- **Providers**: Welcome Pickups, Movability partner transfers
 - **Benefits**: Door-to-door, space for equipment, fixed price, driver meets you at arrivals
 
 ### Option 2: Metro (Line 3)
@@ -389,7 +389,7 @@ export const blogPosts: Article[] = [
     excerpt:
       "Practical advice from our team on making your Greek holiday smoother, more comfortable, and more enjoyable.",
     date: "2026-02-05",
-    author: "Moveability Team",
+    author: "Movability Team",
     image: wheelchairTravelImg,
     category: "Tips",
     body: [
@@ -405,7 +405,7 @@ export const blogPosts: Article[] = [
     excerpt:
       "A packing checklist tailored for travelers who use wheelchairs, scooters, or other mobility equipment.",
     date: "2026-02-18",
-    author: "Moveability Team",
+    author: "Movability Team",
     image: packingImg,
     category: "Tips",
     body: [
@@ -421,7 +421,7 @@ export const blogPosts: Article[] = [
     excerpt:
       "From the Acropolis elevator to metro upgrades — how Athens is investing in accessibility for all visitors.",
     date: "2026-03-02",
-    author: "Moveability Team",
+    author: "Movability Team",
     image: athensAccessibleImg,
     category: "Athens",
     body: [
