@@ -11,7 +11,7 @@ import CtaBanner from "@/components/home/CtaBanner";
 const Index = () => (
   <>
     <SEOHead
-      title="Wheelchair &amp; Mobility Scooter Rental in Athens | Moveability"
+      title="Wheelchair &amp; Mobility Scooter Rental in Athens | Movability"
       description="Rent wheelchairs, mobility scooters &amp; rollators delivered to your Athens hotel. Free city center delivery. Book online in 2 minutes."
     />
     <LocalBusiness />
