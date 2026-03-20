@@ -1,3 +1,4 @@
+import SEOHead from "@/components/SEOHead";
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
@@ -28,6 +29,10 @@ const values = [
 
 const About = () => (
   <>
+    <SEOHead
+      title="About Moveability – Athens Mobility Equipment Rental"
+      description="We're an Athens-based team delivering quality wheelchairs, scooters &amp; mobility aids to your hotel. Local expertise, genuine care."
+    />
     {/* Hero */}
     <section className="relative overflow-hidden bg-gradient-to-br from-primary/10 via-background to-background py-20 md:py-28">
       <div className="container relative z-10 flex flex-col items-center text-center">
