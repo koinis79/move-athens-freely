@@ -22,6 +22,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { getPriceForDays, type EquipmentItem } from "@/data/equipment";
 import { useCart } from "@/context/CartContext";
 import { useToast } from "@/hooks/use-toast";
+import { trackEvent } from "@/lib/analytics";
 
 interface DeliveryZone {
   id: string;
@@ -104,6 +105,18 @@ const BookingPanel = ({ item }: Props) => {
       deliveryZone: selectedZone?.name_en,
       deliveryFee,
     });
+
+    // GA4: add_to_cart
+    trackEvent("add_to_cart", {
+      currency: "EUR",
+      value: subtotal,
+      item_id: item.slug,
+      item_name: item.name,
+      item_category: item.category,
+      quantity: qty,
+      num_days: numDays,
+    });
+
     setAdded(true);
     setTimeout(() => setAdded(false), 2000);
     toast({
@@ -184,7 +197,6 @@ const BookingPanel = ({ item }: Props) => {
                 selected={dateRange}
                 onSelect={(range) => {
                   setDateRange(range);
-                  // Close popover once both dates are chosen
                   if (range?.from && range?.to) setCalOpen(false);
                 }}
                 disabled={(d) => d < today}
@@ -246,10 +258,9 @@ const BookingPanel = ({ item }: Props) => {
           </Select>
         </div>
 
-        {/* Price summary — shown as soon as dates are picked */}
+        {/* Price summary */}
         {numDays > 0 && (
           <div className="rounded-lg border border-primary/20 bg-primary/5 p-4 text-sm space-y-2.5">
-            {/* Days + tier */}
             <div className="flex items-center justify-between">
               <span className="font-medium text-foreground">
                 {numDays} day{numDays !== 1 ? "s" : ""}
@@ -263,7 +274,6 @@ const BookingPanel = ({ item }: Props) => {
               </div>
             </div>
 
-            {/* Delivery fee */}
             <div className="flex items-center justify-between">
               <span className="text-muted-foreground">Delivery fee</span>
               {zoneId ? (
@@ -275,7 +285,6 @@ const BookingPanel = ({ item }: Props) => {
               )}
             </div>
 
-            {/* Total */}
             <div className="flex items-center justify-between border-t border-primary/20 pt-2.5">
               <span className="font-semibold text-foreground">Total</span>
               <span className="text-2xl font-bold text-primary">€{total}</span>
