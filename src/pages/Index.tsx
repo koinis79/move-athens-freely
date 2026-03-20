@@ -1,4 +1,5 @@
 import SEOHead from "@/components/SEOHead";
+import { LocalBusiness } from "@/components/StructuredData";
 import HeroSection from "@/components/home/HeroSection";
 import HowItWorksSection from "@/components/home/HowItWorksSection";
 import EquipmentSection from "@/components/home/EquipmentSection";
@@ -13,6 +14,7 @@ const Index = () => (
       title="Wheelchair &amp; Mobility Scooter Rental in Athens | Moveability"
       description="Rent wheelchairs, mobility scooters &amp; rollators delivered to your Athens hotel. Free city center delivery. Book online in 2 minutes."
     />
+    <LocalBusiness />
     <HeroSection />
     <HowItWorksSection />
     <EquipmentSection />
