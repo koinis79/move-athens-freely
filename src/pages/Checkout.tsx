@@ -1,7 +1,7 @@
 import { useState, useEffect, useMemo } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import { format, differenceInDays } from "date-fns";
-import { ShieldCheck, Loader2 } from "lucide-react";
+import { ShieldCheck, Loader2, ChevronDown } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -45,6 +45,19 @@ const INITIAL_DELIVERY: DeliveryFormData = {
   specialInstructions: "",
 };
 
+const COUNTRY_CODES = [
+  { flag: "🇬🇷", code: "+30",  label: "GR" },
+  { flag: "🇬🇧", code: "+44",  label: "UK" },
+  { flag: "🇺🇸", code: "+1",   label: "US" },
+  { flag: "🇩🇪", code: "+49",  label: "DE" },
+  { flag: "🇫🇷", code: "+33",  label: "FR" },
+  { flag: "🇮🇹", code: "+39",  label: "IT" },
+  { flag: "🇳🇱", code: "+31",  label: "NL" },
+  { flag: "🇪🇸", code: "+34",  label: "ES" },
+  { flag: "🇦🇺", code: "+61",  label: "AU" },
+  { flag: "🇨🇦", code: "+1",   label: "CA" },
+];
+
 const Checkout = () => {
   const { items, clearCart } = useCart();
   const { user } = useAuth();
@@ -52,6 +65,9 @@ const Checkout = () => {
 
   const [submitting, setSubmitting] = useState(false);
   const [submitError, setSubmitError] = useState<string | null>(null);
+
+  // Country code state — Greece default
+  const [countryCode, setCountryCode] = useState("+30");
 
   // Customer info
   const [customer, setCustomer] = useState<CustomerForm>({
@@ -191,6 +207,9 @@ const Checkout = () => {
     setSubmitting(true);
     setSubmitError(null);
 
+    // Combine country code + local number
+    const fullPhone = `${countryCode} ${customer.phone.trim()}`;
+
     try {
       const itemsPayload = lineItems.map((line) => ({
         equipment_id: line.equipment.id,
@@ -240,7 +259,7 @@ const Checkout = () => {
         p_user_id: user?.id ?? null,
         p_customer_name: customer.name.trim(),
         p_customer_email: customer.email.trim(),
-        p_customer_phone: customer.phone.trim(),
+        p_customer_phone: fullPhone,
         p_delivery_zone_id: null,
         p_delivery_address: deliveryAddress,
         p_delivery_time_slot: delivery.timeSlot,
@@ -366,16 +385,37 @@ const Checkout = () => {
                     </p>
                   )}
                 </div>
+
+                {/* Phone with country code */}
                 <div className="space-y-1.5 sm:col-span-2">
                   <Label htmlFor="phone">Phone Number *</Label>
-                  <Input
-                    id="phone"
-                    type="tel"
-                    placeholder="+44 7700 900000"
-                    value={customer.phone}
-                    onChange={(e) => setC("phone", e.target.value)}
-                    className={customerErrors.phone ? "border-destructive" : ""}
-                  />
+                  <div className={`flex rounded-md border bg-background focus-within:ring-2 focus-within:ring-ring focus-within:ring-offset-0 ${customerErrors.phone ? "border-destructive" : "border-input"}`}>
+                    {/* Country code selector */}
+                    <div className="relative flex shrink-0 items-center">
+                      <select
+                        value={countryCode}
+                        onChange={(e) => setCountryCode(e.target.value)}
+                        aria-label="Country code"
+                        className="h-10 appearance-none bg-transparent pl-3 pr-7 text-sm font-medium text-foreground focus:outline-none cursor-pointer border-r border-input"
+                      >
+                        {COUNTRY_CODES.map(({ flag, code, label }) => (
+                          <option key={`${label}-${code}`} value={code}>
+                            {flag} {code} ({label})
+                          </option>
+                        ))}
+                      </select>
+                      <ChevronDown className="pointer-events-none absolute right-1.5 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-muted-foreground" />
+                    </div>
+                    {/* Phone number input */}
+                    <input
+                      id="phone"
+                      type="tel"
+                      placeholder="Phone number"
+                      value={customer.phone}
+                      onChange={(e) => setC("phone", e.target.value)}
+                      className="h-10 flex-1 bg-transparent px-3 text-sm focus:outline-none placeholder:text-muted-foreground"
+                    />
+                  </div>
                   {customerErrors.phone && (
                     <p className="text-xs text-destructive">
                       {customerErrors.phone}
