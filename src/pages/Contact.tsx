@@ -1,3 +1,4 @@
+import SEOHead from "@/components/SEOHead";
 import { useState } from "react";
 import { Link } from "react-router-dom";
 import { z } from "zod";
@@ -137,6 +138,10 @@ const Contact = () => {
 
   return (
     <>
+      <SEOHead
+        title="Contact Moveability – Athens Wheelchair Rental"
+        description="Get in touch for wheelchair, scooter, or rollator rental in Athens. WhatsApp, email, or phone. We respond within 2 hours."
+      />
       {/* ── Hero ──────────────────────────────────────── */}
       <section className="bg-gradient-to-br from-primary/10 via-background to-background py-16 md:py-20">
         <div className="container text-center">
