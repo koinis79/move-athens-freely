@@ -85,7 +85,7 @@ const ResetPassword = () => {
         <Link to="/" className="flex justify-center">
           <img
             src="https://lmgpuqgwkiapgpdsxvmb.supabase.co/storage/v1/object/public/assets/Gemini_Generated_Image_at7c4zat7c4zat7c.png"
-            alt="Moveability"
+            alt="Movability"
             className="h-12 w-auto rounded-lg p-0.5 bg-background dark:invert dark:hue-rotate-180"
           />
         </Link>
