@@ -34,7 +34,10 @@ const categoryHeroImages: Record<string, { src: string; alt: string }> = {
     src: "https://lmgpuqgwkiapgpdsxvmb.supabase.co/storage/v1/object/public/assets/realistic_rollator_athens_1773961139410.png",
     alt: "Rollator on Athens street",
   },
-  // "mobility-scooters": image pending — scooter URL returns 400
+  "mobility-scooters": {
+    src: "https://lmgpuqgwkiapgpdsxvmb.supabase.co/storage/v1/object/public/assets/scooter-street.png",
+    alt: "Smiling elderly woman on a red mobility scooter on Ermou Street in Athens",
+  },
 };
 
 const EquipmentListing = ({ categorySlug }: Props) => {
