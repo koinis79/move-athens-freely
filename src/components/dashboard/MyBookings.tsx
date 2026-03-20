@@ -130,7 +130,7 @@ const BookingCard = ({ booking }: { booking: Booking }) => {
               </div>
               <div className="pt-2">
                 <Button variant="link" size="sm" className="p-0 h-auto" asChild>
-                  <a href="mailto:support@moveability.gr">
+                  <a href="mailto:info@movability.gr">
                     <MessageCircle className="mr-1 h-3.5 w-3.5" />
                     Contact Support
                   </a>
