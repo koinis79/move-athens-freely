@@ -1,4 +1,5 @@
 import SEOHead from "@/components/SEOHead";
+import { FAQPage as FAQPageSD } from "@/components/StructuredData";
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import {
@@ -57,7 +58,7 @@ const sections = [
       },
       {
         q: "How does pickup work?",
-        a: "On your last rental day, we collect the equipment from your accommodation. You can leave it at reception if you’re heading out early. We coordinate the details with you in advance.",
+        a: "On your last rental day, we collect the equipment from your accommodation. You can leave it at reception if you're heading out early. We coordinate the details with you in advance.",
       },
       {
         q: "What are your delivery hours?",
@@ -74,11 +75,11 @@ const sections = [
       },
       {
         q: "What if the equipment breaks during my trip?",
-        a: "Contact us immediately via WhatsApp (+30 210 95 11 750) or phone. We’ll arrange a free replacement within hours — no extra charge.",
+        a: "Contact us immediately via WhatsApp (+30 210 95 11 750) or phone. We'll arrange a free replacement within hours — no extra charge.",
       },
       {
         q: "Can I try the equipment before renting?",
-        a: "Our team demonstrates the equipment when delivering. If it’s not the right fit, we’ll swap it for a better option.",
+        a: "Our team demonstrates the equipment when delivering. If it's not the right fit, we'll swap it for a better option.",
       },
       {
         q: "Do you offer insurance?",
@@ -95,7 +96,7 @@ const sections = [
       },
       {
         q: "Can you help me plan an accessible trip?",
-        a: "We’d love to. Contact us with your travel dates and interests and we’ll share personalized recommendations for accessible attractions, restaurants, and routes in Athens.",
+        a: "We'd love to. Contact us with your travel dates and interests and we'll share personalized recommendations for accessible attractions, restaurants, and routes in Athens.",
       },
     ],
   },
@@ -103,6 +104,12 @@ const sections = [
 
 const FAQ = () => (
   <>
+    <SEOHead
+      title="FAQ – Mobility Equipment Rental Athens | Moveability"
+      description="Answers to common questions about renting wheelchairs and mobility scooters in Athens. Delivery, pricing, cancellation and more."
+    />
+    <FAQPageSD questions={sections.flatMap((s) => s.items)} />
+
     {/* Hero */}
     <section className="bg-gradient-to-br from-primary/10 via-background to-background py-16 md:py-20">
       <div className="container text-center">
