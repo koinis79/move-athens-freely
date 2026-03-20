@@ -46,7 +46,7 @@ export const categorySlugMap: Record<string, EquipmentCategory> = {
   wheelchairs: "Wheelchair",
   "power-wheelchairs": "Power Wheelchair",
   "mobility-scooters": "Mobility Scooter",
-  "rollators-walkers": "Rollator",
+  "walking-aids": "Rollator",
 };
 
 export const categoryFilterLabels = [
@@ -54,7 +54,7 @@ export const categoryFilterLabels = [
   { label: "Wheelchairs", slug: "wheelchairs" },
   { label: "Power Wheelchairs", slug: "power-wheelchairs" },
   { label: "Mobility Scooters", slug: "mobility-scooters" },
-  { label: "Rollators", slug: "rollators-walkers" },
+  { label: "Rollators", slug: "walking-aids" },
 ];
 
 export const equipmentItems: EquipmentItem[] = [
@@ -162,7 +162,7 @@ export const equipmentItems: EquipmentItem[] = [
     slug: "standard-rollator-with-seat",
     name: "Standard Rollator with Seat",
     category: "Rollator",
-    categorySlug: "rollators-walkers",
+    categorySlug: "walking-aids",
     description: "Four-wheeled rollator with built-in seat, basket, and hand brakes.",
     pricePerDay: 5,
     pricePerWeek: 30,
@@ -178,7 +178,7 @@ export const equipmentItems: EquipmentItem[] = [
     slug: "lightweight-carbon-rollator",
     name: "Lightweight Carbon Rollator",
     category: "Rollator",
-    categorySlug: "rollators-walkers",
+    categorySlug: "walking-aids",
     description: "Premium carbon-fibre rollator, extremely light yet durable.",
     pricePerDay: 8,
     pricePerWeek: 45,
