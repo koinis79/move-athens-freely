@@ -1,27 +1,15 @@
 <!doctype html>
 <html lang="en">
   <head>
-    <!-- Google Analytics — loaded conditionally by cookie consent -->
+    <!-- Google Analytics 4 -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-8RD4VHF74X"></script>
     <script>
       window.dataLayer = window.dataLayer || [];
       function gtag(){dataLayer.push(arguments);}
-      (function() {
-        try {
-          var consent = localStorage.getItem('cookie_consent');
-          if (consent) {
-            var parsed = JSON.parse(consent);
-            if (parsed.accepted === true && parsed.expires > Date.now()) {
-              var s = document.createElement('script');
-              s.async = true;
-              s.src = 'https://www.googletagmanager.com/gtag/js?id=G-8RD4VHF74X';
-              document.head.appendChild(s);
-              gtag('js', new Date());
-              gtag('config', 'G-8RD4VHF74X');
-            }
-          }
-        } catch(e) {}
-      })();
+      gtag('js', new Date());
+      gtag('config', 'G-8RD4VHF74X');
     </script>
+
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Moveability — Mobility Equipment Rental in Athens</title>
@@ -32,8 +20,6 @@
     <meta name="description" content="Rent wheelchairs, scooters, and mobility aids delivered to your hotel in Athens. Free delivery in city center.">
     <meta name="author" content="MoveAbility" />
 
-    
-    
     <meta property="og:type" content="website" />
     <meta property="og:image" content="/og-image.png" />
     <meta property="og:site_name" content="MoveAbility" />
@@ -42,10 +28,10 @@
     <meta name="twitter:site" content="@movability_gr" />
     <meta name="twitter:image" content="/og-image.png" />
     <meta property="og:title" content="MoveAbility - Mobility Equipment Rental in Athens" />
-  <meta name="twitter:title" content="MoveAbility - Mobility Equipment Rental in Athens" />
-  <meta property="og:description" content="Rent wheelchairs, scooters, and mobility aids delivered to your hotel in Athens. Free delivery in city center." />
-  <meta name="twitter:description" content="Rent wheelchairs, scooters, and mobility aids delivered to your hotel in Athens. Free delivery in city center." />
-</head>
+    <meta name="twitter:title" content="MoveAbility - Mobility Equipment Rental in Athens" />
+    <meta property="og:description" content="Rent wheelchairs, scooters, and mobility aids delivered to your hotel in Athens. Free delivery in city center." />
+    <meta name="twitter:description" content="Rent wheelchairs, scooters, and mobility aids delivered to your hotel in Athens. Free delivery in city center." />
+  </head>
 
   <body>
     <div id="root"></div>
