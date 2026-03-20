@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { useCart } from "@/context/CartContext";
 import { getPriceForDays } from "@/data/equipment";
+import { trackEvent } from "@/lib/analytics";
 
 const Cart = () => {
   const { items, removeItem, updateItem, itemCount } = useCart();
@@ -209,7 +210,14 @@ const Cart = () => {
             <Button
               size="lg"
               className="w-full rounded-xl text-base"
-              onClick={() => navigate("/checkout")}
+              onClick={() => {
+              trackEvent("begin_checkout", {
+                currency: "EUR",
+                value: equipmentTotal,
+                num_items: itemCount,
+              });
+              navigate("/checkout");
+            }}
             >
               Proceed to Checkout
               <ArrowRight className="ml-2 h-5 w-5" />
