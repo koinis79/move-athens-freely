@@ -30,7 +30,7 @@ const categoryHeroImages: Record<string, { src: string; alt: string }> = {
     src: "https://lmgpuqgwkiapgpdsxvmb.supabase.co/storage/v1/object/public/assets/electric_wheelchair_riviera_1773960744195.png",
     alt: "Electric wheelchair at Athens Riviera coastline",
   },
-  rollators: {
+  "walking-aids": {
     src: "https://lmgpuqgwkiapgpdsxvmb.supabase.co/storage/v1/object/public/assets/realistic_rollator_athens_1773961139410.png",
     alt: "Rollator on Athens street",
   },
@@ -68,7 +68,9 @@ const EquipmentListing = ({ categorySlug }: Props) => {
     ? categoryFilterLabels.find((c) => c.slug === categorySlug)?.label ?? t("nav.equipment")
     : t("equipmentListing.title");
 
-  const hero = categorySlug ? (categoryHeroImages[categorySlug] ?? null) : (activeFilter ? (categoryHeroImages[activeFilter] ?? null) : null);
+  const hero = categorySlug
+    ? (categoryHeroImages[categorySlug] ?? null)
+    : (activeFilter ? (categoryHeroImages[activeFilter] ?? null) : null);
 
   return (
     <>
