@@ -77,7 +77,7 @@ function buildHtml(b: Booking): string {
     <tr>
       <td align="center" style="padding:32px 24px;">
         <p style="margin:0;font-size:22px;font-weight:700;color:#ffffff;letter-spacing:-0.3px;">
-          MoveAbility
+          Movability
         </p>
         <p style="margin:4px 0 0;font-size:13px;color:#bfdbfe;">by Koinis Healthcare Group</p>
       </td>
@@ -195,8 +195,8 @@ function buildHtml(b: Booking): string {
                 </tr>
                 <tr>
                   <td>
-                    <a href="mailto:info@moveability.gr" style="display:inline-flex;align-items:center;gap:8px;text-decoration:none;color:#111827;font-size:15px;">
-                      ✉️ <strong>Email:</strong>&nbsp;info@moveability.gr
+                    <a href="mailto:info@movability.gr" style="display:inline-flex;align-items:center;gap:8px;text-decoration:none;color:#111827;font-size:15px;">
+                      ✉️ <strong>Email:</strong>&nbsp;info@movability.gr
                     </a>
                   </td>
                 </tr>
@@ -210,7 +210,7 @@ function buildHtml(b: Booking): string {
         <table width="600" cellpadding="0" cellspacing="0" style="max-width:600px;margin-top:24px;">
           <tr>
             <td align="center" style="padding:0 16px;font-size:12px;color:#9ca3af;line-height:1.6;">
-              <p style="margin:0;">MoveAbility by Koinis Healthcare Group · Athens, Greece</p>
+              <p style="margin:0;">Movability by Koinis Healthcare Group · Athens, Greece</p>
               <p style="margin:4px 0 0;">Stadiou 31, 105 59 Athens · Kallithea · Chalandri · Korinthos</p>
               <p style="margin:4px 0 0;">© ${new Date().getFullYear()} Koinis Healthcare Group. Est. 1982.</p>
             </td>
@@ -294,9 +294,9 @@ Deno.serve(async (req) => {
         "Content-Type": "application/json",
       },
       body: JSON.stringify({
-        from: "MoveAbility Bookings <onboarding@resend.dev>",
+        from: "Movability Bookings <onboarding@resend.dev>",
         to: [b.customer_email],
-        subject: `Booking Confirmed – ${b.booking_number} | MoveAbility`,
+        subject: `Booking Confirmed – ${b.booking_number} | Movability`,
         html,
       }),
     });
