@@ -68,7 +68,7 @@ const EquipmentListing = ({ categorySlug }: Props) => {
     ? categoryFilterLabels.find((c) => c.slug === categorySlug)?.label ?? t("nav.equipment")
     : t("equipmentListing.title");
 
-  const hero = categorySlug ? (categoryHeroImages[categorySlug] ?? null) : null;
+  const hero = categorySlug ? (categoryHeroImages[categorySlug] ?? null) : (activeFilter ? (categoryHeroImages[activeFilter] ?? null) : null);
 
   return (
     <>
