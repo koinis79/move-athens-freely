@@ -16,6 +16,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
+import { trackEvent } from "@/lib/analytics";
 
 interface BookingItem {
   quantity: number;
@@ -77,6 +78,10 @@ const BookingConfirmation = () => {
   useEffect(() => {
     if (searchParams.get("paid") === "1") {
       clearCart();
+      // GA4: fire purchase event — booking data may not yet be loaded, so we
+      // use the booking number from the URL as the transaction_id and fill in
+      // value once booking loads (see second useEffect below).
+      trackEvent("purchase_initiated", { booking_number: bookingNumber ?? "" });
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
@@ -90,7 +95,16 @@ const BookingConfirmation = () => {
         if (error || !data) {
           setNotFound(true);
         } else {
-          setBooking(data as unknown as Booking);
+          const b = data as unknown as Booking;
+          setBooking(b);
+          if (searchParams.get("paid") === "1") {
+            trackEvent("purchase", {
+              transaction_id: b.booking_number,
+              value: b.total_amount,
+              currency: "EUR",
+              shipping: b.delivery_fee,
+            });
+          }
         }
         setLoading(false);
       });
