@@ -79,16 +79,18 @@ const Cart = () => {
                 key={line.equipment.id}
                 className="rounded-2xl border bg-card p-5 flex flex-col sm:flex-row gap-5"
               >
-                {/* Placeholder image */}
-                <div className="h-28 w-28 shrink-0 rounded-xl bg-muted flex items-center justify-center text-4xl self-start">
-                  {line.equipment.category === "Mobility Scooter"
-                    ? "🛵"
-                    : line.equipment.category === "Power Wheelchair"
-                    ? "⚡"
-                    : line.equipment.category === "Rollator"
-                    ? "🦯"
-                    : "♿"}
-                </div>
+                {/* Product image */}
+                {line.equipment.image ? (
+                  <img
+                    src={line.equipment.image}
+                    alt={line.equipment.name}
+                    className="h-28 w-28 shrink-0 rounded-xl object-contain bg-gray-100 dark:bg-gray-800 p-2 self-start"
+                  />
+                ) : (
+                  <div className="h-28 w-28 shrink-0 rounded-xl bg-muted flex items-center justify-center self-start">
+                    <ShoppingCart className="h-8 w-8 text-muted-foreground" />
+                  </div>
+                )}
 
                 {/* Details */}
                 <div className="flex-1 min-w-0">
