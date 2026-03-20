@@ -60,12 +60,12 @@ const Header = () => {
       <div className="container flex h-[var(--header-height)] items-center justify-between">
         <Link to="/" aria-label="Movability — Home" className="flex-shrink-0 mr-3">
           <img
-            src="https://lmgpuqgwkiapgpdsxvmb.supabase.co/storage/v1/object/public/assets/logo-light-mode.png"
+            src="https://lmgpuqgwkiapgpdsxvmb.supabase.co/storage/v1/object/public/assets/LOGO-LIGHT.png"
             alt="Movability"
             className="h-11 lg:h-14 w-auto block dark:hidden"
           />
           <img
-            src="https://lmgpuqgwkiapgpdsxvmb.supabase.co/storage/v1/object/public/assets/logo-dark-clean2.png"
+            src="https://lmgpuqgwkiapgpdsxvmb.supabase.co/storage/v1/object/public/assets/LOGO-DARK.png"
             alt="Movability"
             className="h-11 lg:h-14 w-auto hidden dark:block"
           />
