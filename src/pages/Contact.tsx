@@ -139,7 +139,7 @@ const Contact = () => {
   return (
     <>
       <SEOHead
-        title="Contact Moveability – Athens Wheelchair Rental"
+        title="Contact Movability – Athens Wheelchair Rental"
         description="Get in touch for wheelchair, scooter, or rollator rental in Athens. WhatsApp, email, or phone. We respond within 2 hours."
       />
       {/* ── Hero ──────────────────────────────────────── */}
