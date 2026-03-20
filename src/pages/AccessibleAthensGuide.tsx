@@ -1,5 +1,6 @@
 import { useParams, Navigate } from "react-router-dom";
 import ArticleDetail from "@/components/articles/ArticleDetail";
+import { Article as ArticleSD } from "@/components/StructuredData";
 import { guides } from "@/data/articles";
 
 const AccessibleAthensGuide = () => {
@@ -11,13 +12,21 @@ const AccessibleAthensGuide = () => {
   const related = guides.filter((g) => g.slug !== slug).slice(0, 3);
 
   return (
-    <ArticleDetail
-      article={article}
-      related={related}
-      basePath="/accessible-athens"
-      parentLabel="Accessible Athens"
-      showCta
-    />
+    <>
+      <ArticleSD
+        title={article.title}
+        description={article.excerpt}
+        datePublished={article.date}
+        image={article.image}
+      />
+      <ArticleDetail
+        article={article}
+        related={related}
+        basePath="/accessible-athens"
+        parentLabel="Accessible Athens"
+        showCta
+      />
+    </>
   );
 };
 
