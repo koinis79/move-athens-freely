@@ -23,21 +23,21 @@ const values = [
   {
     Icon: Heart,
     title: "Genuine Care",
-    desc: "We're not a faceless corporation. When you rent from Moveability, you're supported by people who genuinely care about making your trip memorable.",
+    desc: "We're not a faceless corporation. When you rent from Movability, you're supported by people who genuinely care about making your trip memorable.",
   },
 ];
 
 const About = () => (
   <>
     <SEOHead
-      title="About Moveability – Athens Mobility Equipment Rental"
+      title="About Movability – Athens Mobility Equipment Rental"
       description="We're an Athens-based team delivering quality wheelchairs, scooters &amp; mobility aids to your hotel. Local expertise, genuine care."
     />
     {/* Hero */}
     <section className="relative overflow-hidden bg-gradient-to-br from-primary/10 via-background to-background py-20 md:py-28">
       <div className="container relative z-10 flex flex-col items-center text-center">
         <h1 className="max-w-3xl text-4xl font-heading font-extrabold tracking-tight text-foreground md:text-5xl lg:text-6xl">
-          About Moveability
+          About Movability
         </h1>
         <p className="mt-6 max-w-2xl text-lg text-muted-foreground md:text-xl">
           Making Athens accessible, one trip at a time.
@@ -54,14 +54,14 @@ const About = () => (
             Our Story
           </h2>
           <p className="mt-6 leading-relaxed text-muted-foreground">
-            Moveability was born from a simple realization: visiting Athens with a
+            Movability was born from a simple realization: visiting Athens with a
             mobility need shouldn't be stressful. As locals who love this city, we
             saw too many travelers struggling to find reliable equipment, navigate
             confusing rental options, or figure out which attractions were truly
             accessible.
           </p>
           <p className="mt-4 leading-relaxed text-muted-foreground">
-            We built Moveability to change that. We're an Athens-based team that
+            We built Movability to change that. We're an Athens-based team that
             delivers quality mobility equipment — wheelchairs, scooters, rollators,
             and more — directly to your hotel. But we're more than a rental service.
             We're your local accessibility partner, here to help you experience
