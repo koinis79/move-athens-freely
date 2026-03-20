@@ -34,10 +34,7 @@ const categoryHeroImages: Record<string, { src: string; alt: string }> = {
     src: "https://lmgpuqgwkiapgpdsxvmb.supabase.co/storage/v1/object/public/assets/realistic_rollator_athens_1773961139410.png",
     alt: "Rollator on Athens street",
   },
-  "mobility-scooters": {
-    src: "https://lmgpuqgwkiapgpdsxvmb.supabase.co/storage/v1/object/public/assets/scooter-acropolis-athens.png",
-    alt: "Mobility scooter at the Acropolis in Athens",
-  },
+  // "mobility-scooters": image pending — scooter URL returns 400
 };
 
 const EquipmentListing = ({ categorySlug }: Props) => {
