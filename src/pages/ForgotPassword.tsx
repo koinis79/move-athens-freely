@@ -28,7 +28,7 @@ const ForgotPassword = () => {
     <div className="flex min-h-[70vh] items-center justify-center px-4 py-12">
       <div className="w-full max-w-[420px] rounded-2xl border bg-card p-8 shadow-sm space-y-6">
         <Link to="/" className="block text-center font-heading text-2xl font-extrabold text-primary">
-          Moveability
+          Movability
         </Link>
 
         {sent ? (
