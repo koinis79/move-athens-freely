@@ -1,7 +1,7 @@
 import { Helmet } from "react-helmet-async";
 
 const DEFAULT_OG_IMAGE = "https://moveability.gr/og-image.png";
-const SITE_NAME = "Moveability";
+const SITE_NAME = "Movability";
 
 interface SEOHeadProps {
   title: string;
