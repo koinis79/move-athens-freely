@@ -8,6 +8,7 @@ import BookingPanel from "@/components/equipment/BookingPanel";
 import SpecificationsSection from "@/components/equipment/SpecificationsSection";
 import EquipmentCard from "@/components/equipment/EquipmentCard";
 import EquipmentCardSkeleton from "@/components/equipment/EquipmentCardSkeleton";
+import { Product as ProductSD } from "@/components/StructuredData";
 import NotFound from "./NotFound";
 
 const DEFAULT_INCLUDED = [
@@ -85,6 +86,14 @@ const EquipmentDetail = () => {
 
   return (
     <div className="container py-8 md:py-12">
+      <ProductSD
+        name={item.name}
+        description={longDescription || item.description}
+        image={Array.isArray(images) && images[0] ? images[0] : undefined}
+        price={item.priceTier1}
+        availability={item.availability}
+      />
+
       {/* Breadcrumb */}
       <nav aria-label="Breadcrumb" className="mb-6 text-sm text-muted-foreground">
         <ol className="flex flex-wrap items-center gap-1.5">
