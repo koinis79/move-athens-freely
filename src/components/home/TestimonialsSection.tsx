@@ -13,7 +13,7 @@ import {
 /* TODO: Restore testimonials when we have real reviews */
 const testimonials = [
   {
-    quote: "Moveability made our Athens trip possible. The wheelchair was delivered to our hotel within hours of landing. Excellent service!",
+    quote: "Movability made our Athens trip possible. The wheelchair was delivered to our hotel within hours of landing. Excellent service!",
     name: "Sarah T.",
     location: "London, UK",
   },
