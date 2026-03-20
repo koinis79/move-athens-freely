@@ -57,7 +57,7 @@ const HowItWorks = () => {
   return (
     <>
       <SEOHead
-        title="How It Works – Rent Mobility Equipment in Athens | Moveability"
+        title="How It Works – Rent Mobility Equipment in Athens | Movability"
         description="Book online, we deliver to your hotel, enjoy Athens, we pick up. Simple wheelchair &amp; scooter rental in 3 steps."
       />
       {/* Hero */}
