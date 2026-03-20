@@ -1,6 +1,7 @@
-import { Star } from "lucide-react";
+import { Link } from "react-router-dom";
+import { Star, Users } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
-import { useTranslation } from "react-i18next";
+import { Button } from "@/components/ui/button";
 import {
   Carousel,
   CarouselContent,
@@ -9,6 +10,7 @@ import {
   CarouselNext,
 } from "@/components/ui/carousel";
 
+/* TODO: Restore testimonials when we have real reviews */
 const testimonials = [
   {
     quote: "Moveability made our Athens trip possible. The wheelchair was delivered to our hotel within hours of landing. Excellent service!",
@@ -47,34 +49,28 @@ const TestimonialCard = ({ quote, name, location }: (typeof testimonials)[number
   </Card>
 );
 
-const TestimonialsSection = () => {
-  const { t } = useTranslation();
-
-  return (
-    <section className="bg-primary/5 py-16 md:py-20">
-      <div className="container">
-        <h2 className="text-center text-3xl font-heading font-bold text-foreground md:text-4xl">
-          {t("testimonials.title")}
-        </h2>
-
-        <div className="mt-12 hidden gap-6 md:grid md:grid-cols-3">
-          {testimonials.map((tm) => <TestimonialCard key={tm.name} {...tm} />)}
-        </div>
-
-        <div className="mt-12 md:hidden">
-          <Carousel opts={{ align: "start" }} className="mx-auto max-w-sm">
-            <CarouselContent>
-              {testimonials.map((tm) => (
-                <CarouselItem key={tm.name}><TestimonialCard {...tm} /></CarouselItem>
-              ))}
-            </CarouselContent>
-            <CarouselPrevious className="-left-4" />
-            <CarouselNext className="-right-4" />
-          </Carousel>
-        </div>
+const TestimonialsSection = () => (
+  <section className="bg-muted/40 py-16 md:py-20">
+    <div className="container flex flex-col items-center text-center">
+      {/* Icon */}
+      <div className="flex h-14 w-14 items-center justify-center rounded-full bg-primary/10 mb-5">
+        <Users className="h-7 w-7 text-primary" />
       </div>
-    </section>
-  );
-};
+
+      {/* Heading + subtext */}
+      <h2 className="text-3xl font-heading font-bold text-gray-900 dark:text-foreground md:text-4xl">
+        Join Our Happy Customers
+      </h2>
+      <p className="mt-3 max-w-md text-gray-600 dark:text-muted-foreground">
+        We're new, but we're committed to making your Athens trip accessible and stress-free.
+      </p>
+
+      {/* CTA */}
+      <Button asChild size="lg" className="mt-8 rounded-xl px-8 text-base font-semibold">
+        <Link to="/equipment">Book Your Equipment</Link>
+      </Button>
+    </div>
+  </section>
+);
 
 export default TestimonialsSection;
