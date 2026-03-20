@@ -5,7 +5,7 @@ import { guides } from "@/data/articles";
 const AccessibleAthens = () => (
   <>
     <SEOHead
-      title="Accessible Athens Guide \u2013 Wheelchair Travel Tips | Moveability"
+      title="Accessible Athens Guide \u2013 Wheelchair Travel Tips | Movability"
       description="Practical guides for wheelchair users visiting Athens. Acropolis access, accessible restaurants, metro info &amp; more."
     />
     <ArticleListing
