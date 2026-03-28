@@ -2,6 +2,7 @@ import { useParams, Navigate } from "react-router-dom";
 import SEOHead from "@/components/SEOHead";
 import EquipmentListing from "@/components/equipment/EquipmentListing";
 import { categorySlugMap } from "@/data/equipment";
+import { BreadcrumbList as BreadcrumbSD } from "@/components/StructuredData";
 
 const validSlugs = Object.keys(categorySlugMap);
 
@@ -36,6 +37,13 @@ const EquipmentCategory = () => {
   return (
     <>
       {meta && <SEOHead title={meta.title} description={meta.description} />}
+      <BreadcrumbSD
+        items={[
+          { name: "Home", href: "/" },
+          { name: "Equipment", href: "/equipment" },
+          { name: meta?.title.split(" – ")[0] ?? categorySlug },
+        ]}
+      />
       <EquipmentListing categorySlug={categorySlug} />
     </>
   );
