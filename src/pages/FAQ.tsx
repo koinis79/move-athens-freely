@@ -178,8 +178,8 @@ const FAQ = () => (
           <Button
             asChild
             size="lg"
-            variant="outline"
-            className="gap-1 rounded-xl border-primary-foreground/30 px-8 text-base font-semibold text-primary-foreground hover:bg-primary-foreground/10"
+            variant="ghost"
+            className="gap-1 rounded-xl bg-transparent border-2 border-white px-8 text-base font-semibold text-white hover:bg-white hover:text-blue-600 transition-colors"
           >
             <Link to="/contact">
               Contact Us <ArrowRight className="h-4 w-4" />
