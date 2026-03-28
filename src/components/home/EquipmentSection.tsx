@@ -2,20 +2,29 @@ import { Link } from "react-router-dom";
 import { Card, CardContent } from "@/components/ui/card";
 import { useTranslation } from "react-i18next";
 
-import wheelchairsImg from "@/assets/categories/wheelchairs.jpg";
-import powerWheelchairsImg from "@/assets/categories/power-wheelchairs.jpg";
-import mobilityScootersImg from "@/assets/categories/mobility-scooters.jpg";
-import rollatorsImg from "@/assets/categories/rollators.jpg";
+const categories = [
+  {
+    titleKey: "equipmentSection.manualWheelchairs",
+    price: "10",
+    slug: "wheelchairs",
+    image: "https://lmgpuqgwkiapgpdsxvmb.supabase.co/storage/v1/object/public/assets/IMAGE%20WHEELCHAIR.png",
+  },
+  {
+    titleKey: "equipmentSection.mobilityScooters",
+    price: "25",
+    slug: "mobility-scooters",
+    image: "https://lmgpuqgwkiapgpdsxvmb.supabase.co/storage/v1/object/public/assets/SCOOTER%20IMAGE.png",
+  },
+  {
+    titleKey: "equipmentSection.rollatorsWalkers",
+    price: "5",
+    slug: "walking-aids",
+    image: "https://lmgpuqgwkiapgpdsxvmb.supabase.co/storage/v1/object/public/assets/ROLATOR%20IIMAGE.png",
+  },
+];
 
 const EquipmentSection = () => {
   const { t } = useTranslation();
-
-  const categories = [
-    { titleKey: "equipmentSection.manualWheelchairs", price: "10", slug: "wheelchairs", image: wheelchairsImg },
-    { titleKey: "equipmentSection.powerWheelchairs", price: "35", slug: "power-wheelchairs", image: powerWheelchairsImg },
-    { titleKey: "equipmentSection.mobilityScooters", price: "25", slug: "mobility-scooters", image: mobilityScootersImg },
-    { titleKey: "equipmentSection.rollatorsWalkers", price: "5", slug: "rollators-walkers", image: rollatorsImg },
-  ];
 
   return (
     <section className="bg-muted/30 py-16 md:py-20">
@@ -24,7 +33,7 @@ const EquipmentSection = () => {
           {t("equipmentSection.title")}
         </h2>
 
-        <div className="mt-12 grid gap-6 grid-cols-1 sm:grid-cols-2 lg:grid-cols-4">
+        <div className="mt-12 grid gap-6 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 max-w-5xl mx-auto">
           {categories.map(({ titleKey, price, slug, image }) => (
             <Link key={slug} to={`/equipment/${slug}`} className="group">
               <Card className="overflow-hidden transition-all duration-200 hover:-translate-y-1 hover:shadow-lg">
