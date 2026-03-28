@@ -42,9 +42,8 @@ const HeroSection = () => {
           </Button>
           <Button
             asChild
-            variant="outline"
             size="lg"
-            className="rounded-xl border-white/40 px-8 text-base font-semibold text-white hover:bg-white/10"
+            className="rounded-xl bg-transparent border-2 border-white px-8 text-base font-semibold text-white hover:bg-white hover:text-gray-900 transition-colors"
           >
             <Link to="/how-it-works">{t("hero.howItWorks")}</Link>
           </Button>
