@@ -8,7 +8,7 @@ import BookingPanel from "@/components/equipment/BookingPanel";
 import SpecificationsSection from "@/components/equipment/SpecificationsSection";
 import EquipmentCard from "@/components/equipment/EquipmentCard";
 import EquipmentCardSkeleton from "@/components/equipment/EquipmentCardSkeleton";
-import { Product as ProductSD } from "@/components/StructuredData";
+import { Product as ProductSD, BreadcrumbList as BreadcrumbSD } from "@/components/StructuredData";
 import NotFound from "./NotFound";
 
 const DEFAULT_INCLUDED = [
@@ -92,6 +92,16 @@ const EquipmentDetail = () => {
         image={Array.isArray(images) && images[0] ? images[0] : undefined}
         price={item.priceTier1}
         availability={item.availability}
+        categorySlug={item.categorySlug}
+        slug={item.slug}
+      />
+      <BreadcrumbSD
+        items={[
+          { name: "Home", href: "/" },
+          { name: "Equipment", href: "/equipment" },
+          { name: categoryLabel, href: `/equipment/${item.categorySlug}` },
+          { name: item.name },
+        ]}
       />
 
       {/* Breadcrumb */}
