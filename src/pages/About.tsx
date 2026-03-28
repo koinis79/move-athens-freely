@@ -156,8 +156,8 @@ const About = () => (
           <Button
             asChild
             size="lg"
-            variant="outline"
-            className="rounded-xl border-primary-foreground/30 px-8 text-base font-semibold text-primary-foreground hover:bg-primary-foreground/10"
+            variant="ghost"
+            className="rounded-xl bg-transparent border-2 border-white px-8 text-base font-semibold text-white hover:bg-white hover:text-blue-600 transition-colors"
           >
             <Link to="/contact">Contact Us</Link>
           </Button>
