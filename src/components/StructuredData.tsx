@@ -1,5 +1,8 @@
 import { Helmet } from "react-helmet-async";
 
+const SITE = "https://movability.gr";
+const LOGO = "https://lmgpuqgwkiapgpdsxvmb.supabase.co/storage/v1/object/public/assets/LOGO-LIGHT-final.png";
+
 function JsonLd({ data }: { data: Record<string, unknown> }) {
   return (
     <Helmet>
@@ -8,6 +11,7 @@ function JsonLd({ data }: { data: Record<string, unknown> }) {
   );
 }
 
+/* ── LocalBusiness (homepage) ── */
 export function LocalBusiness() {
   return (
     <JsonLd
@@ -15,10 +19,11 @@ export function LocalBusiness() {
         "@context": "https://schema.org",
         "@type": "LocalBusiness",
         name: "Movability",
-        description: "Wheelchair and mobility equipment rental in Athens, Greece",
-        url: "https://moveability.gr",
+        description:
+          "Wheelchair and mobility equipment rental in Athens, Greece. Delivered to your hotel.",
+        url: SITE,
         telephone: "+30-210-951-1750",
-        email: "info@moveability.gr",
+        email: "info@movability.gr",
         address: {
           "@type": "PostalAddress",
           streetAddress: "Stadiou 31",
@@ -31,11 +36,37 @@ export function LocalBusiness() {
           latitude: 37.9838,
           longitude: 23.7275,
         },
+        areaServed: "Athens, Greece",
         priceRange: "€€",
-        openingHours: "Mo-Su 08:00-21:00",
+        image: LOGO,
+        openingHoursSpecification: {
+          "@type": "OpeningHoursSpecification",
+          dayOfWeek: [
+            "Monday",
+            "Tuesday",
+            "Wednesday",
+            "Thursday",
+            "Friday",
+            "Saturday",
+            "Sunday",
+          ],
+          opens: "08:00",
+          closes: "21:00",
+        },
       }}
     />
   );
+}
+
+/* ── Product (equipment detail) ── */
+interface ProductProps {
+  name: string;
+  description: string;
+  image?: string;
+  price: number;
+  availability: string;
+  categorySlug?: string;
+  slug?: string;
 }
 
 const availabilityUrl: Record<string, string> = {
@@ -44,15 +75,15 @@ const availabilityUrl: Record<string, string> = {
   Unavailable: "https://schema.org/OutOfStock",
 };
 
-interface ProductProps {
-  name: string;
-  description: string;
-  image?: string;
-  price: number;
-  availability: string;
-}
-
-export function Product({ name, description, image, price, availability }: ProductProps) {
+export function Product({
+  name,
+  description,
+  image,
+  price,
+  availability,
+  categorySlug,
+  slug,
+}: ProductProps) {
   return (
     <JsonLd
       data={{
@@ -66,14 +97,19 @@ export function Product({ name, description, image, price, availability }: Produ
           "@type": "Offer",
           priceCurrency: "EUR",
           price: price.toFixed(2),
-          availability: availabilityUrl[availability] ?? "https://schema.org/InStock",
-          seller: { "@type": "Organization", name: "Movability" },
+          availability:
+            availabilityUrl[availability] ?? "https://schema.org/InStock",
+          priceValidUntil: "2026-12-31",
+          ...(categorySlug && slug
+            ? { url: `${SITE}/equipment/${categorySlug}/${slug}` }
+            : {}),
         },
       }}
     />
   );
 }
 
+/* ── FAQPage ── */
 interface FAQPageProps {
   questions: { q: string; a: string }[];
 }
@@ -94,17 +130,23 @@ export function FAQPage({ questions }: FAQPageProps) {
   );
 }
 
+/* ── Article ── */
 interface ArticleProps {
   title: string;
   description: string;
   datePublished: string;
   image: string;
+  slug?: string;
 }
 
-export function Article({ title, description, datePublished, image }: ArticleProps) {
-  const imageUrl = image.startsWith("http")
-    ? image
-    : `https://moveability.gr${image}`;
+export function Article({
+  title,
+  description,
+  datePublished,
+  image,
+  slug,
+}: ArticleProps) {
+  const imageUrl = image.startsWith("http") ? image : `${SITE}${image}`;
   return (
     <JsonLd
       data={{
@@ -118,11 +160,34 @@ export function Article({ title, description, datePublished, image }: ArticlePro
         publisher: {
           "@type": "Organization",
           name: "Movability",
-          logo: {
-            "@type": "ImageObject",
-            url: "https://moveability.gr/og-image.png",
-          },
+          logo: { "@type": "ImageObject", url: LOGO },
         },
+        ...(slug
+          ? { mainEntityOfPage: `${SITE}/accessible-athens/${slug}` }
+          : {}),
+      }}
+    />
+  );
+}
+
+/* ── BreadcrumbList ── */
+interface BreadcrumbItem {
+  name: string;
+  href?: string;
+}
+
+export function BreadcrumbList({ items }: { items: BreadcrumbItem[] }) {
+  return (
+    <JsonLd
+      data={{
+        "@context": "https://schema.org",
+        "@type": "BreadcrumbList",
+        itemListElement: items.map((item, i) => ({
+          "@type": "ListItem",
+          position: i + 1,
+          name: item.name,
+          ...(item.href ? { item: `${SITE}${item.href}` } : {}),
+        })),
       }}
     />
   );
