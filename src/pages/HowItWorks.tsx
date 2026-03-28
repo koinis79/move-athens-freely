@@ -1,3 +1,4 @@
+import { useEffect, useRef } from "react";
 import SEOHead from "@/components/SEOHead";
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
@@ -15,190 +16,255 @@ import {
   Truck,
   Smile,
   MapPin,
-  Hotel,
   Ship,
   Plane,
   ArrowRight,
+  CheckCircle,
 } from "lucide-react";
-import { useTranslation } from "react-i18next";
 
-const HowItWorks = () => {
-  const { t } = useTranslation();
+/* ------------------------------------------------------------------ */
+/*  Scroll-reveal hook                                                 */
+/* ------------------------------------------------------------------ */
+function useReveal() {
+  const ref = useRef<HTMLDivElement>(null);
+  useEffect(() => {
+    const el = ref.current;
+    if (!el) return;
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting) {
+          el.classList.add("opacity-100", "translate-y-0");
+          el.classList.remove("opacity-0", "translate-y-6");
+          observer.unobserve(el);
+        }
+      },
+      { threshold: 0.15 },
+    );
+    observer.observe(el);
+    return () => observer.disconnect();
+  }, []);
+  return ref;
+}
 
-  const steps = [
-    { num: 1, Icon: Search, title: t("howItWorksPage.step1Title"), desc: t("howItWorksPage.step1Desc") },
-    { num: 2, Icon: CalendarDays, title: t("howItWorksPage.step2Title"), desc: t("howItWorksPage.step2Desc") },
-    { num: 3, Icon: CreditCard, title: t("howItWorksPage.step3Title"), desc: t("howItWorksPage.step3Desc") },
-    { num: 4, Icon: Truck, title: t("howItWorksPage.step4Title"), desc: t("howItWorksPage.step4Desc") },
-    { num: 5, Icon: Smile, title: t("howItWorksPage.step5Title"), desc: t("howItWorksPage.step5Desc") },
-  ];
-
-  const pricingCards = [
-    { label: t("howItWorksPage.1to3days"), items: ["Rollators from €20", "Wheelchairs from €35", "Scooters from €100", "Power Wheelchairs from €150"] },
-    { label: t("howItWorksPage.4to7days"), items: ["Rollators from €35", "Wheelchairs from €55", "Scooters from €170", "Power Wheelchairs from €250"] },
-    { label: t("howItWorksPage.8to14days"), items: ["Rollators from €55", "Wheelchairs from €80", "Scooters from €280", "Power Wheelchairs from €400"] },
-  ];
-
-  const zones = [
-    { Icon: Hotel, name: "Hotel — City Center", areas: "Syntagma, Plaka, Monastiraki, Psiri", fee: "€10", note: null },
-    { Icon: Hotel, name: "Hotel — Extended Center", areas: "Kallithea, Kolonaki, Pagkrati", fee: "€15", note: null },
-    { Icon: Hotel, name: "Hotel — Suburbs & Riviera", areas: "Glyfada, Kifisia, Vouliagmeni", fee: "€20", note: null },
-    { Icon: Ship, name: "Piraeus Cruise / Ferry Terminal", areas: "Cruise & ferry port area", fee: "€25", note: t("howItWorksPage.preArranged") },
-    { Icon: Plane, name: "Athens Airport (ATH)", areas: "Eleftherios Venizelos", fee: "€30", note: t("howItWorksPage.preArranged") },
-  ];
-
-  const faqs = [
-    { q: t("howItWorksPage.faq1q"), a: t("howItWorksPage.faq1a") },
-    { q: t("howItWorksPage.faq2q"), a: t("howItWorksPage.faq2a") },
-    { q: t("howItWorksPage.faq3q"), a: t("howItWorksPage.faq3a") },
-    { q: t("howItWorksPage.faq4q"), a: t("howItWorksPage.faq4a") },
-  ];
-
+function Reveal({ children, className = "" }: { children: React.ReactNode; className?: string }) {
+  const ref = useReveal();
   return (
-    <>
-      <SEOHead
-        title="How It Works – Rent Mobility Equipment in Athens | Movability"
-        description="Book online, we deliver to your hotel, enjoy Athens, we pick up. Simple wheelchair &amp; scooter rental in 3 steps."
-      />
-      {/* Hero */}
-      <section className="relative overflow-hidden bg-gradient-to-br from-primary/10 via-background to-background py-20 md:py-28">
-        <div className="container relative z-10 flex flex-col items-center text-center">
-          <h1 className="max-w-3xl text-4xl font-heading font-extrabold tracking-tight text-foreground md:text-5xl lg:text-6xl">
-            {t("howItWorksPage.title")}
-          </h1>
-          <p className="mt-6 max-w-2xl text-lg text-muted-foreground md:text-xl">
-            {t("howItWorksPage.subtitle")}
-          </p>
-        </div>
-        <div className="pointer-events-none absolute -right-32 -top-32 h-96 w-96 rounded-full bg-primary/5 blur-3xl" />
-        <div className="pointer-events-none absolute -bottom-24 -left-24 h-72 w-72 rounded-full bg-secondary/10 blur-3xl" />
-      </section>
+    <div ref={ref} className={`opacity-0 translate-y-6 transition-all duration-700 ease-out ${className}`}>
+      {children}
+    </div>
+  );
+}
 
-      {/* Timeline steps */}
-      <section className="bg-background py-16 md:py-24">
-        <div className="container max-w-4xl">
-          <div className="relative">
-            <div className="absolute left-1/2 top-0 hidden h-full w-px -translate-x-1/2 bg-border md:block" />
-            <div className="flex flex-col gap-12 md:gap-16">
-              {steps.map(({ num, Icon, title, desc }, i) => {
-                const isLeft = i % 2 === 0;
-                return (
-                  <div key={num} className="relative flex flex-col items-center md:flex-row">
-                    <div className={`hidden w-5/12 md:block ${isLeft ? "pr-10 text-right" : "order-3 pl-10 text-left"}`}>
-                      <Card className="border-none bg-muted/50 shadow-none">
-                        <CardContent className="p-6">
-                          <Icon className="mb-3 inline-block h-7 w-7 text-primary" />
-                          <h3 className="text-xl font-heading font-semibold text-foreground">{title}</h3>
-                          <p className="mt-2 text-muted-foreground">{desc}</p>
-                        </CardContent>
-                      </Card>
-                    </div>
-                    <div className="z-10 flex h-12 w-12 shrink-0 items-center justify-center rounded-full bg-primary text-lg font-bold text-primary-foreground shadow-md md:order-2">
-                      {num}
-                    </div>
-                    <div className={`hidden w-5/12 md:block ${isLeft ? "order-3" : ""}`} />
-                    <Card className="mt-4 w-full border-none bg-muted/50 shadow-none md:hidden">
-                      <CardContent className="flex flex-col items-center p-6 text-center">
-                        <Icon className="mb-3 h-7 w-7 text-primary" />
-                        <h3 className="text-xl font-heading font-semibold text-foreground">{title}</h3>
-                        <p className="mt-2 text-muted-foreground">{desc}</p>
-                      </CardContent>
-                    </Card>
-                  </div>
-                );
-              })}
-            </div>
-          </div>
-        </div>
-      </section>
+/* ------------------------------------------------------------------ */
+/*  Data                                                               */
+/* ------------------------------------------------------------------ */
+const steps = [
+  { num: 1, Icon: Search, title: "Browse & Choose", desc: "Explore our range of wheelchairs, scooters, and rollators" },
+  { num: 2, Icon: CalendarDays, title: "Select Your Dates", desc: "Pick your rental start and end dates" },
+  { num: 3, Icon: CreditCard, title: "Book & Pay Online", desc: "Enter your hotel details and pay securely via Stripe" },
+  { num: 4, Icon: Truck, title: "We Deliver", desc: "Equipment arrives at your hotel, sanitized and ready" },
+  { num: 5, Icon: Smile, title: "Enjoy Athens", desc: "Explore freely, we pick up when you're done" },
+];
 
-      {/* Pricing */}
-      <section className="bg-muted/40 py-16 md:py-24">
-        <div className="container">
-          <h2 className="text-center text-3xl font-heading font-bold text-foreground md:text-4xl">{t("howItWorksPage.pricingTitle")}</h2>
-          <p className="mx-auto mt-4 max-w-2xl text-center text-muted-foreground">{t("howItWorksPage.pricingSubtitle")}</p>
+const zones = [
+  {
+    Icon: MapPin,
+    name: "Athens City Center",
+    areas: "Plaka, Syntagma, Monastiraki, Kolonaki",
+    fee: "FREE",
+    color: "bg-green-100 text-green-800 dark:bg-green-900/40 dark:text-green-300",
+  },
+  {
+    Icon: MapPin,
+    name: "Greater Athens",
+    areas: "Kifisia, Glyfada, Marousi, Piraeus suburbs",
+    fee: "€15",
+    color: "bg-blue-100 text-blue-800 dark:bg-blue-900/40 dark:text-blue-300",
+  },
+  {
+    Icon: Ship,
+    name: "Piraeus Port",
+    areas: "Cruise terminal & ferry port",
+    fee: "€20",
+    color: "bg-blue-100 text-blue-800 dark:bg-blue-900/40 dark:text-blue-300",
+  },
+  {
+    Icon: Plane,
+    name: "Athens Airport",
+    areas: "Eleftherios Venizelos (ATH)",
+    fee: "€25",
+    color: "bg-blue-100 text-blue-800 dark:bg-blue-900/40 dark:text-blue-300",
+  },
+];
 
-          <div className="mx-auto mt-12 grid max-w-4xl gap-6 sm:grid-cols-3">
-            {pricingCards.map((c) => (
-              <Card key={c.label} className="border border-border bg-card shadow-sm">
-                <CardContent className="flex flex-col p-8">
-                  <span className="text-sm font-semibold uppercase tracking-wider text-primary">{c.label}</span>
-                  <ul className="mt-4 space-y-2">
-                    {c.items.map((item) => (
-                      <li key={item} className="text-sm text-foreground">{item}</li>
-                    ))}
-                  </ul>
-                </CardContent>
-              </Card>
+const faqs = [
+  { q: "How far in advance should I book?", a: "We recommend 48 hours, but same-day delivery is often available." },
+  { q: "What payment methods do you accept?", a: "All major credit cards via Stripe (Visa, Mastercard, Amex, Apple Pay, Google Pay)." },
+  { q: "Can I modify or cancel my booking?", a: "Free cancellation up to 48 hours before delivery. Contact us to modify." },
+  { q: "Do you deliver to Airbnbs and cruise ships?", a: "Yes! We deliver to any accommodation in Athens, including Airbnbs, hotels, and cruise terminals." },
+  { q: "What if the equipment doesn't work?", a: "Contact us immediately — we'll replace it within hours at no extra charge." },
+];
+
+/* ------------------------------------------------------------------ */
+/*  Component                                                          */
+/* ------------------------------------------------------------------ */
+const HowItWorks = () => (
+  <>
+    <SEOHead
+      title="How It Works – Rent Mobility Equipment in Athens | Movability"
+      description="Book online, we deliver to your hotel, enjoy Athens, we pick up. Simple wheelchair & scooter rental in 5 easy steps."
+    />
+
+    {/* ── Hero ── */}
+    <section className="relative overflow-hidden bg-gradient-to-br from-primary/10 via-background to-background py-20 md:py-28">
+      <div className="container relative z-10 flex flex-col items-center text-center">
+        <h1 className="max-w-3xl text-4xl font-heading font-extrabold tracking-tight text-foreground md:text-5xl lg:text-6xl">
+          Renting Made Simple
+        </h1>
+        <p className="mt-6 max-w-2xl text-lg text-muted-foreground md:text-xl">
+          From browsing to exploring Athens — five easy steps, zero hassle.
+        </p>
+      </div>
+      <div className="pointer-events-none absolute -right-32 -top-32 h-96 w-96 rounded-full bg-primary/5 blur-3xl" />
+      <div className="pointer-events-none absolute -bottom-24 -left-24 h-72 w-72 rounded-full bg-secondary/10 blur-3xl" />
+    </section>
+
+    {/* ── Timeline Steps ── */}
+    <section className="bg-background py-16 md:py-24">
+      <div className="container">
+        <Reveal>
+          <h2 className="text-center text-3xl font-heading font-bold text-foreground md:text-4xl">
+            How It Works
+          </h2>
+        </Reveal>
+
+        {/* Desktop: horizontal timeline */}
+        <div className="relative mt-16 hidden md:block">
+          {/* Connecting line */}
+          <div className="absolute left-0 right-0 top-6 h-0.5 border-t-2 border-dashed border-primary/30" />
+
+          <div className="grid grid-cols-5 gap-4">
+            {steps.map(({ num, Icon, title, desc }, i) => (
+              <Reveal key={num} className="flex flex-col items-center text-center" style-delay>
+                <div className="relative z-10 flex h-12 w-12 items-center justify-center rounded-full bg-primary text-lg font-bold text-primary-foreground shadow-md ring-4 ring-background">
+                  {num}
+                </div>
+                <Icon className="mt-5 h-7 w-7 text-primary/70" />
+                <h3 className="mt-3 text-base font-heading font-semibold text-foreground">{title}</h3>
+                <p className="mt-1 text-sm text-muted-foreground">{desc}</p>
+              </Reveal>
             ))}
           </div>
-
-          <p className="mx-auto mt-8 max-w-xl text-center text-sm text-muted-foreground">
-            {t("howItWorksPage.pricingNote")}{" "}
-            <Link to="/equipment" className="font-medium text-primary underline underline-offset-2">
-              {t("howItWorksPage.equipmentPage")}
-            </Link>
-            .
-          </p>
         </div>
-      </section>
 
-      {/* Delivery zones */}
-      <section className="bg-background py-16 md:py-24">
-        <div className="container">
-          <h2 className="text-center text-3xl font-heading font-bold text-foreground md:text-4xl">{t("howItWorksPage.deliveryTitle")}</h2>
+        {/* Mobile: vertical timeline */}
+        <div className="relative mt-12 md:hidden">
+          {/* Vertical dashed line */}
+          <div className="absolute bottom-0 left-6 top-0 w-0.5 border-l-2 border-dashed border-primary/30" />
 
-          <div className="mx-auto mt-12 grid max-w-6xl gap-6 sm:grid-cols-2 lg:grid-cols-5">
-            {zones.map((z) => (
-              <Card key={z.name} className="border border-border bg-card text-center shadow-sm">
+          <div className="flex flex-col gap-10">
+            {steps.map(({ num, Icon, title, desc }) => (
+              <Reveal key={num} className="relative flex gap-5">
+                <div className="relative z-10 flex h-12 w-12 shrink-0 items-center justify-center rounded-full bg-primary text-lg font-bold text-primary-foreground shadow-md ring-4 ring-background">
+                  {num}
+                </div>
+                <div>
+                  <Icon className="mb-1 h-5 w-5 text-primary/70" />
+                  <h3 className="text-lg font-heading font-semibold text-foreground">{title}</h3>
+                  <p className="mt-1 text-sm text-muted-foreground">{desc}</p>
+                </div>
+              </Reveal>
+            ))}
+          </div>
+        </div>
+      </div>
+    </section>
+
+    {/* ── Delivery Zones ── */}
+    <section className="bg-muted/40 py-16 md:py-24">
+      <div className="container">
+        <Reveal>
+          <h2 className="text-center text-3xl font-heading font-bold text-foreground md:text-4xl">
+            Delivery Zones
+          </h2>
+          <p className="mx-auto mt-4 max-w-2xl text-center text-muted-foreground">
+            We deliver directly to your hotel, Airbnb, cruise terminal, or the airport.
+          </p>
+        </Reveal>
+
+        <div className="mx-auto mt-12 grid max-w-4xl gap-6 sm:grid-cols-2 lg:grid-cols-4">
+          {zones.map((z) => (
+            <Reveal key={z.name}>
+              <Card className="h-full border border-border bg-card text-center shadow-sm transition-all duration-200 hover:-translate-y-1 hover:shadow-md">
                 <CardContent className="flex flex-col items-center p-6">
-                  <z.Icon className="h-7 w-7 text-muted-foreground" />
+                  <z.Icon className="h-8 w-8 text-primary" />
                   <h3 className="mt-3 text-base font-heading font-semibold text-foreground">{z.name}</h3>
                   <p className="mt-1 text-xs text-muted-foreground">{z.areas}</p>
-                  <span className="mt-4 inline-block rounded-full bg-muted px-4 py-1 text-sm font-semibold text-foreground">{z.fee}</span>
-                  {z.note && <span className="mt-1 text-xs italic text-muted-foreground">{z.note}</span>}
+                  <span className={`mt-4 inline-block rounded-full px-4 py-1 text-sm font-bold ${z.color}`}>
+                    {z.fee}
+                  </span>
                 </CardContent>
               </Card>
-            ))}
-          </div>
-
-          <p className="mx-auto mt-8 max-w-xl text-center text-sm text-muted-foreground">{t("howItWorksPage.deliveryNote")}</p>
+            </Reveal>
+          ))}
         </div>
-      </section>
 
-      {/* FAQ */}
-      <section className="bg-muted/40 py-16 md:py-24">
-        <div className="container max-w-2xl">
-          <h2 className="text-center text-3xl font-heading font-bold text-foreground md:text-4xl">{t("howItWorksPage.faqTitle")}</h2>
+        <Reveal>
+          <p className="mx-auto mt-8 flex max-w-md items-center justify-center gap-2 text-center text-sm text-muted-foreground">
+            <CheckCircle className="h-4 w-4 shrink-0 text-green-600" />
+            Pickup is always free from all zones
+          </p>
+        </Reveal>
+      </div>
+    </section>
 
-          <Accordion type="single" collapsible className="mt-10">
-            {faqs.map((f, i) => (
-              <AccordionItem key={i} value={`faq-${i}`}>
-                <AccordionTrigger className="text-left text-base font-medium text-foreground">{f.q}</AccordionTrigger>
-                <AccordionContent className="text-muted-foreground">{f.a}</AccordionContent>
-              </AccordionItem>
-            ))}
-          </Accordion>
+    {/* ── FAQ ── */}
+    <section className="bg-background py-16 md:py-24">
+      <div className="container max-w-2xl">
+        <Reveal>
+          <h2 className="text-center text-3xl font-heading font-bold text-foreground md:text-4xl">
+            Booking Questions
+          </h2>
+        </Reveal>
 
-          <div className="mt-8 text-center">
-            <Button asChild variant="link" className="gap-1">
-              <Link to="/faq">{t("howItWorksPage.viewAllFaqs")} <ArrowRight className="h-4 w-4" /></Link>
-            </Button>
-          </div>
-        </div>
-      </section>
+        <Accordion type="single" collapsible className="mt-10">
+          {faqs.map((f, i) => (
+            <AccordionItem key={i} value={`faq-${i}`}>
+              <AccordionTrigger className="text-left text-base font-medium text-foreground">
+                {f.q}
+              </AccordionTrigger>
+              <AccordionContent className="text-muted-foreground">
+                {f.a}
+              </AccordionContent>
+            </AccordionItem>
+          ))}
+        </Accordion>
 
-      {/* Bottom CTA */}
-      <section className="bg-primary py-16 md:py-20">
-        <div className="container flex flex-col items-center text-center">
-          <h2 className="text-3xl font-heading font-bold text-primary-foreground md:text-4xl">{t("howItWorksPage.readyToBook")}</h2>
-          <Button asChild size="lg" variant="secondary" className="mt-8 rounded-xl px-8 text-base font-semibold">
-            <Link to="/equipment">{t("howItWorksPage.browseEquipment")}</Link>
+        <div className="mt-8 text-center">
+          <Button asChild variant="link" className="gap-1">
+            <Link to="/faq">
+              View all FAQs <ArrowRight className="h-4 w-4" />
+            </Link>
           </Button>
         </div>
-      </section>
-    </>
-  );
-};
+      </div>
+    </section>
+
+    {/* ── Bottom CTA ── */}
+    <section className="bg-primary py-16 md:py-20">
+      <div className="container flex flex-col items-center text-center">
+        <h2 className="text-3xl font-heading font-bold text-primary-foreground md:text-4xl">
+          Ready to Explore Athens?
+        </h2>
+        <p className="mt-4 max-w-lg text-primary-foreground/80">
+          Browse our equipment, pick your dates, and we'll handle the rest.
+        </p>
+        <Button asChild size="lg" variant="secondary" className="mt-8 rounded-xl px-8 text-base font-semibold">
+          <Link to="/equipment">Browse Equipment</Link>
+        </Button>
+      </div>
+    </section>
+  </>
+);
 
 export default HowItWorks;
