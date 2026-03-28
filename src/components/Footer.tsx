@@ -32,12 +32,12 @@ const Footer = () => {
           <div className="space-y-4">
             <Link to="/" aria-label="Movability — Home">
                 <img
-                  src="https://lmgpuqgwkiapgpdsxvmb.supabase.co/storage/v1/object/public/assets/LOGO-LIGHT.png"
+                  src="https://lmgpuqgwkiapgpdsxvmb.supabase.co/storage/v1/object/public/assets/LOGO-LIGHT-final.png"
                   alt="Movability"
                   className="h-14 w-auto block dark:hidden"
                 />
                 <img
-                  src="https://lmgpuqgwkiapgpdsxvmb.supabase.co/storage/v1/object/public/assets/LOGO-DARK.png"
+                  src="https://lmgpuqgwkiapgpdsxvmb.supabase.co/storage/v1/object/public/assets/LOGO-DARK-final.png"
                   alt="Movability"
                   className="h-14 w-auto hidden dark:block"
                 />
