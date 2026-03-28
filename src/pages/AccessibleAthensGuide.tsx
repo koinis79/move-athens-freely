@@ -1,6 +1,6 @@
 import { useParams, Navigate } from "react-router-dom";
 import ArticleDetail from "@/components/articles/ArticleDetail";
-import { Article as ArticleSD } from "@/components/StructuredData";
+import { Article as ArticleSD, BreadcrumbList as BreadcrumbSD } from "@/components/StructuredData";
 import { guides } from "@/data/articles";
 
 const AccessibleAthensGuide = () => {
@@ -18,6 +18,14 @@ const AccessibleAthensGuide = () => {
         description={article.excerpt}
         datePublished={article.date}
         image={article.image}
+        slug={article.slug}
+      />
+      <BreadcrumbSD
+        items={[
+          { name: "Home", href: "/" },
+          { name: "Accessible Athens", href: "/accessible-athens" },
+          { name: article.title },
+        ]}
       />
       <ArticleDetail
         article={article}
