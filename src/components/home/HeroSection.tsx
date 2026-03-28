@@ -4,7 +4,7 @@ import { CheckCircle } from "lucide-react";
 import { useTranslation } from "react-i18next";
 
 const HERO_IMG =
-  "https://lmgpuqgwkiapgpdsxvmb.supabase.co/storage/v1/object/public/assets/hero-wheelchair-acropolis.png";
+  "https://lmgpuqgwkiapgpdsxvmb.supabase.co/storage/v1/object/public/assets/hero-wheelchair-acropolis.png.png";
 
 const HeroSection = () => {
   const { t } = useTranslation();
