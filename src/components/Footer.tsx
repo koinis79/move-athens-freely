@@ -37,7 +37,7 @@ const Footer = () => {
                   className="h-14 w-auto block dark:hidden"
                 />
                 <img
-                  src="https://lmgpuqgwkiapgpdsxvmb.supabase.co/storage/v1/object/public/assets/LOGO-DARK-final.png"
+                  src="https://lmgpuqgwkiapgpdsxvmb.supabase.co/storage/v1/object/public/assets/LOGO-DARK-final2.png"
                   alt="Movability"
                   className="h-14 w-auto hidden dark:block"
                 />
