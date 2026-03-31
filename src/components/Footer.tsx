@@ -27,7 +27,7 @@ const Footer = () => {
   return (
     <footer role="contentinfo" style={{ backgroundColor: "hsl(var(--footer-bg))", color: footerFg }}>
       <div className="container py-16">
-        <div className="grid grid-cols-1 gap-10 sm:grid-cols-2 lg:grid-cols-4">
+        <div className="grid grid-cols-1 gap-10 sm:grid-cols-2 lg:grid-cols-5">
           {/* Brand */}
           <div className="space-y-4">
             <Link to="/" aria-label="Movability — Home">
@@ -87,13 +87,26 @@ const Footer = () => {
             </ul>
           </div>
 
+          {/* Popular Guides */}
+          <div>
+            <h3 className="font-heading text-sm font-semibold uppercase tracking-wider mb-4" style={{ color: footerFg50 }}>
+              Popular Guides
+            </h3>
+            <ul className="space-y-2.5">
+              <li><Link to="/accessible-athens/acropolis-wheelchair-guide" className="text-sm hover:underline transition-colors" style={{ color: footerFg70 }}>Acropolis Wheelchair Guide</Link></li>
+              <li><Link to="/accessible-athens/accessible-restaurants-bars-athens" className="text-sm hover:underline transition-colors" style={{ color: footerFg70 }}>Accessible Restaurants</Link></li>
+              <li><Link to="/accessible-athens/athens-airport-wheelchair-guide" className="text-sm hover:underline transition-colors" style={{ color: footerFg70 }}>Athens Airport Guide</Link></li>
+              <li><Link to="/accessible-athens/accessible-beaches-athens" className="text-sm hover:underline transition-colors" style={{ color: footerFg70 }}>Accessible Beaches</Link></li>
+            </ul>
+          </div>
+
           {/* Contact */}
           <div>
             <h3 className="font-heading text-sm font-semibold uppercase tracking-wider mb-4" style={{ color: footerFg50 }}>
               {t("footer.contactTitle")}
             </h3>
             <ul className="space-y-2.5 text-sm" style={{ color: footerFg70 }}>
-              <li><a href="mailto:info@moveability.gr" className="hover:opacity-100 transition-colors">info@moveability.gr</a></li>
+              <li><a href="mailto:info@movability.gr" className="hover:opacity-100 transition-colors">info@movability.gr</a></li>
               <li><a href="tel:+302109511750" className="hover:opacity-100 transition-colors">+30 210 95 11 750</a></li>
               <li>
                 <a href="https://wa.me/302109511750" target="_blank" rel="noopener noreferrer" className="hover:opacity-100 transition-colors inline-flex items-center gap-1.5">
