@@ -4,7 +4,7 @@ import { CheckCircle } from "lucide-react";
 import { useTranslation } from "react-i18next";
 
 const HERO_IMG =
-  "https://lmgpuqgwkiapgpdsxvmb.supabase.co/storage/v1/object/public/assets/HERO%20IMAGE%20MOVABILITY.png";
+  "https://lmgpuqgwkiapgpdsxvmb.supabase.co/storage/v1/object/public/assets/wheelchair-user-acropolis-view-athens.png";
 
 const HeroSection = () => {
   const { t } = useTranslation();
@@ -20,7 +20,7 @@ const HeroSection = () => {
       {/* Background image */}
       <img
         src={HERO_IMG}
-        alt="Wheelchair traveler enjoying the view of the Acropolis in Athens"
+        alt="Wheelchair user enjoying panoramic view of the Acropolis in Athens"
         className="absolute inset-0 h-full w-full object-cover object-right-center"
       />
 
