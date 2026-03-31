@@ -75,7 +75,7 @@ const sections = [
       },
       {
         q: "What if the equipment breaks during my trip?",
-        a: "Contact us immediately via WhatsApp (+30 210 95 11 750) or phone. We'll arrange a free replacement within hours — no extra charge.",
+        a: "Contact us immediately via WhatsApp (+30 697 463 3697) or phone. We'll arrange a free replacement within hours — no extra charge.",
       },
       {
         q: "Can I try the equipment before renting?",
@@ -167,7 +167,7 @@ const FAQ = () => (
             className="gap-2 rounded-xl px-8 text-base font-semibold"
           >
             <a
-              href="https://wa.me/302109511750"
+              href="https://wa.me/306974633697?text=Hi!%20I%27m%20interested%20in%20renting%20mobility%20equipment%20in%20Athens."
               target="_blank"
               rel="noopener noreferrer"
             >
