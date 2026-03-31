@@ -7,21 +7,24 @@ const categories = [
     titleKey: "equipmentSection.manualWheelchairs",
     price: "10",
     slug: "wheelchairs",
-    image: "https://lmgpuqgwkiapgpdsxvmb.supabase.co/storage/v1/object/public/assets/IMAGE%20WHEELCHAIR.png",
+    image: "https://lmgpuqgwkiapgpdsxvmb.supabase.co/storage/v1/object/public/assets/wheelchair-rental-plaka-athens.png",
+    alt: "Wheelchair rental in Plaka, Athens - elderly woman exploring with caregiver",
     objectPosition: "object-top",
   },
   {
     titleKey: "equipmentSection.mobilityScooters",
     price: "25",
     slug: "mobility-scooters",
-    image: "https://lmgpuqgwkiapgpdsxvmb.supabase.co/storage/v1/object/public/assets/SCOOTER%20IMAGE.png",
+    image: "https://lmgpuqgwkiapgpdsxvmb.supabase.co/storage/v1/object/public/assets/mobility-scooter-acropolis-athens.png",
+    alt: "Mobility scooter rental near Acropolis, Athens - tourist exploring independently",
     objectPosition: "object-center",
   },
   {
     titleKey: "equipmentSection.rollatorsWalkers",
     price: "5",
     slug: "walking-aids",
-    image: "https://lmgpuqgwkiapgpdsxvmb.supabase.co/storage/v1/object/public/assets/ROLATOR%20IIMAGE.png",
+    image: "https://lmgpuqgwkiapgpdsxvmb.supabase.co/storage/v1/object/public/assets/rollator-walker-piraeus-harbor.png",
+    alt: "Rollator walker rental at Piraeus harbor, Athens - senior enjoying waterfront",
     objectPosition: "object-center",
   },
 ];
@@ -37,11 +40,11 @@ const EquipmentSection = () => {
         </h2>
 
         <div className="mt-12 grid gap-6 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 max-w-5xl mx-auto">
-          {categories.map(({ titleKey, price, slug, image, objectPosition }) => (
+          {categories.map(({ titleKey, price, slug, image, alt, objectPosition }) => (
             <Link key={slug} to={`/equipment/${slug}`} className="group">
               <Card className="overflow-hidden transition-all duration-200 hover:-translate-y-1 hover:shadow-lg">
                 <div className="aspect-[3/4] bg-muted flex items-center justify-center">
-                  <img src={image} alt={t(titleKey)} className={`h-full w-full object-cover ${objectPosition}`} loading="lazy" />
+                  <img src={image} alt={alt || t(titleKey)} className={`h-full w-full object-cover ${objectPosition}`} loading="lazy" />
                 </div>
                 <CardContent className="p-5">
                   <h3 className="text-lg font-heading font-semibold text-foreground group-hover:text-primary transition-colors">
