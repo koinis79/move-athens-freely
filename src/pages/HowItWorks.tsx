@@ -10,11 +10,10 @@ import {
   AccordionTrigger,
 } from "@/components/ui/accordion";
 import {
-  Search,
-  CalendarDays,
-  CreditCard,
+  MousePointerClick,
   Truck,
-  Smile,
+  Compass,
+  PackageCheck,
   MapPin,
   Ship,
   Plane,
@@ -59,11 +58,34 @@ function Reveal({ children, className = "" }: { children: React.ReactNode; class
 /*  Data                                                               */
 /* ------------------------------------------------------------------ */
 const steps = [
-  { num: 1, Icon: Search, title: "Browse & Choose", desc: "Explore our range of wheelchairs, scooters, and rollators" },
-  { num: 2, Icon: CalendarDays, title: "Select Your Dates", desc: "Pick your rental start and end dates" },
-  { num: 3, Icon: CreditCard, title: "Book & Pay Online", desc: "Enter your hotel details and pay securely via Stripe" },
-  { num: 4, Icon: Truck, title: "We Deliver", desc: "Equipment arrives at your hotel, sanitized and ready" },
-  { num: 5, Icon: Smile, title: "Enjoy Athens", desc: "Explore freely, we pick up when you're done" },
+  {
+    num: 1,
+    Icon: MousePointerClick,
+    title: "Book in 2 Minutes",
+    desc: "Choose your equipment, select your dates, and tell us your location — hotel, Airbnb, or airport.",
+    trust: "No account required. Instant confirmation.",
+  },
+  {
+    num: 2,
+    Icon: Truck,
+    title: "We Deliver & Set Everything Up",
+    desc: "Your equipment arrives directly at your accommodation, fully adjusted to your needs.",
+    trust: "We ensure everything works perfectly before we leave.",
+  },
+  {
+    num: 3,
+    Icon: Compass,
+    title: "Enjoy Athens Without Stress",
+    desc: "Explore freely with reliable equipment. Need help? We’re a message away.",
+    trust: "We can guide you on accessible routes — like the Acropolis elevator access.",
+  },
+  {
+    num: 4,
+    Icon: PackageCheck,
+    title: "We Pick It Up",
+    desc: "When your rental ends, we collect the equipment from your location. That’s it.",
+    trust: "Flexible pickup times based on your schedule.",
+  },
 ];
 
 const zones = [
@@ -143,15 +165,20 @@ const HowItWorks = () => (
           {/* Connecting line */}
           <div className="absolute left-0 right-0 top-6 h-0.5 border-t-2 border-dashed border-primary/30" />
 
-          <div className="grid grid-cols-5 gap-4">
-            {steps.map(({ num, Icon, title, desc }, i) => (
-              <Reveal key={num} className="flex flex-col items-center text-center" style-delay>
+          <div className="grid grid-cols-4 gap-6">
+            {steps.map(({ num, Icon, title, desc, trust }) => (
+              <Reveal key={num} className="flex flex-col items-center text-center">
                 <div className="relative z-10 flex h-12 w-12 items-center justify-center rounded-full bg-primary text-lg font-bold text-primary-foreground shadow-md ring-4 ring-background">
                   {num}
                 </div>
                 <Icon className="mt-5 h-7 w-7 text-primary/70" />
                 <h3 className="mt-3 text-base font-heading font-semibold text-foreground">{title}</h3>
                 <p className="mt-1 text-sm text-muted-foreground">{desc}</p>
+                {trust && (
+                  <p className="mt-2 flex items-center gap-1 text-xs text-primary">
+                    <span>✓</span> {trust}
+                  </p>
+                )}
               </Reveal>
             ))}
           </div>
@@ -163,7 +190,7 @@ const HowItWorks = () => (
           <div className="absolute bottom-0 left-6 top-0 w-0.5 border-l-2 border-dashed border-primary/30" />
 
           <div className="flex flex-col gap-10">
-            {steps.map(({ num, Icon, title, desc }) => (
+            {steps.map(({ num, Icon, title, desc, trust }) => (
               <Reveal key={num} className="relative flex gap-5">
                 <div className="relative z-10 flex h-12 w-12 shrink-0 items-center justify-center rounded-full bg-primary text-lg font-bold text-primary-foreground shadow-md ring-4 ring-background">
                   {num}
@@ -172,6 +199,11 @@ const HowItWorks = () => (
                   <Icon className="mb-1 h-5 w-5 text-primary/70" />
                   <h3 className="text-lg font-heading font-semibold text-foreground">{title}</h3>
                   <p className="mt-1 text-sm text-muted-foreground">{desc}</p>
+                  {trust && (
+                    <p className="mt-2 flex items-center gap-1 text-xs text-primary">
+                      <span>✓</span> {trust}
+                    </p>
+                  )}
                 </div>
               </Reveal>
             ))}
