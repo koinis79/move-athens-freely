@@ -486,7 +486,7 @@ We've personally visited and checked the accessibility of every restaurant on th
     excerpt:
       "Yes, the Acropolis is wheelchair accessible! Free elevator, paved paths, free entry. Our complete guide with tips, routes, and what to expect.",
     date: "2026-03-15",
-    image: "https://lmgpuqgwkiapgpdsxvmb.supabase.co/storage/v1/object/public/assets/SCOOTER%20IMAGE.png",
+    image: "https://lmgpuqgwkiapgpdsxvmb.supabase.co/storage/v1/object/public/assets/mobility-scooter-acropolis-athens.png",
     category: "Attractions",
     takeaways: [
       "The Acropolis has a free elevator and paved accessible pathways — wheelchair users can visit independently",
