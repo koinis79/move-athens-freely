@@ -60,13 +60,13 @@ const Header = () => {
       <div className="container flex h-[var(--header-height)] items-center justify-between">
         <Link to="/" aria-label="Movability — Home" className="flex-shrink-0 mr-3">
           <img
-            src="https://lmgpuqgwkiapgpdsxvmb.supabase.co/storage/v1/object/public/assets/LOGO-LIGHT-final.png"
-            alt="Movability"
+            src="https://lmgpuqgwkiapgpdsxvmb.supabase.co/storage/v1/object/public/assets/movability-logo.png"
+            alt="Movability - Wheelchair and mobility equipment rental in Athens"
             className="h-11 lg:h-14 w-auto block dark:hidden"
           />
           <img
-            src="https://lmgpuqgwkiapgpdsxvmb.supabase.co/storage/v1/object/public/assets/LOGO-DARK-final2.png"
-            alt="Movability"
+            src="https://lmgpuqgwkiapgpdsxvmb.supabase.co/storage/v1/object/public/assets/movability-logo-dark.png"
+            alt="Movability - Wheelchair and mobility equipment rental in Athens"
             className="h-11 lg:h-14 w-auto hidden dark:block"
           />
         </Link>
