@@ -305,7 +305,7 @@ const Checkout = () => {
               ? { Authorization: `Bearer ${supabaseSession.access_token}` }
               : {}),
           },
-          body: JSON.stringify({ booking_number: bookingNumber }),
+          body: JSON.stringify({ booking_number: bookingNumber, customer_email: customer.email.trim() }),
         }
       );
 

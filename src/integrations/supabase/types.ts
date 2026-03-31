@@ -169,6 +169,7 @@ export type Database = {
           payment_status: string
           rental_end: string
           rental_start: string
+          review_requested_at: string | null
           special_requirements: string | null
           status: string
           stripe_payment_intent_id: string | null
@@ -197,6 +198,7 @@ export type Database = {
           payment_status?: string
           rental_end: string
           rental_start: string
+          review_requested_at?: string | null
           special_requirements?: string | null
           status?: string
           stripe_payment_intent_id?: string | null
@@ -225,6 +227,7 @@ export type Database = {
           payment_status?: string
           rental_end?: string
           rental_start?: string
+          review_requested_at?: string | null
           special_requirements?: string | null
           status?: string
           stripe_payment_intent_id?: string | null

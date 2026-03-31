@@ -81,12 +81,12 @@ const AdminBookings = () => {
       .select(`
         id, booking_number, customer_name, customer_email, customer_phone,
         delivery_address, delivery_notes, rental_start, rental_end,
-        total_amount, payment_status, status, internal_notes, review_requested_at,
+        total_amount, payment_status, status, internal_notes,
         delivery_zones ( name_en, delivery_fee ),
         booking_items ( quantity, num_days, subtotal, equipment ( name_en ) )
       `)
       .order("created_at", { ascending: false });
-    setBookings((data as Booking[]) ?? []);
+    setBookings((data as unknown as Booking[]) ?? []);
     setLoading(false);
   };
 

@@ -12,9 +12,9 @@ Deno.serve(async (req) => {
   }
 
   try {
-    const { booking_number } = await req.json();
-    if (!booking_number) {
-      return new Response(JSON.stringify({ error: "booking_number required" }), {
+    const { booking_number, customer_email } = await req.json();
+    if (!booking_number || !customer_email) {
+      return new Response(JSON.stringify({ error: "booking_number and customer_email required" }), {
         status: 400,
         headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
@@ -26,7 +26,7 @@ Deno.serve(async (req) => {
       Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!,
     );
 
-    // Fetch booking with items
+    // Fetch booking with items — also verify customer_email matches
     const { data: booking, error: bookingErr } = await supabase
       .from("bookings")
       .select(`
@@ -46,17 +46,12 @@ Deno.serve(async (req) => {
         )
       `)
       .eq("booking_number", booking_number)
+      .eq("customer_email", customer_email)
       .single();
 
-    if (bookingErr || !booking) {
-      return new Response(JSON.stringify({ error: "Booking not found" }), {
-        status: 404,
-        headers: { ...corsHeaders, "Content-Type": "application/json" },
-      });
-    }
-
-    if (booking.payment_status === "paid") {
-      return new Response(JSON.stringify({ error: "Booking already paid" }), {
+    // Normalize error responses — don't reveal whether booking exists or is already paid
+    if (bookingErr || !booking || booking.payment_status === "paid") {
+      return new Response(JSON.stringify({ error: "Unable to process this booking" }), {
         status: 400,
         headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
@@ -79,7 +74,6 @@ Deno.serve(async (req) => {
         product_data: {
           name: `${item.equipment?.name_en ?? "Equipment"} — ${item.num_days} day${item.num_days !== 1 ? "s" : ""}`,
         },
-        // unit_amount = price per single unit in cents
         unit_amount: Math.round((item.subtotal / item.quantity) * 100),
       },
       quantity: item.quantity,
@@ -124,7 +118,7 @@ Deno.serve(async (req) => {
     });
   } catch (err) {
     console.error("create-checkout-session error:", err);
-    return new Response(JSON.stringify({ error: (err as Error).message }), {
+    return new Response(JSON.stringify({ error: "Internal server error" }), {
       status: 500,
       headers: { ...corsHeaders, "Content-Type": "application/json" },
     });

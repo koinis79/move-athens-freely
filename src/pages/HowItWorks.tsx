@@ -19,6 +19,11 @@ import {
   Plane,
   ArrowRight,
   CheckCircle,
+  HelpCircle,
+  Wrench,
+  CalendarPlus,
+  XCircle,
+  Phone,
 } from "lucide-react";
 
 /* ------------------------------------------------------------------ */
