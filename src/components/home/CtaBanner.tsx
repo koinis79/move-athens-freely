@@ -18,7 +18,7 @@ const CtaBanner = () => {
 
         <div className="mt-8 flex flex-col gap-4 sm:flex-row">
           <Button asChild size="lg" className="rounded-xl bg-accent px-8 text-base font-semibold text-accent-foreground hover:bg-accent/90">
-            <a href="https://wa.me/302109511750?text=Hi!%20I'm%20interested%20in%20renting%20mobility%20equipment%20in%20Athens." target="_blank" rel="noopener noreferrer">
+            <a href="https://wa.me/306974633697?text=Hi!%20I%27m%20interested%20in%20renting%20mobility%20equipment%20in%20Athens." target="_blank" rel="noopener noreferrer">
               <MessageCircle className="mr-2 h-5 w-5" />
               {t("ctaBanner.chatWhatsApp")}
             </a>
