@@ -1,7 +1,7 @@
 import { Helmet } from "react-helmet-async";
 
 const SITE = "https://movability.gr";
-const LOGO = "https://lmgpuqgwkiapgpdsxvmb.supabase.co/storage/v1/object/public/assets/LOGO-LIGHT-final.png";
+const LOGO = "https://lmgpuqgwkiapgpdsxvmb.supabase.co/storage/v1/object/public/assets/movability-logo.png";
 
 function JsonLd({ data }: { data: Record<string, unknown> }) {
   return (
