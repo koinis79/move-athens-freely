@@ -218,6 +218,77 @@ const HowItWorks = () => (
       </div>
     </section>
 
+
+    {/* ── What If Something Goes Wrong? ── */}
+    <section className="bg-background py-16 md:py-24">
+      <div className="container">
+        <Reveal>
+          <h2 className="text-center text-3xl font-heading font-bold text-foreground md:text-4xl">
+            What If Something Goes Wrong?
+          </h2>
+          <p className="mx-auto mt-4 max-w-2xl text-center text-muted-foreground">
+            We've got you covered. Here's how we handle the unexpected.
+          </p>
+        </Reveal>
+
+        <div className="mx-auto mt-12 grid max-w-5xl gap-6 sm:grid-cols-2 lg:grid-cols-3">
+          {[
+            {
+              Icon: Plane,
+              scenario: "\u201cMy flight is delayed\u201d",
+              solution:
+                "No problem \u2014 we reschedule delivery to whenever you arrive. Just message us.",
+            },
+            {
+              Icon: HelpCircle,
+              scenario: "\u201cI\u2019m not sure which equipment I need\u201d",
+              solution:
+                "Tell us about your trip and mobility needs \u2014 we\u2019ll recommend the perfect fit.",
+            },
+            {
+              Icon: Wrench,
+              scenario: "\u201cThe equipment has a problem\u201d",
+              solution:
+                "We\u2019ll replace it within hours, free of charge. Call or WhatsApp us anytime.",
+            },
+            {
+              Icon: CalendarPlus,
+              scenario: "\u201cI need to extend my rental\u201d",
+              solution:
+                "Easy \u2014 just let us know. We\u2019ll extend it and only charge the extra days.",
+            },
+            {
+              Icon: XCircle,
+              scenario: "\u201cI need to cancel\u201d",
+              solution:
+                "Free cancellation up to 48 hours before delivery. Full refund, no questions.",
+            },
+            {
+              Icon: Phone,
+              scenario: "\u201cI have a question during my trip\u201d",
+              solution:
+                "We\u2019re available 7 days a week via WhatsApp, phone, or email. Real humans, fast replies.",
+            },
+          ].map(({ Icon, scenario, solution }) => (
+            <Reveal key={scenario}>
+              <Card className="h-full border border-border bg-card shadow-sm transition-all duration-200 hover:-translate-y-1 hover:shadow-md">
+                <CardContent className="p-6">
+                  <Icon className="h-7 w-7 text-primary" />
+                  <p className="mt-3 text-base font-semibold text-foreground">{scenario}</p>
+                  <p className="mt-2 text-sm text-muted-foreground leading-relaxed">{solution}</p>
+                </CardContent>
+              </Card>
+            </Reveal>
+          ))}
+        </div>
+
+        <Reveal>
+          <p className="mx-auto mt-10 max-w-md text-center text-sm font-medium text-muted-foreground italic">
+            Your trip matters to us. We're here to make it stress-free.
+          </p>
+        </Reveal>
+      </div>
+    </section>
     {/* ── FAQ ── */}
     <section className="bg-background py-16 md:py-24">
       <div className="container max-w-2xl">
