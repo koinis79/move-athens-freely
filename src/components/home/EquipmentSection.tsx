@@ -10,6 +10,8 @@ const categories = [
     image: "https://lmgpuqgwkiapgpdsxvmb.supabase.co/storage/v1/object/public/assets/wheelchair-rental-plaka-athens.png",
     alt: "Wheelchair rental in Plaka, Athens - elderly woman exploring with caregiver",
     objectPosition: "object-top",
+    guideText: "Perfect for visiting the Acropolis",
+    guideHref: "/accessible-athens/acropolis-wheelchair-guide",
   },
   {
     titleKey: "equipmentSection.mobilityScooters",
@@ -18,6 +20,8 @@ const categories = [
     image: "https://lmgpuqgwkiapgpdsxvmb.supabase.co/storage/v1/object/public/assets/mobility-scooter-acropolis-athens.png",
     alt: "Mobility scooter rental near Acropolis, Athens - tourist exploring independently",
     objectPosition: "object-center",
+    guideText: "Great for exploring Athens beaches",
+    guideHref: "/accessible-athens/accessible-beaches-athens",
   },
   {
     titleKey: "equipmentSection.rollatorsWalkers",
@@ -26,6 +30,8 @@ const categories = [
     image: "https://lmgpuqgwkiapgpdsxvmb.supabase.co/storage/v1/object/public/assets/rollator-walker-piraeus-harbor.png",
     alt: "Rollator walker rental at Piraeus harbor, Athens - senior enjoying waterfront",
     objectPosition: "object-center",
+    guideText: "Ideal for strolling through Plaka",
+    guideHref: "/accessible-athens/accessible-restaurants-bars-athens",
   },
 ];
 
@@ -40,7 +46,7 @@ const EquipmentSection = () => {
         </h2>
 
         <div className="mt-12 grid gap-6 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 max-w-5xl mx-auto">
-          {categories.map(({ titleKey, price, slug, image, alt, objectPosition }) => (
+          {categories.map(({ titleKey, price, slug, image, alt, objectPosition, guideText, guideHref }) => (
             <Link key={slug} to={`/equipment/${slug}`} className="group">
               <Card className="overflow-hidden transition-all duration-200 hover:-translate-y-1 hover:shadow-lg">
                 <div className="aspect-[3/4] bg-muted flex items-center justify-center">
@@ -53,6 +59,11 @@ const EquipmentSection = () => {
                   <p className="mt-1 text-sm font-semibold text-secondary">
                     {t("equipmentSection.fromPrice", { price })}
                   </p>
+                  {guideText && (
+                    <p className="mt-2 text-xs text-primary hover:underline">
+                      {guideText} &rarr;
+                    </p>
+                  )}
                 </CardContent>
               </Card>
             </Link>
