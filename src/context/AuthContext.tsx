@@ -15,9 +15,7 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined);
 export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const [session, setSession] = useState<Session | null>(null);
   const [loading, setLoading] = useState(true);
-
-  // TODO: Replace with Supabase RLS check (e.g. supabase.rpc("is_admin"))
-  const isAdmin = true;
+  const [isAdmin, setIsAdmin] = useState(false);
 
   useEffect(() => {
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
@@ -34,6 +32,22 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
     return () => subscription.unsubscribe();
   }, []);
+
+  // Check admin status whenever session changes
+  useEffect(() => {
+    if (!session) {
+      setIsAdmin(false);
+      return;
+    }
+    supabase.rpc('is_admin').then(({ data, error }) => {
+      if (error) {
+        console.error('Failed to check admin status:', error);
+        setIsAdmin(false);
+      } else {
+        setIsAdmin(!!data);
+      }
+    });
+  }, [session]);
 
   const signOut = async () => {
     await supabase.auth.signOut();
