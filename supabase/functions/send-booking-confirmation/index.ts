@@ -188,8 +188,8 @@ function buildHtml(b: Booking): string {
               <table cellpadding="0" cellspacing="0">
                 <tr>
                   <td style="padding:0 0 8px;">
-                    <a href="https://wa.me/302109511750" style="display:inline-flex;align-items:center;gap:8px;text-decoration:none;color:#111827;font-size:15px;">
-                      📱 <strong>WhatsApp:</strong>&nbsp;+30 210 951 1750
+                    <a href="https://wa.me/306974633697?text=Hi!%20I%27m%20interested%20in%20renting%20mobility%20equipment%20in%20Athens." style="display:inline-flex;align-items:center;gap:8px;text-decoration:none;color:#111827;font-size:15px;">
+                      📱 <strong>WhatsApp:</strong>&nbsp;+30 697 463 3697
                     </a>
                   </td>
                 </tr>
