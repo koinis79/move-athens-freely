@@ -1,6 +1,6 @@
 import { useParams, Link } from "react-router-dom";
 import { Badge } from "@/components/ui/badge";
-import { CheckCircle2 } from "lucide-react";
+import { CheckCircle2, MapPin } from "lucide-react";
 import { categoryFilterLabels } from "@/data/equipment";
 import { useEquipmentDetail, useRelatedEquipment } from "@/hooks/useEquipment";
 import ImageGallery from "@/components/equipment/ImageGallery";
@@ -186,6 +186,46 @@ const EquipmentDetail = () => {
             </li>
           ))}
         </ul>
+      </section>
+
+
+      {/* Plan Your Trip */}
+      <section className="mt-12 space-y-4">
+        <h2 className="text-2xl font-heading font-bold text-foreground">
+          Plan Your Accessible Athens Trip
+        </h2>
+        <div className="grid gap-3 sm:grid-cols-3">
+          <Link
+            to="/accessible-athens/acropolis-wheelchair-guide"
+            className="flex items-start gap-3 rounded-xl border border-border bg-card p-4 transition-all hover:-translate-y-0.5 hover:shadow-md"
+          >
+            <MapPin className="mt-0.5 h-5 w-5 shrink-0 text-primary" />
+            <div>
+              <p className="text-sm font-semibold text-foreground">Visiting the Acropolis?</p>
+              <p className="mt-0.5 text-xs text-primary hover:underline">Read our wheelchair accessibility guide &rarr;</p>
+            </div>
+          </Link>
+          <Link
+            to="/accessible-athens/accessible-restaurants-bars-athens"
+            className="flex items-start gap-3 rounded-xl border border-border bg-card p-4 transition-all hover:-translate-y-0.5 hover:shadow-md"
+          >
+            <MapPin className="mt-0.5 h-5 w-5 shrink-0 text-primary" />
+            <div>
+              <p className="text-sm font-semibold text-foreground">Looking for accessible restaurants?</p>
+              <p className="mt-0.5 text-xs text-primary hover:underline">See our top 10 picks &rarr;</p>
+            </div>
+          </Link>
+          <Link
+            to="/accessible-athens/athens-airport-wheelchair-guide"
+            className="flex items-start gap-3 rounded-xl border border-border bg-card p-4 transition-all hover:-translate-y-0.5 hover:shadow-md"
+          >
+            <MapPin className="mt-0.5 h-5 w-5 shrink-0 text-primary" />
+            <div>
+              <p className="text-sm font-semibold text-foreground">Arriving at the airport?</p>
+              <p className="mt-0.5 text-xs text-primary hover:underline">Athens airport accessibility guide &rarr;</p>
+            </div>
+          </Link>
+        </div>
       </section>
 
       {/* Related Equipment */}
