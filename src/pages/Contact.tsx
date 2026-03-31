@@ -78,7 +78,7 @@ const stores = [
   {
     name: "Kallithea",
     address: "Davaki 16, Kallithea",
-    phone: "210 95 11 750",
+    phone: "697 463 3697",
   },
   {
     name: "Chalandri",
@@ -314,12 +314,12 @@ const Contact = () => {
                     WhatsApp
                   </p>
                   <p className="text-sm text-muted-foreground">
-                    +30 210 95 11 750
+                    +30 697 463 3697
                   </p>
                 </div>
                 <Button asChild variant="outline" size="sm" className="shrink-0">
                   <a
-                    href="https://wa.me/302109511750"
+                    href="https://wa.me/306974633697?text=Hi!%20I%27m%20interested%20in%20renting%20mobility%20equipment%20in%20Athens."
                     target="_blank"
                     rel="noopener noreferrer"
                   >
@@ -349,10 +349,10 @@ const Contact = () => {
               <div>
                 <p className="font-semibold text-foreground">Phone</p>
                 <a
-                  href="tel:+302109511750"
+                  href="tel:+306974633697"
                   className="text-sm text-muted-foreground"
                 >
-                  +30 210 95 11 750
+                  +30 697 463 3697
                 </a>
               </div>
             </div>
