@@ -35,7 +35,7 @@ const NotFound = () => {
         <p className="mt-8 text-sm text-muted-foreground">
           Need help?{" "}
           <a
-            href="https://wa.me/302109511750?text=Hi!%20I%20need%20help%20finding%20a%20page%20on%20your%20website."
+            href="https://wa.me/306974633697?text=Hi!%20I%20need%20help%20finding%20a%20page%20on%20your%20website."
             target="_blank"
             rel="noopener noreferrer"
             className="inline-flex items-center gap-1 font-medium text-accent hover:underline"
