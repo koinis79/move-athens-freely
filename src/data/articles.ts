@@ -482,87 +482,116 @@ We've personally visited and checked the accessibility of every restaurant on th
   },
   {
     slug: "acropolis-wheelchair-guide",
-    title: "How to Visit the Acropolis with a Wheelchair",
+    title: "Is the Acropolis Wheelchair Accessible? Complete 2026 Guide",
     excerpt:
-      "Yes, the Acropolis is wheelchair accessible! Free elevator, paved paths, free entry. Our complete guide with tips, routes, and what to expect.",
+      "Yes, the Acropolis is wheelchair accessible. Free elevator, paved paths, free admission. Our local guide covers exactly what to expect \u2014 the good and the limitations.",
     date: "2026-03-15",
     image: "https://lmgpuqgwkiapgpdsxvmb.supabase.co/storage/v1/object/public/assets/mobility-scooter-acropolis-athens.png",
     category: "Attractions",
     takeaways: [
-      "The Acropolis has a free elevator and paved accessible pathways — wheelchair users can visit independently",
-      "Free admission for wheelchair users + 1 companion",
-      "Go early morning to avoid crowds and heat — allow 2-3 hours for a comfortable visit",
+      "Free elevator access to the top \u2014 use the northeast entrance near the Acropolis Museum",
+      "Wheelchair users + 1 companion enter FREE \u2014 no ticket needed",
+      "Go early morning (8-9am) to avoid elevator queues and heat",
     ],
     body: [],
     content: `
 ## Is the Acropolis Wheelchair Accessible?
 
-**Yes!** The Acropolis has been accessible to wheelchair users since 2004 when a dedicated elevator was installed on the north slope. Combined with paved concrete pathways around the summit, visitors using wheelchairs, mobility scooters, and rollators can now experience this iconic site.
+Yes \u2014 and it\u2019s better than most people expect. The Acropolis has a wheelchair lift/elevator that takes you directly to the top. Paved pathways connect the main monuments, and admission is FREE for wheelchair users plus one companion.
 
-## The Accessible Route
+But let\u2019s be honest about limitations: not every corner is accessible, some ancient pathways are uneven, and on crowded days the elevator has a queue. This guide covers exactly what to expect.
 
-### Getting to the Entrance
+## The Accessible Entrance (Don\u2019t Go to the Main Gate)
 
-Skip the main entrance with its steep marble steps. Instead:
+**Important:** The main entrance on the west side has stairs.
 
-1. Head to the **accessible entrance on the east side**, near the Acropolis Museum
-2. Follow the paved pathway to the **North Slope elevator**
-3. The elevator is free and fits standard wheelchairs and most mobility scooters
+Use the **accessible entrance on the northeast side**, near Dionysiou Areopagitou street. Look for signs pointing to the elevator. This entrance is about 300m from the Acropolis Metro station.
 
-### At the Top
+**Address:** Accessible entrance is near the Acropolis Museum, on the path heading up from Makrigianni area.
 
-Wide concrete pathways loop around all the major monuments. The paths have gentle grades and are well-maintained.
+## How the Elevator Works
 
-## What You Can See
+- **Capacity:** Fits 1 wheelchair + 1 companion
+- **Hours:** Same as Acropolis opening hours (8am-8pm summer, 8am-5pm winter)
+- **Cost:** FREE (no ticket needed for wheelchair users + 1 companion)
+- **Wait time:** 5-20 minutes depending on season
+- **Tip:** Go early morning (8-9am) or late afternoon (after 5pm) to avoid queues
 
-- **The Parthenon**: Full accessible loop around the exterior — the most photographed angle is from the northwest corner
-- **The Erechtheion**: Accessible viewing area with the famous Caryatid porch clearly visible
-- **Temple of Athena Nike**: Viewing areas are accessible from the main pathway
-- **The Propylaea**: Partial access to the monumental gateway
+The elevator takes you to the main plateau where the Parthenon sits.
 
-## What to Know Before You Go
+## What You CAN See (Accessible Areas)
 
-### Admission
-- **Free** for visitors with a disability + 1 companion
-- Bring documentation (disability card or letter) — though enforcement is relaxed
+\u2705 **The Parthenon** \u2014 Full view, can get close on paved paths
 
-### Elevator Hours
-- **Summer (April–October)**: 8:00 AM – 8:00 PM
-- **Winter (November–March)**: 8:00 AM – 5:00 PM
-- **Peak season tip**: Call ahead to confirm availability: **+30 210 321 4172**
+\u2705 **The Erechtheion** \u2014 Viewable from accessible path (the Caryatid porch)
 
-### Facilities
-- Accessible restrooms available near the elevator entrance
-- Small café near the entrance (has steps — buy water before going up)
-- Shaded rest areas along the accessible path
+\u2705 **Temple of Athena Nike** \u2014 Visible from the accessible route
 
-## Getting There
+\u2705 **Panoramic views of Athens** \u2014 The accessible areas have stunning viewpoints
 
-### By Metro
-**Acropolis station** (Line 2, Red) has elevators to street level. From the station exit, it's a 5-minute roll to the accessible entrance.
+\u2705 **Propylaea (entrance gate)** \u2014 Partially viewable
 
-### With Our Equipment
-We deliver wheelchairs and mobility scooters directly to your hotel. [Rent a wheelchair for your Acropolis visit →](/equipment/wheelchairs)
+## What You CANNOT Access
 
-## Tips for the Best Experience
+\u274c **Inside the Parthenon** \u2014 Nobody can, it\u2019s closed to all visitors
 
-1. **Go early morning** (8:00–9:30 AM) — fewer crowds, cooler temperatures, best light for photos
-2. **Bring water and sun protection** — there's minimal shade at the top
-3. **Allow 2-3 hours** — don't rush, the views are extraordinary
-4. **Wear a hat** — the marble reflects heat intensely in summer
-5. **Charge your scooter** — the round trip from hotel to Acropolis and back can use significant battery
+\u274c **Some narrow ancient pathways** \u2014 Uneven stone, not wheelchair-friendly
 
-## Nearby Accessible Spots
+\u274c **The Theatre of Dionysus** \u2014 Below the Acropolis, steep terrain
 
-After the Acropolis, consider:
+\u274c **Areopagus (Mars Hill)** \u2014 Rocky outcrop, no accessible route
 
-- **Acropolis Museum** (5 min away): Fully accessible, world-class collection, excellent café
-- **Plaka** (flat streets): Adrianou and Kydathineon streets are mostly flat and pedestrianized
-- **Dionysiou Areopagitou**: The pedestrian boulevard below the Acropolis — smooth, shaded, beautiful
+## Getting There: Transport Options
+
+**Metro (Recommended):**
+- Take Line 2 (red) to **Acropolis station**
+- Station has elevators \u2014 fully accessible
+- 5-minute wheel/roll to the accessible entrance
+
+**Taxi:**
+- Ask driver for \u201cAcropolis accessible entrance, near the museum\u201d
+- Drop-off point is close to the elevator
+
+**From Your Hotel:**
+- We deliver wheelchairs and scooters directly to your accommodation
+- [Rent a wheelchair for your Acropolis visit \u2192](/equipment/wheelchairs)
+
+## Practical Tips From Locals
+
+1. **Book nothing** \u2014 Just show up. No reservation needed for the elevator.
+2. **Bring water** \u2014 No shops at the top, and it\u2019s hot in summer.
+3. **Wear a hat** \u2014 Zero shade on the plateau.
+4. **Morning is magic** \u2014 Fewer crowds, cooler temperatures, better photos.
+5. **Allow 2 hours** \u2014 Enough time to see everything accessible without rushing.
+6. **Check the elevator** \u2014 Very rarely it\u2019s under maintenance. Call +30 210 321 4172 to confirm.
+
+## Accessible Restrooms
+
+\u2705 Available near the accessible entrance (before you go up)
+
+\u274c None at the top \u2014 use facilities before taking the elevator
+
+## After the Acropolis: Accessible Spots Nearby
+
+- **Acropolis Museum** (5 min) \u2014 Fully accessible, world-class collection, air-conditioned
+- **Plaka** (10 min) \u2014 Some flat pedestrian streets, cafes with outdoor seating
+- **Monastiraki Square** (15 min) \u2014 Flat, bustling, great for people-watching
+
+[See our guide to accessible restaurants in Athens \u2192](/accessible-athens/accessible-restaurants-bars-athens)
+
+## The Honest Summary
+
+The Acropolis is more accessible than most ancient sites in the world. The elevator works, the paths are paved, and the views are spectacular. You won\u2019t see every corner, but you WILL see the Parthenon up close \u2014 and that\u2019s why you\u2019re here.
+
+Don\u2019t skip it because you\u2019re worried about access. It\u2019s worth it.
 
 ---
 
-*Need mobility equipment for your Athens trip? [Browse our equipment →](/equipment)*
+## Need a Wheelchair for Your Visit?
+
+We deliver wheelchairs and mobility scooters directly to your Athens hotel. Free delivery in the city center.
+
+[Browse Wheelchairs \u2192](/equipment/wheelchairs) | [Browse Mobility Scooters \u2192](/equipment/mobility-scooters)
 `,
   },
   {
