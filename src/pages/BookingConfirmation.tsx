@@ -295,7 +295,7 @@ const BookingConfirmation = () => {
         <div className="flex flex-wrap gap-3">
           <Button asChild className="rounded-xl bg-[#25D366] hover:bg-[#22bc5a] text-white">
             <a
-              href={`https://wa.me/302109511750?text=${whatsappMsg}`}
+              href={`https://wa.me/306974633697?text=Hi!%20I%27m%20interested%20in%20renting%20mobility%20equipment%20in%20Athens.?text=${whatsappMsg}`}
               target="_blank"
               rel="noopener noreferrer"
             >
@@ -310,9 +310,9 @@ const BookingConfirmation = () => {
             </a>
           </Button>
           <Button asChild variant="outline" className="rounded-xl">
-            <a href="tel:+302109511750">
+            <a href="tel:+306974633697">
               <Phone className="mr-2 h-4 w-4" />
-              +30 210 95 11 750
+              +30 697 463 3697
             </a>
           </Button>
         </div>
