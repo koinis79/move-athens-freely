@@ -132,14 +132,14 @@ const AdminBookings = () => {
     setReviewSending((prev) => new Set(prev).add(booking.id));
     try {
       const { data: { session } } = await supabase.auth.getSession();
+      if (!session?.access_token) throw new Error("Not authenticated");
       const res = await fetch(
-        `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/send-review-request`,
+        "https://lmgpuqgwkiapgpdsxvmb.supabase.co/functions/v1/send-review-request",
         {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
-            "apikey": import.meta.env.VITE_SUPABASE_ANON_KEY,
-            ...(session?.access_token ? { Authorization: `Bearer ${session.access_token}` } : {}),
+            "Authorization": `Bearer ${session.access_token}`,
           },
           body: JSON.stringify({ booking_id: booking.id }),
         }
