@@ -17,37 +17,50 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const [loading, setLoading] = useState(true);
   const [isAdmin, setIsAdmin] = useState(false);
 
-  useEffect(() => {
-    const { data: { subscription } } = supabase.auth.onAuthStateChange(
-      (_event, session) => {
-        setSession(session);
-        setLoading(false);
-      }
-    );
-
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      setSession(session);
+  /** Check admin role via RPC, then mark loading as done. */
+  const checkAdmin = async (s: Session | null) => {
+    if (!s) {
+      setIsAdmin(false);
       setLoading(false);
+      return;
+    }
+
+    try {
+      const { data, error } = await supabase.rpc("is_admin");
+      if (error) {
+        console.error("[Auth] Failed to check admin status:", error);
+        setIsAdmin(false);
+      } else {
+        console.log("[Auth] is_admin =", data, "for user", s.user.email);
+        setIsAdmin(!!data);
+      }
+    } catch (err) {
+      console.error("[Auth] Admin check threw:", err);
+      setIsAdmin(false);
+    }
+
+    setLoading(false);
+  };
+
+  useEffect(() => {
+    // 1. Get the initial session, check admin, THEN set loading=false
+    supabase.auth.getSession().then(({ data: { session: s } }) => {
+      setSession(s);
+      checkAdmin(s);
+    });
+
+    // 2. Listen for future auth changes (login/logout)
+    const {
+      data: { subscription },
+    } = supabase.auth.onAuthStateChange((_event, s) => {
+      setSession(s);
+      // Re-check admin on every auth change
+      setLoading(true);
+      checkAdmin(s);
     });
 
     return () => subscription.unsubscribe();
   }, []);
-
-  // Check admin status whenever session changes
-  useEffect(() => {
-    if (!session) {
-      setIsAdmin(false);
-      return;
-    }
-    supabase.rpc('is_admin').then(({ data, error }) => {
-      if (error) {
-        console.error('Failed to check admin status:', error);
-        setIsAdmin(false);
-      } else {
-        setIsAdmin(!!data);
-      }
-    });
-  }, [session]);
 
   const signOut = async () => {
     await supabase.auth.signOut();
