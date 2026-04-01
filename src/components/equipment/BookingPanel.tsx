@@ -1,4 +1,4 @@
-import { useState, useEffect, useMemo } from "react";
+import { useState, useEffect, useMemo, useRef } from "react";
 import { Link } from "react-router-dom";
 import { format, differenceInDays } from "date-fns";
 import type { DateRange } from "react-day-picker";
@@ -51,6 +51,8 @@ const BookingPanel = ({ item }: Props) => {
   const [zones, setZones] = useState<DeliveryZone[]>([]);
   const [added, setAdded] = useState(false);
   const [calOpen, setCalOpen] = useState(false);
+  const datePickerRef = useRef<HTMLDivElement>(null);
+  const zonePickerRef = useRef<HTMLDivElement>(null);
 
   const today = new Date();
   today.setHours(0, 0, 0, 0);
@@ -133,6 +135,24 @@ const BookingPanel = ({ item }: Props) => {
     });
   };
 
+  const handleMobileButton = () => {
+    if (!startDate || !endDate) {
+      datePickerRef.current?.scrollIntoView({ behavior: "smooth", block: "center" });
+    } else if (!zoneId) {
+      zonePickerRef.current?.scrollIntoView({ behavior: "smooth", block: "center" });
+    } else {
+      handleAddToCart();
+    }
+  };
+
+  const mobileButtonText = !startDate || !endDate
+    ? "Select Dates"
+    : !zoneId
+      ? "Select Zone"
+      : added
+        ? "Added!"
+        : "Add to Cart";
+
   return (
     <div className="space-y-6">
       {/* Tier pricing table */}
@@ -174,7 +194,7 @@ const BookingPanel = ({ item }: Props) => {
         </h3>
 
         {/* Date range picker */}
-        <div className="space-y-1.5">
+        <div ref={datePickerRef} className="space-y-1.5">
           <label className="text-sm font-medium text-foreground">
             Rental Dates
           </label>
@@ -239,7 +259,7 @@ const BookingPanel = ({ item }: Props) => {
         </div>
 
         {/* Delivery zone */}
-        <div className="space-y-1.5">
+        <div ref={zonePickerRef} className="space-y-1.5">
           <label className="text-sm font-medium text-foreground">
             Delivery Zone
           </label>
@@ -317,6 +337,41 @@ const BookingPanel = ({ item }: Props) => {
           <ShieldCheck className="h-3.5 w-3.5 text-accent" />
           Free cancellation up to 48 hours before delivery
         </p>
+      </div>
+
+      {/* Sticky Mobile Booking Bar */}
+      <div className="fixed bottom-0 left-0 right-0 border-t border-border bg-background p-4 pb-[calc(1rem+env(safe-area-inset-bottom))] shadow-[0_-4px_12px_rgba(0,0,0,0.1)] z-50 md:hidden">
+        <div className="flex items-center justify-between gap-4 max-w-lg mx-auto">
+          <div className="flex flex-col">
+            {numDays > 0 && zoneId ? (
+              <>
+                <span className="text-xs text-muted-foreground">
+                  {numDays} day{numDays !== 1 ? "s" : ""}{qty > 1 ? ` \u00d7 ${qty}` : ""}
+                </span>
+                <span className="text-xl font-bold text-primary">\u20ac{total}</span>
+              </>
+            ) : numDays > 0 ? (
+              <>
+                <span className="text-xs text-muted-foreground">{numDays} day{numDays !== 1 ? "s" : ""}</span>
+                <span className="text-xl font-bold text-primary">\u20ac{subtotal}</span>
+              </>
+            ) : (
+              <>
+                <span className="text-xs text-muted-foreground">From</span>
+                <span className="text-xl font-bold text-primary">\u20ac{item.priceTier1}/day</span>
+              </>
+            )}
+          </div>
+          <Button
+            size="lg"
+            className="flex-1 max-w-[200px] rounded-xl text-base"
+            disabled={added}
+            onClick={handleMobileButton}
+          >
+            <ShoppingCart className="mr-2 h-4 w-4" />
+            {mobileButtonText}
+          </Button>
+        </div>
       </div>
     </div>
   );
