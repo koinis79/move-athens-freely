@@ -346,19 +346,19 @@ const BookingPanel = ({ item }: Props) => {
             {numDays > 0 && zoneId ? (
               <>
                 <span className="text-xs text-muted-foreground">
-                  {numDays} day{numDays !== 1 ? "s" : ""}{qty > 1 ? ` \u00d7 ${qty}` : ""}
+                  {numDays} day{numDays !== 1 ? "s" : ""}{qty > 1 ? ` × ${qty}` : ""}
                 </span>
-                <span className="text-xl font-bold text-primary">\u20ac{total}</span>
+                <span className="text-xl font-bold text-primary">€{total}</span>
               </>
             ) : numDays > 0 ? (
               <>
                 <span className="text-xs text-muted-foreground">{numDays} day{numDays !== 1 ? "s" : ""}</span>
-                <span className="text-xl font-bold text-primary">\u20ac{subtotal}</span>
+                <span className="text-xl font-bold text-primary">€{subtotal}</span>
               </>
             ) : (
               <>
                 <span className="text-xs text-muted-foreground">From</span>
-                <span className="text-xl font-bold text-primary">\u20ac{item.priceTier1}/day</span>
+                <span className="text-xl font-bold text-primary">€{item.priceTier1}/day</span>
               </>
             )}
           </div>
