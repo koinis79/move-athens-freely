@@ -51,6 +51,7 @@ const BookingPanel = ({ item }: Props) => {
   const [zones, setZones] = useState<DeliveryZone[]>([]);
   const [added, setAdded] = useState(false);
   const [calOpen, setCalOpen] = useState(false);
+  const [zoneError, setZoneError] = useState(false);
   const datePickerRef = useRef<HTMLDivElement>(null);
   const zonePickerRef = useRef<HTMLDivElement>(null);
 
@@ -99,6 +100,15 @@ const BookingPanel = ({ item }: Props) => {
 
   const handleAddToCart = () => {
     if (!startDate || !endDate || numDays === 0) return;
+
+    // Nudge user to select zone, but don't block
+    if (!zoneId) {
+      setZoneError(true);
+      zonePickerRef.current?.scrollIntoView({ behavior: "smooth", block: "center" });
+      setTimeout(() => setZoneError(false), 3000);
+      return;
+    }
+
     addItem({
       equipment: item,
       startDate,
@@ -139,7 +149,9 @@ const BookingPanel = ({ item }: Props) => {
     if (!startDate || !endDate) {
       datePickerRef.current?.scrollIntoView({ behavior: "smooth", block: "center" });
     } else if (!zoneId) {
+      setZoneError(true);
       zonePickerRef.current?.scrollIntoView({ behavior: "smooth", block: "center" });
+      setTimeout(() => setZoneError(false), 3000);
     } else {
       handleAddToCart();
     }
@@ -263,8 +275,8 @@ const BookingPanel = ({ item }: Props) => {
           <label className="text-sm font-medium text-foreground">
             Delivery Zone
           </label>
-          <Select value={zoneId} onValueChange={setZoneId}>
-            <SelectTrigger className="w-full">
+          <Select value={zoneId} onValueChange={(v) => { setZoneId(v); setZoneError(false); }}>
+            <SelectTrigger className={cn("w-full", zoneError && "border-destructive ring-2 ring-destructive/20")}>
               <SelectValue placeholder="Select delivery zone" />
             </SelectTrigger>
             <SelectContent>
@@ -276,6 +288,11 @@ const BookingPanel = ({ item }: Props) => {
               ))}
             </SelectContent>
           </Select>
+          {zoneError && (
+            <p className="text-sm text-destructive mt-1.5">
+              Please select where we should deliver
+            </p>
+          )}
         </div>
 
         {/* Price summary */}
@@ -307,7 +324,10 @@ const BookingPanel = ({ item }: Props) => {
 
             <div className="flex items-center justify-between border-t border-primary/20 pt-2.5">
               <span className="font-semibold text-foreground">Total</span>
-              <span className="text-2xl font-bold text-primary">€{total}</span>
+              <span className="text-2xl font-bold text-primary">
+                €{total}
+                {!zoneId && <span className="text-sm font-normal text-muted-foreground"> + delivery</span>}
+              </span>
             </div>
           </div>
         )}
