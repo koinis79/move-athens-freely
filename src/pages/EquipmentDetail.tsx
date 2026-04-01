@@ -43,7 +43,7 @@ const EquipmentDetail = () => {
   // Loading skeleton
   if (loading) {
     return (
-      <div className="container py-8 md:py-12">
+      <div className="container py-8 pb-28 md:py-12 md:pb-12">
         <div className="h-4 w-48 mb-6 rounded bg-muted animate-pulse" />
         <div className="grid gap-8 lg:grid-cols-[3fr_2fr]">
           <div className="relative aspect-[3/2] overflow-hidden rounded-2xl bg-muted">
@@ -85,7 +85,7 @@ const EquipmentDetail = () => {
   }));
 
   return (
-    <div className="container py-8 md:py-12">
+    <div className="container py-8 pb-28 md:py-12 md:pb-12">
       <ProductSD
         name={item.name}
         description={longDescription || item.description}
