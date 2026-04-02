@@ -27,6 +27,115 @@ export interface Article {
 /* ── Accessible Athens guides ───────────────────────────── */
 export const guides: Article[] = [
   {
+    slug: "athens-accessibility-honest-guide",
+    title: "The Honest Truth About Wheelchair Accessibility in Athens",
+    excerpt:
+      "Athens has made progress, but challenges remain. Here's what to actually expect \u2014 the good, the bad, and how to navigate it all.",
+    date: "2026-04-02",
+    image: athensAccessibleImg,
+    category: "Accessibility",
+    takeaways: [
+      "Cobblestones and sidewalk obstacles are the biggest daily challenge \u2014 stick to main commercial streets",
+      "Metro Lines 2 and 3 are accessible; Line 1 mostly is not \u2014 plan routes around working stations",
+      "Greeks will go out of their way to help \u2014 the human element compensates for imperfect infrastructure",
+    ],
+    body: [],
+    content: `
+Athens is one of the oldest cities in the world. That\u2019s what makes it magical \u2014 and also what makes it challenging for wheelchair users and people with mobility needs.
+
+We\u2019re not going to sugarcoat it. As a local mobility equipment company, we see the reality every day. But we also know that Athens IS doable with the right preparation. Here\u2019s the honest truth about what you\u2019ll face, and how to handle it.
+
+## The Real Challenges
+
+### Cobblestones & Uneven Surfaces
+
+**The problem:** The historic neighborhoods \u2014 Plaka, Monastiraki, Anafiotika \u2014 are paved with centuries-old cobblestones. They\u2019re beautiful and absolutely brutal on wheelchairs. Manual wheelchair users will feel every bump. Power wheelchair and scooter users risk getting stuck in gaps.
+
+**The solution:** Stick to the main commercial streets like Ermou, Athinas, and Adrianou where surfaces are smoother. If you want to experience Plaka, go with a companion who can help navigate, and consider a wheelchair with larger front casters or a suspension system. Our [lightweight folding wheelchair](/equipment/wheelchairs/lightweight-folding-wheelchair) handles cobblestones better than rigid frames.
+
+### Sidewalk Obstacles
+
+**The problem:** Athenian sidewalks are an obstacle course. Parked motorcycles, caf\u00e9 tables, tree roots breaking through concrete, random steps, and cars parked across ramps. It\u2019s not malicious \u2014 it\u2019s just decades of unplanned urban growth.
+
+**The solution:** Often, the street itself is smoother than the sidewalk. Don\u2019t be afraid to use the road (carefully) on quieter streets. In busy areas, go early morning when caf\u00e9s haven\u2019t set up their outdoor seating yet.
+
+### Metro Accessibility Is Incomplete
+
+**The problem:** The Athens Metro is actually quite good \u2014 most stations on Lines 2 and 3 (the newer ones) have elevators. But Line 1 (the old line from Piraeus to Kifisia) has many stations with only stairs.
+
+**The solution:** Plan your route using stations we know work:
+- \u2705 Syntagma (Lines 2 & 3) \u2014 elevators, accessible
+- \u2705 Acropolis (Line 2) \u2014 elevators, accessible
+- \u2705 Monastiraki (Lines 1 & 3) \u2014 accessible entrance on Line 3 side
+- \u2705 Evangelismos (Line 3) \u2014 elevators
+- \u274c Thissio \u2014 stairs only
+- \u274c Omonia \u2014 elevators often broken
+- \u274c Victoria \u2014 not accessible
+
+Use an accessible taxi or our [scooter](/equipment/mobility-scooters) / [wheelchair](/equipment/wheelchairs) rental as backup for areas the metro doesn\u2019t serve well.
+
+### Restaurants & Caf\u00e9s With Steps
+
+**The problem:** A huge number of restaurants, especially in older neighborhoods, have one or more steps at the entrance. Narrow doorways are common. Accessible bathrooms are rare outside of newer establishments.
+
+**The solution:** We maintain a list of accessible restaurants we\u2019ve personally verified \u2014 see our [Accessible Restaurants in Athens guide](/accessible-athens/accessible-restaurants-bars-athens). When in doubt, call ahead. Most restaurant owners are genuinely helpful and will assist with a portable ramp or help you enter if you let them know in advance.
+
+### The Hills
+
+**The problem:** Athens is built on hills. The Acropolis sits on one. Lycabettus Hill towers over the city. Even \u201cflat\u201d areas have unexpected inclines. Power wheelchair users \u2014 watch your battery on steep climbs.
+
+**The solution:** For the Acropolis, use the [accessible entrance on the north slope](/accessible-athens/acropolis-wheelchair-guide) which has a gentler grade and an elevator. Avoid trying to reach Lycabettus Hill unless you\u2019re taking the funicular. The Stavros Niarchos Foundation Cultural Center is completely flat and modern \u2014 a great accessible outing.
+
+### Aggressive Traffic
+
+**The problem:** Athenian drivers are... enthusiastic. Crosswalks are suggestions. Ramps are sometimes blocked by parked cars.
+
+**The solution:** Use pedestrian crossings at traffic lights rather than zebra crossings. Make eye contact with drivers before crossing. Consider going out during siesta hours (3\u20136pm) when traffic is lighter.
+
+## What\u2019s Actually Good
+
+It\u2019s not all bad. Here\u2019s where Athens has genuinely improved:
+
+### The Acropolis Is Accessible
+
+Yes, really. There\u2019s an elevator that takes you to the top. You can see the Parthenon. The path is paved. Greece invested significantly in accessibility for the 2004 Olympics.
+
+### New Metro Stations Are Excellent
+
+Lines 2 and 3 were built in the 1990s\u20132000s with accessibility in mind. Elevators work, platforms are level with trains, and there\u2019s tactile paving for visually impaired visitors.
+
+### Beaches Have Seatrac Systems
+
+Several [beaches near Athens](/accessible-athens/accessible-beaches-athens) (Alimos, Voula, and others) have Seatrac \u2014 an autonomous system that helps wheelchair users enter the sea independently. It\u2019s actually world-class.
+
+### People Want To Help
+
+This matters. Greeks will go out of their way to assist \u2014 carrying wheelchairs up steps, clearing paths, finding solutions. It\u2019s not perfect infrastructure, but the human element is strong.
+
+## Our Honest Advice
+
+1. **Rent equipment locally.** Don\u2019t bring your own wheelchair on the plane if you can avoid it \u2014 airline damage is common, and you\u2019ll want something suited to Athens\u2019 terrain.
+
+2. **Stay in the right area.** Book accommodation in the center (Syntagma, Plaka, Koukaki) near accessible metro stations. Avoid hilly Exarchia or remote suburbs.
+
+3. **Plan, but stay flexible.** Have a rough itinerary but be ready to adapt. That \u201caccessible\u201d restaurant might have new steps. That \u201cinaccessible\u201d site might have a helpful guard who knows a back entrance.
+
+4. **Contact us before your trip.** Seriously \u2014 we do this every day. We can tell you the current state of specific locations, suggest routes, and recommend what equipment will work best for your needs.
+
+Athens isn\u2019t Copenhagen or Tokyo. It\u2019s messy, chaotic, ancient, and imperfect. But it\u2019s also magical, welcoming, and absolutely worth visiting. With realistic expectations and good preparation, you can have an incredible trip.
+
+We\u2019re here to help make that happen.
+
+---
+
+## Need Mobility Equipment for Your Athens Trip?
+
+We deliver wheelchairs, scooters, and rollators directly to your hotel. Free delivery in the city center.
+
+[Browse Equipment \u2192](/equipment) | [Contact Us \u2192](/contact)
+`,
+  },
+  {
     slug: "acropolis",
     title: "Is the Acropolis Wheelchair Accessible?",
     excerpt:
