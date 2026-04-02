@@ -21,6 +21,7 @@ const categoryColors: Record<string, string> = {
   Outdoors:    "bg-green-500/15 text-green-600 border-green-500/30",
   Tips:        "bg-violet-500/15 text-violet-600 border-violet-500/30",
   Athens:      "bg-secondary/15 text-secondary border-secondary/30",
+  Accessibility: "bg-teal-500/15 text-teal-600 border-teal-500/30",
 };
 
 function readingTime(article: Article): number {
@@ -28,11 +29,19 @@ function readingTime(article: Article): number {
   return Math.max(1, Math.ceil(text.split(/\s+/).length / 200));
 }
 
-/** Convert **bold** and *italic* to HTML */
+/** Convert **bold**, *italic*, and [links](url) to HTML */
 function inlineMd(text: string): string {
   return text
     .replace(/\*\*(.+?)\*\*/g, "<strong>$1</strong>")
-    .replace(/\*([^*]+?)\*/g, "<em>$1</em>");
+    .replace(/\*([^*]+?)\*/g, "<em>$1</em>")
+    .replace(
+      /\[([^\]]+)\]\((\/[^)]+)\)/g,
+      '<a href="$2" class="text-primary font-medium hover:underline">$1</a>'
+    )
+    .replace(
+      /\[([^\]]+)\]\((https?:\/\/[^)]+)\)/g,
+      '<a href="$2" target="_blank" rel="noopener noreferrer" class="text-primary font-medium hover:underline">$1</a>'
+    );
 }
 
 /** Render a markdown string into JSX nodes */
@@ -91,6 +100,9 @@ function renderMarkdown(md: string): React.ReactNode[] {
     } else if (/^\d+\. /.test(line)) {
       if (listType !== "ol") { flushList(); listType = "ol"; }
       listItems.push(line.replace(/^\d+\.\s/, ""));
+    } else if (/^---+$/.test(line.trim())) {
+      flushList();
+      nodes.push(<hr key={key++} className="my-8 border-border" />);
     } else if (line === "") {
       flushList();
     } else {
