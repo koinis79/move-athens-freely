@@ -77,11 +77,57 @@ const EquipmentDetail = () => {
     categoryFilterLabels.find((c) => c.slug === item.categorySlug)?.label ??
     item.category;
 
-  // Convert specifications JSONB to SpecItem[] for SpecificationsSection
-  const specs = Object.entries(specifications).map(([label, value]) => ({
-    label,
-    value: String(value),
-    icon: "Circle",
+  // ── Spec label, value formatter, and icon mapping ──
+  const specLabels: Record<string, string> = {
+    foldable: "Foldable",
+    wheel_type: "Wheel Type",
+    self_propel: "Self-Propel",
+    seat_width_cm: "Seat Width",
+    product_weight_kg: "Weight",
+    weight_capacity_kg: "Weight Capacity",
+    max_speed_kmh: "Max Speed",
+    range_km: "Range",
+    wheels: "Wheels",
+    has_seat: "Built-in Seat",
+    has_basket: "Storage Basket",
+    height_adjustable: "Height Adjustable",
+    control: "Control Type",
+    battery_type: "Battery",
+    airline_approved: "Airline Approved",
+  };
+
+  const specIcons: Record<string, string> = {
+    foldable: "FoldVertical",
+    weight_capacity_kg: "Weight",
+    product_weight_kg: "Package",
+    seat_width_cm: "Armchair",
+    max_speed_kmh: "Gauge",
+    range_km: "Battery",
+    wheels: "Circle",
+    has_seat: "Armchair",
+    has_basket: "Package",
+    airline_approved: "ShieldCheck",
+    control: "Gauge",
+    battery_type: "Battery",
+    wheel_type: "Circle",
+    self_propel: "Footprints",
+    height_adjustable: "Ruler",
+  };
+
+  const formatSpecValue = (key: string, value: unknown): string => {
+    if (value === true) return "Yes";
+    if (value === false) return "No";
+    if (key.endsWith("_cm")) return `${value} cm`;
+    if (key.endsWith("_kg")) return `${value} kg`;
+    if (key.endsWith("_kmh")) return `${value} km/h`;
+    if (key.endsWith("_km")) return `${value} km`;
+    return String(value);
+  };
+
+  const specs = Object.entries(specifications).map(([key, value]) => ({
+    label: specLabels[key] || key.replace(/_/g, " ").replace(/\b\w/g, (c) => c.toUpperCase()),
+    value: formatSpecValue(key, value),
+    icon: specIcons[key] || "Circle",
   }));
 
   return (
