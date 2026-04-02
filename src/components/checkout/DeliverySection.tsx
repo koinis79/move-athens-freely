@@ -120,7 +120,7 @@ export function getDeliveryFee(data: DeliveryFormData): number {
   if (data.method === "pickup") return 0;
   if (data.method === "delivery") {
     if (data.subType === "cruise") return 25;
-    if (data.subType === "airport") return 30;
+    if (data.subType === "airport") return 50;
     if (data.subType === "hotel") {
       const n = NEIGHBORHOOD_OPTIONS.find((o) => o.value === data.neighborhood);
       return n?.fee ?? 0;
