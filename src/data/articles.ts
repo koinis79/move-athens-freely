@@ -32,7 +32,7 @@ export const guides: Article[] = [
     excerpt:
       "Athens has made progress, but challenges remain. Here's what to actually expect \u2014 the good, the bad, and how to navigate it all.",
     date: "2026-04-02",
-    image: athensAccessibleImg,
+    image: "https://lmgpuqgwkiapgpdsxvmb.supabase.co/storage/v1/object/public/assets/athens-accessible.jpg",
     category: "Accessibility",
     takeaways: [
       "Cobblestones and sidewalk obstacles are the biggest daily challenge \u2014 stick to main commercial streets",
