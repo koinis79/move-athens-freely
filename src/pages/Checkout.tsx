@@ -58,6 +58,26 @@ const COUNTRY_CODES = [
   { flag: "🇨🇦", code: "+1",   label: "CA" },
 ];
 
+/** Map checkout delivery form data to a delivery_zones table slug */
+function getDeliveryZoneSlug(delivery: DeliveryFormData): string | null {
+  if (delivery.method === "pickup") return "store-pickup";
+  if (delivery.method === "delivery") {
+    if (delivery.subType === "cruise") return "piraeus-cruise";
+    if (delivery.subType === "airport") return "airport";
+    if (delivery.subType === "hotel") {
+      const map: Record<string, string> = {
+        center: "city-center",
+        inner: "extended-center",
+        suburbs: "suburbs-riviera",
+        other: "suburbs-riviera",
+      };
+      return map[delivery.neighborhood] ?? null;
+    }
+  }
+  return null;
+}
+
+
 const Checkout = () => {
   const { items, clearCart } = useCart();
   const { user } = useAuth();
@@ -254,13 +274,26 @@ const Checkout = () => {
         .filter(Boolean)
         .join(" | ");
 
+      // Resolve delivery zone ID from form selection
+      const zoneSlug = getDeliveryZoneSlug(delivery);
+      let deliveryZoneId: string | null = null;
+      if (zoneSlug) {
+        const { data: zoneRow } = await supabase
+          .from("delivery_zones")
+          .select("id")
+          .eq("slug", zoneSlug)
+          .eq("is_active", true)
+          .single();
+        deliveryZoneId = zoneRow?.id ?? null;
+      }
+
       const { data, error: rpcErr } = await supabase.rpc("create_booking", {
         p_booking_number: "",
         p_user_id: user?.id ?? null,
         p_customer_name: customer.name.trim(),
         p_customer_email: customer.email.trim(),
         p_customer_phone: fullPhone,
-        p_delivery_zone_id: null,
+        p_delivery_zone_id: deliveryZoneId,
         p_delivery_address: deliveryAddress,
         p_delivery_time_slot: delivery.timeSlot,
         p_delivery_notes: deliveryNotes || null,
