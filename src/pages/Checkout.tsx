@@ -178,31 +178,7 @@ const Checkout = () => {
     if (!customer.phone.trim()) cErr.phone = "Phone number is required";
     if (!customer.agreeTerms) cErr.agreeTerms = "You must agree to the terms";
 
-    const dErr: DeliveryErrors = {};
-    if (!delivery.method) dErr.method = "Please select a delivery method";
-
-    if (delivery.method === "delivery") {
-      if (!delivery.subType) dErr.subType = "Please select where you're staying";
-      if (delivery.subType === "hotel") {
-        if (!delivery.hotelName.trim()) dErr.hotelName = "Hotel name is required";
-        if (!delivery.neighborhood) dErr.neighborhood = "Please select an area";
-        if (!delivery.preferredDate) dErr.preferredDate = "Please select a date";
-      }
-      if (delivery.subType === "cruise") {
-        if (!delivery.shipName.trim()) dErr.shipName = "Ship name is required";
-        if (!delivery.portArrival) dErr.portArrival = "Arrival date is required";
-        if (!delivery.portDeparture) dErr.portDeparture = "Departure date is required";
-      }
-      if (delivery.subType === "airport") {
-        if (!delivery.arrivalDateTime) dErr.arrivalDateTime = "Arrival date is required";
-      }
-    }
-
-    if (delivery.method === "pickup") {
-      if (!delivery.pickupLocation) dErr.pickupLocation = "Please select a pickup location";
-      if (delivery.pickupLocation && !delivery.preferredDate)
-        dErr.preferredDate = "Please select a pickup date";
-    }
+    const dErr: DeliveryErrors = validateDelivery(delivery);
 
     setCustomerErrors(cErr);
     setDeliveryErrors(dErr);
