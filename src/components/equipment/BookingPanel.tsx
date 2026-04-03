@@ -1,8 +1,8 @@
 import { useState, useEffect, useMemo, useRef } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { format, differenceInDays } from "date-fns";
 import type { DateRange } from "react-day-picker";
-import { CalendarIcon, Minus, Plus, ShieldCheck, ShoppingCart } from "lucide-react";
+import { ArrowRight, CalendarIcon, Minus, Plus, ShieldCheck, ShoppingCart } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { Calendar } from "@/components/ui/calendar";
@@ -45,6 +45,7 @@ const TIER_LABELS = [
 const BookingPanel = ({ item }: Props) => {
   const { addItem } = useCart();
   const { toast } = useToast();
+  const navigate = useNavigate();
   const [dateRange, setDateRange] = useState<DateRange | undefined>();
   const [qty, setQty] = useState(1);
   const [zoneId, setZoneId] = useState<string>();
@@ -145,6 +146,40 @@ const BookingPanel = ({ item }: Props) => {
     });
   };
 
+
+  const handleRentNow = () => {
+    if (!startDate || !endDate || numDays === 0) {
+      datePickerRef.current?.scrollIntoView({ behavior: "smooth", block: "center" });
+      return;
+    }
+    if (!zoneId) {
+      setZoneError(true);
+      zonePickerRef.current?.scrollIntoView({ behavior: "smooth", block: "center" });
+      setTimeout(() => setZoneError(false), 3000);
+      return;
+    }
+
+    addItem({
+      equipment: item,
+      startDate,
+      endDate,
+      quantity: qty,
+      deliveryZone: selectedZone?.name_en,
+      deliveryFee,
+    });
+
+    trackEvent("add_to_cart", {
+      currency: "EUR",
+      value: subtotal,
+      item_id: item.slug,
+      item_name: item.name,
+      item_category: item.category,
+      quantity: qty,
+      num_days: numDays,
+    });
+
+    navigate("/checkout");
+  };
   const handleMobileButton = () => {
     if (!startDate || !endDate) {
       datePickerRef.current?.scrollIntoView({ behavior: "smooth", block: "center" });
@@ -161,9 +196,7 @@ const BookingPanel = ({ item }: Props) => {
     ? "Select Dates"
     : !zoneId
       ? "Select Zone"
-      : added
-        ? "Added!"
-        : "Add to Cart";
+      : "Rent Now";
 
   return (
     <div className="space-y-6">
@@ -335,23 +368,23 @@ const BookingPanel = ({ item }: Props) => {
         <Button
           size="lg"
           className="w-full rounded-xl text-base"
+          disabled={!startDate || !endDate || numDays === 0}
+          onClick={handleRentNow}
+        >
+          Rent Now
+          <ArrowRight className="ml-2 h-5 w-5" />
+        </Button>
+
+        <Button
+          variant="outline"
+          size="lg"
+          className="w-full rounded-xl text-base"
           disabled={!startDate || !endDate || numDays === 0 || added}
           onClick={handleAddToCart}
         >
           <ShoppingCart className="mr-2 h-5 w-5" />
-          {added ? "Added to Cart!" : "Add to Cart"}
+          {added ? "Added!" : "Add to Cart"}
         </Button>
-
-        {added && (
-          <div className="flex justify-center">
-            <Link
-              to="/cart"
-              className="text-sm text-primary font-medium underline underline-offset-2"
-            >
-              View cart &amp; checkout →
-            </Link>
-          </div>
-        )}
 
         <p className="flex items-center justify-center gap-1.5 text-xs text-muted-foreground">
           <ShieldCheck className="h-3.5 w-3.5 text-accent" />
@@ -385,8 +418,17 @@ const BookingPanel = ({ item }: Props) => {
           <Button
             size="lg"
             className="flex-1 max-w-[200px] rounded-xl text-base"
-            disabled={added}
-            onClick={handleMobileButton}
+            onClick={() => {
+              if (!startDate || !endDate) {
+                datePickerRef.current?.scrollIntoView({ behavior: "smooth", block: "center" });
+              } else if (!zoneId) {
+                setZoneError(true);
+                zonePickerRef.current?.scrollIntoView({ behavior: "smooth", block: "center" });
+                setTimeout(() => setZoneError(false), 3000);
+              } else {
+                handleRentNow();
+              }
+            }}
           >
             <ShoppingCart className="mr-2 h-4 w-4" />
             {mobileButtonText}
