@@ -43,7 +43,7 @@ const TIER_LABELS = [
 ];
 
 const BookingPanel = ({ item }: Props) => {
-  const { addItem } = useCart();
+  const { addItem, items: cartItems } = useCart();
   const { toast } = useToast();
   const navigate = useNavigate();
   const [dateRange, setDateRange] = useState<DateRange | undefined>();
@@ -53,6 +53,7 @@ const BookingPanel = ({ item }: Props) => {
   const [added, setAdded] = useState(false);
   const [calOpen, setCalOpen] = useState(false);
   const [zoneError, setZoneError] = useState(false);
+  const [pendingCheckout, setPendingCheckout] = useState(false);
   const datePickerRef = useRef<HTMLDivElement>(null);
   const zonePickerRef = useRef<HTMLDivElement>(null);
 
@@ -147,6 +148,15 @@ const BookingPanel = ({ item }: Props) => {
   };
 
 
+
+  // Navigate to checkout after cart is updated from Rent Now
+  useEffect(() => {
+    if (pendingCheckout && cartItems.length > 0) {
+      setPendingCheckout(false);
+      navigate("/checkout");
+    }
+  }, [pendingCheckout, cartItems.length, navigate]);
+
   const handleRentNow = () => {
     if (!startDate || !endDate || numDays === 0) {
       datePickerRef.current?.scrollIntoView({ behavior: "smooth", block: "center" });
@@ -178,7 +188,7 @@ const BookingPanel = ({ item }: Props) => {
       num_days: numDays,
     });
 
-    navigate("/checkout");
+    setPendingCheckout(true);
   };
   const handleMobileButton = () => {
     if (!startDate || !endDate) {
