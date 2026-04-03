@@ -1,5 +1,6 @@
 import { useState, useEffect, useMemo } from "react";
 import { useNavigate, Link } from "react-router-dom";
+import { cn } from "@/lib/utils";
 import { format, differenceInDays } from "date-fns";
 import { ShieldCheck, Loader2, ChevronDown } from "lucide-react";
 import { Button } from "@/components/ui/button";
