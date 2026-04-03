@@ -41,6 +41,9 @@ interface Booking {
   subtotal: number;
   delivery_fee: number;
   total_amount: number;
+  payment_type: string;
+  amount_paid: number;
+  amount_due: number;
   status: string;
   created_at: string;
   delivery_zones: {
@@ -261,6 +264,16 @@ const BookingConfirmation = () => {
               <div className="flex justify-between border-t pt-2 font-bold text-base">
                 <span>Total</span>
                 <span className="text-primary">€{booking.total_amount}</span>
+                    {booking.payment_type === "deposit" && booking.amount_due > 0 && (
+                      <div className="mt-2 rounded-lg bg-orange-50 dark:bg-orange-950/30 border border-orange-200 dark:border-orange-800 px-4 py-3 text-sm">
+                        <p className="font-medium text-orange-800 dark:text-orange-300">
+                          Deposit paid: €{Number(booking.amount_paid).toFixed(0)}
+                        </p>
+                        <p className="text-orange-700 dark:text-orange-400">
+                          Remaining €{Number(booking.amount_due).toFixed(0)} due on delivery (cash or card)
+                        </p>
+                      </div>
+                    )}
               </div>
             </div>
           </div>
