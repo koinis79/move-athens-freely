@@ -13,6 +13,8 @@ import { getPriceForDays } from "@/data/equipment";
 import DeliverySection, {
   getDeliveryFee,
   getDeliveryAddress,
+  getDeliveryZoneSlug,
+  validateDelivery,
   type DeliveryFormData,
   type DeliveryErrors,
 } from "@/components/checkout/DeliverySection";
