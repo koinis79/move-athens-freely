@@ -86,6 +86,7 @@ const Checkout = () => {
   // Delivery
   const [delivery, setDelivery] = useState<DeliveryFormData>(INITIAL_DELIVERY);
   const [deliveryErrors, setDeliveryErrors] = useState<DeliveryErrors>({});
+  const [paymentMethod, setPaymentMethod] = useState<"full" | "deposit">("full");
 
   // Pre-fill from logged-in user
   useEffect(() => {
@@ -126,6 +127,9 @@ const Checkout = () => {
   const equipmentTotal = lineItems.reduce((s, i) => s + i.subtotal, 0);
   const deliveryFee = getDeliveryFee(delivery);
   const total = equipmentTotal + deliveryFee;
+  const depositAmount = Math.ceil(total * 0.30);
+  const remainingAmount = total - depositAmount;
+  const chargeAmount = paymentMethod === "full" ? total : depositAmount;
 
   const rentalStart = useMemo(
     () =>
@@ -323,7 +327,7 @@ const Checkout = () => {
               ? { Authorization: `Bearer ${supabaseSession.access_token}` }
               : {}),
           },
-          body: JSON.stringify({ booking_number: bookingNumber, customer_email: customer.email.trim() }),
+          body: JSON.stringify({ booking_number: bookingNumber, customer_email: customer.email.trim(), payment_type: paymentMethod }),
         }
       );
 
@@ -495,6 +499,70 @@ const Checkout = () => {
             )}
           </div>
 
+
+          {/* ── Payment method ─────────────────────────────────────── */}
+          <div className="space-y-3">
+            <h2 className="text-xl font-heading font-semibold text-foreground">
+              Payment Method
+            </h2>
+
+            <label
+              className={cn(
+                "flex items-start gap-3 rounded-xl border-2 p-4 cursor-pointer transition-all",
+                paymentMethod === "full"
+                  ? "border-primary bg-primary/5"
+                  : "border-border hover:border-primary/40"
+              )}
+            >
+              <input
+                type="radio"
+                name="paymentMethod"
+                value="full"
+                checked={paymentMethod === "full"}
+                onChange={() => setPaymentMethod("full")}
+                className="mt-1 accent-primary"
+              />
+              <CreditCard className="mt-0.5 h-5 w-5 shrink-0 text-primary" />
+              <div>
+                <p className="font-semibold text-foreground">
+                  Pay Now{" "}
+                  <span className="text-primary">€{total}</span>
+                </p>
+                <p className="text-sm text-muted-foreground">
+                  Full payment via card. Nothing to pay on delivery.
+                </p>
+              </div>
+            </label>
+
+            <label
+              className={cn(
+                "flex items-start gap-3 rounded-xl border-2 p-4 cursor-pointer transition-all",
+                paymentMethod === "deposit"
+                  ? "border-primary bg-primary/5"
+                  : "border-border hover:border-primary/40"
+              )}
+            >
+              <input
+                type="radio"
+                name="paymentMethod"
+                value="deposit"
+                checked={paymentMethod === "deposit"}
+                onChange={() => setPaymentMethod("deposit")}
+                className="mt-1 accent-primary"
+              />
+              <Wallet className="mt-0.5 h-5 w-5 shrink-0 text-primary" />
+              <div>
+                <p className="font-semibold text-foreground">
+                  Pay on Delivery{" "}
+                  <span className="text-primary">€{depositAmount} deposit now</span>
+                </p>
+                <p className="text-sm text-muted-foreground">
+                  30% deposit via card. Pay remaining €{remainingAmount} on delivery (cash or card).
+                </p>
+              </div>
+            </label>
+          </div>
+
           {/* ── Right: order summary ────────────────────────────────── */}
           <div className="lg:sticky lg:top-24 h-fit space-y-4">
             <div className="rounded-2xl border bg-card p-6 space-y-4">
@@ -556,6 +624,18 @@ const Checkout = () => {
                     €{total}
                   </span>
                 </div>
+                {paymentMethod === "deposit" && (
+                  <>
+                    <div className="flex justify-between text-sm text-primary font-medium">
+                      <span>Deposit (30%)</span>
+                      <span>€{depositAmount}</span>
+                    </div>
+                    <div className="flex justify-between text-xs text-muted-foreground">
+                      <span>Due on delivery</span>
+                      <span>€{remainingAmount}</span>
+                    </div>
+                  </>
+                )}
               </div>
 
               <div className="rounded-lg bg-muted/50 p-3 text-xs text-muted-foreground space-y-1">
@@ -577,16 +657,18 @@ const Checkout = () => {
                 {submitting ? (
                   <>
                     <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                    Placing booking...
+                    Processing...
                   </>
+                ) : paymentMethod === "full" ? (
+                  `Pay €${total}`
                 ) : (
-                  "Confirm Booking"
+                  `Pay €${depositAmount} Deposit`
                 )}
               </Button>
 
               <p className="flex items-center justify-center gap-1.5 text-xs text-muted-foreground">
                 <ShieldCheck className="h-3.5 w-3.5 text-accent" />
-                No payment now — we confirm within 2 hours
+                Secure payment via Stripe. Free cancellation up to 48h.
               </p>
             </div>
           </div>
