@@ -30,19 +30,23 @@ interface CustomerErrors {
 const INITIAL_DELIVERY: DeliveryFormData = {
   method: null,
   subType: null,
+  deliveryAddress: "",
+  shipName: "",
+  flightNumber: "",
+  pickupLocation: null,
+  detectedZone: null,
+  manualZone: null,
+  timeSlot: "tbc",
+  whatsappUpdates: true,
+  specialInstructions: "",
+  // Legacy compat
   hotelName: "",
   neighborhood: "",
   roomNumber: "",
-  shipName: "",
   portArrival: undefined,
   portDeparture: undefined,
-  flightNumber: "",
   arrivalDateTime: undefined,
-  pickupLocation: null,
   preferredDate: undefined,
-  timeSlot: "morning",
-  whatsappUpdates: true,
-  specialInstructions: "",
 };
 
 const COUNTRY_CODES = [
@@ -57,25 +61,6 @@ const COUNTRY_CODES = [
   { flag: "🇦🇺", code: "+61",  label: "AU" },
   { flag: "🇨🇦", code: "+1",   label: "CA" },
 ];
-
-/** Map checkout delivery form data to a delivery_zones table slug */
-function getDeliveryZoneSlug(delivery: DeliveryFormData): string | null {
-  if (delivery.method === "pickup") return "store-pickup";
-  if (delivery.method === "delivery") {
-    if (delivery.subType === "cruise") return "piraeus-cruise";
-    if (delivery.subType === "airport") return "airport";
-    if (delivery.subType === "hotel") {
-      const map: Record<string, string> = {
-        center: "city-center",
-        inner: "extended-center",
-        suburbs: "suburbs-riviera",
-        other: "suburbs-riviera",
-      };
-      return map[delivery.neighborhood] ?? null;
-    }
-  }
-  return null;
-}
 
 
 const Checkout = () => {
@@ -264,10 +249,10 @@ const Checkout = () => {
         delivery.method === "pickup"
           ? `Pickup: ${delivery.pickupLocation}`
           : "",
-        delivery.subType === "cruise"
+        delivery.shipName.trim()
           ? `Ship: ${delivery.shipName}`
           : "",
-        delivery.subType === "airport" && delivery.flightNumber
+        delivery.flightNumber.trim()
           ? `Flight: ${delivery.flightNumber}`
           : "",
       ]
@@ -275,7 +260,7 @@ const Checkout = () => {
         .join(" | ");
 
       // Resolve delivery zone ID from form selection
-      const zoneSlug = getDeliveryZoneSlug(delivery);
+      const zoneSlug = getDeliveryZoneSlug(delivery) as string | null;
       let deliveryZoneId: string | null = null;
       if (zoneSlug) {
         const { data: zoneRow } = await supabase
@@ -295,7 +280,7 @@ const Checkout = () => {
         p_customer_phone: fullPhone,
         p_delivery_zone_id: deliveryZoneId,
         p_delivery_address: deliveryAddress,
-        p_delivery_time_slot: delivery.timeSlot,
+        p_delivery_time_slot: "tbc",
         p_delivery_notes: deliveryNotes || null,
         p_rental_start: format(rentalStart, "yyyy-MM-dd"),
         p_rental_end: format(rentalEnd, "yyyy-MM-dd"),
