@@ -33,19 +33,19 @@ const EquipmentCard = ({ item }: { item: EquipmentItem }) => {
   return (
     <Link to={`/equipment/${item.categorySlug}/${item.slug}`} className="group block">
       <Card className="h-full overflow-hidden transition-all duration-200 hover:-translate-y-1 hover:shadow-[0_12px_24px_rgba(0,0,0,0.1)]">
-        <div className="relative h-40 bg-gray-100 dark:bg-gray-800 flex items-center justify-center p-3">
+        <div className="relative aspect-square bg-white dark:bg-card flex items-center justify-center p-6">
           {item.image ? (
             <img
               src={item.image}
               alt={item.name}
-              className="h-full w-full object-contain"
+              className="max-h-full max-w-full object-contain"
               loading="lazy"
               onError={(e) => { (e.target as HTMLImageElement).src = "/placeholder.svg"; }}
             />
           ) : (
-            <span className="text-6xl select-none" aria-hidden="true">{categoryEmoji[item.category] ?? "♿"}</span>
+            <span className="text-7xl text-primary/40 select-none" aria-hidden="true">{categoryEmoji[item.category] ?? "♿"}</span>
           )}
-          <Badge variant="secondary" className={`absolute left-3 top-3 text-xs font-semibold ${categoryColors[item.category] ?? ""}`}>
+          <Badge variant="secondary" className={`absolute left-3 top-3 text-xs font-semibold backdrop-blur-sm ${categoryColors[item.category] ?? ""}`}>
             {item.category}
           </Badge>
         </div>
