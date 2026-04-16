@@ -1,7 +1,8 @@
 import { useState } from "react";
 import { useAuth } from "@/context/AuthContext";
 import { useIsMobile } from "@/hooks/use-mobile";
-import { ClipboardList, UserCog } from "lucide-react";
+import { Link } from "react-router-dom";
+import { ClipboardList, Shield, UserCog } from "lucide-react";
 import { cn } from "@/lib/utils";
 import MyBookings from "@/components/dashboard/MyBookings";
 import ProfileSettings from "@/components/dashboard/ProfileSettings";
@@ -15,7 +16,7 @@ type TabId = (typeof tabs)[number]["id"];
 
 const Dashboard = () => {
   const [activeTab, setActiveTab] = useState<TabId>("bookings");
-  const { user } = useAuth();
+  const { user, isAdmin } = useAuth();
   const isMobile = useIsMobile();
 
   return (
@@ -60,11 +61,29 @@ const Dashboard = () => {
               {tab.label}
             </button>
           ))}
+          {isAdmin && (
+            <Link
+              to="/admin"
+              className="mt-4 w-full flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-semibold bg-primary text-primary-foreground hover:bg-primary/90 transition-colors"
+            >
+              <Shield className="h-4 w-4" />
+              Admin Dashboard
+            </Link>
+          )}
         </aside>
       )}
 
       {/* Content */}
       <main className="flex-1 p-6 md:p-8 max-w-4xl">
+        {isAdmin && isMobile && (
+          <Link
+            to="/admin"
+            className="mb-4 flex items-center justify-center gap-2 rounded-lg bg-primary text-primary-foreground px-4 py-2.5 text-sm font-semibold hover:bg-primary/90 transition-colors"
+          >
+            <Shield className="h-4 w-4" />
+            Open Admin Dashboard
+          </Link>
+        )}
         {activeTab === "bookings" && <MyBookings />}
         {activeTab === "profile" && <ProfileSettings user={user} />}
       </main>
