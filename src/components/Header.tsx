@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { Link, useLocation } from "react-router-dom";
-import { Menu, X, ChevronDown, User, LogOut, LayoutDashboard, ShoppingCart, Sun, Moon, MessageCircle } from "lucide-react";
+import { Menu, X, ChevronDown, User, LogOut, LayoutDashboard, Shield, ShoppingCart, Sun, Moon, MessageCircle } from "lucide-react";
 import { useTheme } from "next-themes";
 import { useTranslation } from "react-i18next";
 import { useAuth } from "@/context/AuthContext";
@@ -17,7 +17,7 @@ const Header = () => {
   const [menuOpen, setMenuOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
   const location = useLocation();
-  const { user, signOut } = useAuth();
+  const { user, isAdmin, signOut } = useAuth();
   const { itemCount } = useCart();
   const { theme, setTheme } = useTheme();
   const { t, i18n } = useTranslation();
@@ -118,6 +118,11 @@ const Header = () => {
                 <DropdownMenuItem asChild>
                   <Link to="/dashboard" className="gap-2"><LayoutDashboard className="h-4 w-4" /> {t("nav.myBookings")}</Link>
                 </DropdownMenuItem>
+                {isAdmin && (
+                  <DropdownMenuItem asChild>
+                    <Link to="/admin" className="gap-2 text-primary font-medium"><Shield className="h-4 w-4" /> Admin Dashboard</Link>
+                  </DropdownMenuItem>
+                )}
                 <DropdownMenuItem asChild>
                   <Link to="/dashboard" className="gap-2"><User className="h-4 w-4" /> {t("nav.profile")}</Link>
                 </DropdownMenuItem>
