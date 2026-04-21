@@ -75,30 +75,23 @@ interface ZoneInfo {
 
 const ZONES: ZoneInfo[] = [
   { slug: "store-pickup", label: "Store Pickup", fee: 0 },
-  { slug: "city-center", label: "City Center", fee: 10 },
-  { slug: "extended-center", label: "Extended Center", fee: 15 },
-  { slug: "suburbs-riviera", label: "Suburbs & Riviera", fee: 20 },
-  { slug: "piraeus-cruise", label: "Piraeus Port", fee: 25 },
-  { slug: "airport", label: "Athens Airport", fee: 50 },
-  { slug: "rafina-port", label: "Rafina Port", fee: 30 },
-  { slug: "lavrio-port", label: "Lavrio Port", fee: 35 },
+  { slug: "athens-city", label: "Athens City", fee: 10 },
+  { slug: "athens-airport", label: "Athens Airport", fee: 50 },
+  { slug: "piraeus-port", label: "Piraeus Cruise Terminal", fee: 25 },
 ];
 
 function detectZoneFromAddress(address: string): string {
   const l = address.toLowerCase();
-  if (l.includes("airport") || l.includes("aerodrom") || l.includes("eleftherios") || l.includes("venizelos")) return "airport";
-  if (l.includes("rafina") || l.includes("ραφήνα") || l.includes("ραφηνα")) return "rafina-port";
-  if (l.includes("lavrio") || l.includes("λαύριο") || l.includes("λαυριο")) return "lavrio-port";
-  if (l.includes("piraeus") || l.includes("πειραι") || l.includes("cruise") || l.includes("ferry") || l.includes("port") || l.includes("λιμάνι")) return "piraeus-cruise";
-  const suburbs = ["glyfada","voula","vouliagmeni","kifisia","kifissia","marousi","chalandri","cholargos","psychico","filothei","vari","γλυφάδα","βούλα","κηφισιά","μαρούσι","χαλάνδρι"];
-  if (suburbs.some(k => l.includes(k))) return "suburbs-riviera";
-  const extended = ["koukaki","pagrati","pangrati","kallithea","neos kosmos","petralona","exarchia","kypseli","kolonaki","ilisia","zografou","κουκάκι","παγκράτι","καλλιθέα","κολωνάκι","εξάρχεια"];
-  if (extended.some(k => l.includes(k))) return "extended-center";
-  const center = ["syntagma","plaka","monastiraki","psiri","psyrri","thissio","acropolis","ermou","athinas","omonia","σύνταγμα","πλάκα","μοναστηράκι"];
-  if (center.some(k => l.includes(k))) return "city-center";
-  // Default for any Athens address
-  if (l.length > 5) return "city-center";
-  return "city-center";
+
+  // Airport
+  if (l.includes("airport") || l.includes("venizelos") || l.includes("eleftherios") || l.includes("aerodrom") || l.includes("αεροδρόμ")) return "athens-airport";
+
+  // Piraeus / Cruise / Port
+  if (l.includes("piraeus") || l.includes("πειραι") || l.includes("cruise") || l.includes("ferry") || l.includes("port") || l.includes("λιμάνι")) return "piraeus-port";
+
+  // Default — all Athens addresses
+  if (l.length > 3) return "athens-city";
+  return "athens-city";
 }
 
 function getZone(slug: string | null): ZoneInfo | undefined {
