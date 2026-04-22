@@ -1,9 +1,10 @@
-import { Activity, Truck, Clock, Euro, ArrowUpRight, ArrowDownRight, MapPin, ChevronRight, Calendar } from "lucide-react";
+import { Activity, CalendarDays, CheckCircle2, ChevronRight, ClipboardList, Clock, Euro } from "lucide-react";
+import { useEffect, useState } from "react";
+import { supabase } from "@/integrations/supabase/client";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Link, useNavigate } from "react-router-dom";
-import { useAdminStats } from "@/hooks/useAdminStats";
 import { useAdminBookings } from "@/hooks/useAdminBookings";
 
 /* ── Status badge config ── */
@@ -24,27 +25,102 @@ interface StatCardProps {
   accentColor: string;
   accentBg: string;
   loading?: boolean;
+  onClick?: () => void;
+  subtitle?: string;
 }
 
-const StatCard = ({ title, value, icon: Icon, accentColor, accentBg, loading }: StatCardProps) => (
-  <Card className="border border-border shadow-sm hover:shadow-md transition-shadow">
-    <CardContent className="p-5">
-      <div className="flex items-start justify-between">
-        <div className="space-y-2">
-          <p className="text-sm font-medium text-muted-foreground">{title}</p>
-          {loading ? (
-            <Skeleton className="h-9 w-16" />
-          ) : (
-            <p className="text-3xl font-bold text-foreground tracking-tight">{value}</p>
-          )}
-        </div>
-        <div className={`rounded-xl p-3 ${accentBg}`}>
-          <Icon className={`h-5 w-5 ${accentColor}`} />
-        </div>
-      </div>
-    </CardContent>
-  </Card>
-);
+const StatCard = ({ title, value, icon: Icon, accentColor, accentBg, loading, onClick, subtitle }: StatCardProps) => {
+  const Wrap: React.ElementType = onClick ? "button" : "div";
+  const wrapProps = onClick
+    ? { type: "button" as const, onClick, className: "text-left w-full" }
+    : {};
+  return (
+    <Wrap {...wrapProps}>
+      <Card className={`border border-border shadow-sm transition-all ${onClick ? "hover:shadow-md hover:-translate-y-0.5 cursor-pointer" : ""}`}>
+        <CardContent className="p-5">
+          <div className="flex items-start justify-between">
+            <div className="space-y-2 min-w-0">
+              <p className="text-sm font-medium text-muted-foreground">{title}</p>
+              {loading ? (
+                <Skeleton className="h-9 w-16" />
+              ) : (
+                <>
+                  <p className="text-3xl font-bold text-foreground tracking-tight">{value}</p>
+                  {subtitle && <p className="text-xs text-muted-foreground">{subtitle}</p>}
+                </>
+              )}
+            </div>
+            <div className={`rounded-xl p-3 shrink-0 ${accentBg}`}>
+              <Icon className={`h-5 w-5 ${accentColor}`} />
+            </div>
+          </div>
+        </CardContent>
+      </Card>
+    </Wrap>
+  );
+};
+
+/* ── Overview stats ── */
+interface OverviewStats {
+  todaysBookings: number;
+  pendingBookings: number;
+  activeRentals: number;
+  weekRevenue: number;
+  completedThisMonth: number;
+}
+
+function useOverviewStats() {
+  const [stats, setStats] = useState<OverviewStats | null>(null);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    async function load() {
+      const now = new Date();
+      const todayStart = new Date(now.getFullYear(), now.getMonth(), now.getDate()).toISOString();
+      // Week start: Monday
+      const day = now.getDay(); // 0=Sun .. 6=Sat
+      const diffToMonday = (day === 0 ? -6 : 1 - day);
+      const weekStart = new Date(now.getFullYear(), now.getMonth(), now.getDate() + diffToMonday).toISOString();
+      const monthStart = new Date(now.getFullYear(), now.getMonth(), 1).toISOString();
+
+      const [todays, pending, active, week, completed] = await Promise.all([
+        supabase.from("bookings")
+          .select("id", { count: "exact", head: true })
+          .gte("created_at", todayStart),
+        supabase.from("bookings")
+          .select("id", { count: "exact", head: true })
+          .eq("status", "pending")
+          .eq("is_archived", false),
+        supabase.from("bookings")
+          .select("id", { count: "exact", head: true })
+          .in("status", ["confirmed", "delivered", "active", "out_for_delivery", "preparing"])
+          .eq("is_archived", false),
+        supabase.from("bookings")
+          .select("total_amount")
+          .gte("created_at", weekStart)
+          .eq("payment_status", "paid"),
+        supabase.from("bookings")
+          .select("id", { count: "exact", head: true })
+          .eq("status", "completed")
+          .gte("created_at", monthStart),
+      ]);
+
+      const weekRevenue = (week.data ?? []).reduce((s, b) => s + Number(b.total_amount || 0), 0);
+
+      setStats({
+        todaysBookings: todays.count ?? 0,
+        pendingBookings: pending.count ?? 0,
+        activeRentals: active.count ?? 0,
+        weekRevenue,
+        completedThisMonth: completed.count ?? 0,
+      });
+      setLoading(false);
+    }
+    load();
+  }, []);
+
+  return { stats, loading };
+}
 
 /* ── Date formatter ── */
 const fmtDate = (dateStr: string) => {
@@ -70,10 +146,8 @@ const TableSkeleton = ({ rows = 5, cols = 6 }: { rows?: number; cols?: number })
 /* ── Main Dashboard ── */
 const AdminDashboard = () => {
   const navigate = useNavigate();
-  const { stats, loading: statsLoading } = useAdminStats();
+  const { stats: overview, loading: overviewLoading } = useOverviewStats();
   const { bookings, loading: bookingsLoading } = useAdminBookings();
-
-  const loading = statsLoading;
   const recentBookings = bookings.slice(0, 10);
 
   return (
@@ -84,11 +158,56 @@ const AdminDashboard = () => {
       </div>
 
       {/* ── Top Row: Stat Cards ── */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4">
-        <StatCard title="Active Rentals" value={String(stats?.activeRentals ?? 0)} icon={Activity} accentColor="text-primary" accentBg="bg-primary/10" loading={loading} />
-        <StatCard title="Today's Deliveries" value={String(stats?.todaysDeliveries ?? 0)} icon={Truck} accentColor="text-secondary" accentBg="bg-secondary/10" loading={loading} />
-        <StatCard title="Pending Requests" value={String(stats?.pendingRequests ?? 0)} icon={Clock} accentColor="text-amber-600" accentBg="bg-amber-50" loading={loading} />
-        <StatCard title="Today's Revenue" value={`€${(stats?.todaysRevenue ?? 0).toLocaleString()}`} icon={Euro} accentColor="text-accent" accentBg="bg-accent/10" loading={loading} />
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-4">
+        <StatCard
+          title="Today's Bookings"
+          value={String(overview?.todaysBookings ?? 0)}
+          icon={ClipboardList}
+          accentColor="text-primary"
+          accentBg="bg-primary/10"
+          loading={overviewLoading}
+          onClick={() => navigate("/admin/bookings")}
+          subtitle="Created today"
+        />
+        <StatCard
+          title="Pending Bookings"
+          value={String(overview?.pendingBookings ?? 0)}
+          icon={Clock}
+          accentColor="text-amber-700"
+          accentBg="bg-amber-100"
+          loading={overviewLoading}
+          onClick={() => navigate("/admin/bookings?status=pending")}
+          subtitle="Awaiting action"
+        />
+        <StatCard
+          title="Active Rentals"
+          value={String(overview?.activeRentals ?? 0)}
+          icon={Activity}
+          accentColor="text-blue-700"
+          accentBg="bg-blue-100"
+          loading={overviewLoading}
+          onClick={() => navigate("/admin/bookings?status=active")}
+          subtitle="Currently out"
+        />
+        <StatCard
+          title="This Week Revenue"
+          value={`€${(overview?.weekRevenue ?? 0).toLocaleString()}`}
+          icon={Euro}
+          accentColor="text-emerald-700"
+          accentBg="bg-emerald-100"
+          loading={overviewLoading}
+          subtitle="Paid bookings"
+        />
+        <StatCard
+          title="Completed This Month"
+          value={String(overview?.completedThisMonth ?? 0)}
+          icon={CheckCircle2}
+          accentColor="text-purple-700"
+          accentBg="bg-purple-100"
+          loading={overviewLoading}
+          onClick={() => navigate("/admin/bookings?status=completed")}
+          subtitle="Finished rentals"
+        />
       </div>
 
       {/* ── Recent Bookings ── */}
