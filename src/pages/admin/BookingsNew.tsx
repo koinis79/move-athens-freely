@@ -5,7 +5,9 @@ import { format } from "date-fns";
 import {
   Archive,
   ArchiveRestore,
+  ArrowRight,
   Check,
+  CheckCircle2,
   ChevronDown,
   MessageCircle,
   Search,
@@ -60,6 +62,24 @@ const statusColors: Record<string, string> = {
   cancelled: "bg-red-100 text-red-800",
 };
 
+/** Next status in the quick-advance flow. Returns null if no advance is possible. */
+function nextStatus(current: string): string | null {
+  const flow: Record<string, string> = {
+    pending: "confirmed",
+    confirmed: "delivered",
+    preparing: "out_for_delivery",
+    out_for_delivery: "delivered",
+    delivered: "completed",
+  };
+  return flow[current] ?? null;
+}
+
+function nextStatusLabel(current: string): string | null {
+  const next = nextStatus(current);
+  if (!next) return null;
+  return next.replace(/_/g, " ");
+}
+
 function formatDate(dateStr: string): string {
   const d = new Date(dateStr + "T00:00:00Z");
   return format(d, "dd MMM yyyy");
@@ -74,6 +94,8 @@ export default function BookingsNew() {
   const [search, setSearch] = useState("");
   const [selected, setSelected] = useState<Booking | null>(null);
   const [openMenuId, setOpenMenuId] = useState<string | null>(null);
+  const [archiveConfirm, setArchiveConfirm] = useState<Booking | null>(null);
+  const [cancelConfirm, setCancelConfirm] = useState<Booking | null>(null);
 
   async function fetchBookings() {
     setLoading(true);
@@ -99,14 +121,16 @@ export default function BookingsNew() {
     fetchBookings();
   }, []);
 
-  async function updateStatus(id: string, status: string) {
+  async function updateStatus(id: string, status: string, successMsg?: string) {
     const { error } = await supabase.from("bookings").update({ status }).eq("id", id);
     if (error) {
       toast({ title: "Error", description: error.message, variant: "destructive" });
-    } else {
-      toast({ title: "Status updated", description: `Marked as ${status}` });
-      fetchBookings();
+      return;
     }
+    toast({ title: successMsg ?? `Status: ${status.replace(/_/g, " ")}` });
+    await fetchBookings();
+    // Update selected booking if it's the same one
+    setSelected((prev) => (prev && prev.id === id ? { ...prev, status } : prev));
     setOpenMenuId(null);
   }
 
@@ -117,11 +141,19 @@ export default function BookingsNew() {
       .eq("id", id);
     if (error) {
       toast({ title: "Error", description: error.message, variant: "destructive" });
-    } else {
-      toast({ title: archived ? "Booking archived" : "Booking restored" });
-      fetchBookings();
+      return;
     }
+    toast({ title: archived ? "Booking archived" : "Booking restored" });
+    await fetchBookings();
+    setSelected(null);
     setOpenMenuId(null);
+    setArchiveConfirm(null);
+  }
+
+  async function cancelBooking(id: string) {
+    await updateStatus(id, "cancelled", "Booking cancelled");
+    setCancelConfirm(null);
+    setSelected((prev) => (prev && prev.id === id ? { ...prev, status: "cancelled" } : prev));
   }
 
   const filtered = bookings.filter((b) => {
@@ -233,123 +265,141 @@ export default function BookingsNew() {
               </tr>
             )}
             {!loading &&
-              filtered.map((b) => (
-                <tr
-                  key={b.id}
-                  className="hover:bg-gray-50 cursor-pointer"
-                  onClick={() => setSelected(b)}
-                >
-                  <td className="px-4 py-3 font-mono text-xs">{b.booking_number}</td>
-                  <td className="px-4 py-3">
-                    <div className="font-medium text-gray-900">{b.customer_name}</div>
-                    <div className="text-xs text-gray-500">{b.customer_email}</div>
-                  </td>
-                  <td className="px-4 py-3 text-xs text-gray-700">
-                    {b.booking_items
-                      .map((i) => `${i.equipment?.name_en ?? "?"} ×${i.quantity}`)
-                      .join(", ")}
-                  </td>
-                  <td className="px-4 py-3 text-xs">
-                    {formatDate(b.rental_start)} → {formatDate(b.rental_end)}
-                  </td>
-                  <td className="px-4 py-3">
-                    <span
-                      className={`inline-flex px-2 py-0.5 rounded-full text-xs font-medium ${
-                        statusColors[b.status] ?? "bg-gray-100 text-gray-800"
-                      }`}
-                    >
-                      {b.status.replace(/_/g, " ")}
-                    </span>
-                  </td>
-                  <td className="px-4 py-3 text-right font-semibold">
-                    €{Number(b.total_amount).toFixed(0)}
-                  </td>
-                  <td className="px-4 py-3 text-right relative">
-                    <button
-                      type="button"
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        setOpenMenuId(openMenuId === b.id ? null : b.id);
-                      }}
-                      className="inline-flex items-center gap-1 px-2 py-1 text-xs rounded hover:bg-gray-100"
-                    >
-                      Actions <ChevronDown className="h-3 w-3" />
-                    </button>
-                    {openMenuId === b.id && (
-                      <div
-                        className="absolute right-4 top-full mt-1 w-48 bg-white rounded-md shadow-lg border border-gray-200 z-20 py-1"
-                        onClick={(e) => e.stopPropagation()}
-                      >
-                        {tab === "active" ? (
-                          <>
-                            <button
-                              type="button"
-                              onClick={() => updateStatus(b.id, "confirmed")}
-                              className="w-full text-left px-3 py-1.5 text-sm hover:bg-gray-100 flex items-center gap-2"
-                            >
-                              <Check className="h-3.5 w-3.5" /> Mark Confirmed
-                            </button>
-                            <button
-                              type="button"
-                              onClick={() => updateStatus(b.id, "delivered")}
-                              className="w-full text-left px-3 py-1.5 text-sm hover:bg-gray-100 flex items-center gap-2"
-                            >
-                              <Truck className="h-3.5 w-3.5" /> Mark Delivered
-                            </button>
-                            <button
-                              type="button"
-                              onClick={() => updateStatus(b.id, "completed")}
-                              className="w-full text-left px-3 py-1.5 text-sm hover:bg-gray-100 flex items-center gap-2"
-                            >
-                              <Check className="h-3.5 w-3.5" /> Mark Completed
-                            </button>
-                            {(b.status === "completed" || b.status === "cancelled") && (
-                              <>
-                                <div className="h-px bg-gray-200 my-1" />
-                                <button
-                                  type="button"
-                                  onClick={() => setArchived(b.id, true)}
-                                  className="w-full text-left px-3 py-1.5 text-sm hover:bg-gray-100 flex items-center gap-2"
-                                >
-                                  <Archive className="h-3.5 w-3.5" /> Archive
-                                </button>
-                              </>
-                            )}
-                            <div className="h-px bg-gray-200 my-1" />
-                            <button
-                              type="button"
-                              onClick={() => updateStatus(b.id, "cancelled")}
-                              className="w-full text-left px-3 py-1.5 text-sm hover:bg-gray-100 flex items-center gap-2 text-red-600"
-                            >
-                              <XIcon className="h-3.5 w-3.5" /> Cancel Booking
-                            </button>
-                          </>
-                        ) : (
+              filtered.map((b) => {
+                const nxt = nextStatus(b.status);
+                const nxtLabel = nextStatusLabel(b.status);
+                return (
+                  <tr
+                    key={b.id}
+                    className="hover:bg-gray-50 cursor-pointer"
+                    onClick={() => setSelected(b)}
+                  >
+                    <td className="px-4 py-3 font-mono text-xs">{b.booking_number}</td>
+                    <td className="px-4 py-3">
+                      <div className="font-medium text-gray-900">{b.customer_name}</div>
+                      <div className="text-xs text-gray-500">{b.customer_email}</div>
+                    </td>
+                    <td className="px-4 py-3 text-xs text-gray-700">
+                      {b.booking_items
+                        .map((i) => `${i.equipment?.name_en ?? "?"} ×${i.quantity}`)
+                        .join(", ")}
+                    </td>
+                    <td className="px-4 py-3 text-xs">
+                      {formatDate(b.rental_start)} → {formatDate(b.rental_end)}
+                    </td>
+                    <td className="px-4 py-3">
+                      <div className="flex items-center gap-2">
+                        <span
+                          className={`inline-flex px-2 py-0.5 rounded-full text-xs font-medium ${
+                            statusColors[b.status] ?? "bg-gray-100 text-gray-800"
+                          }`}
+                        >
+                          {b.status.replace(/_/g, " ")}
+                        </span>
+                        {tab === "active" && nxt && (
                           <button
                             type="button"
-                            onClick={() => setArchived(b.id, false)}
-                            className="w-full text-left px-3 py-1.5 text-sm hover:bg-gray-100 flex items-center gap-2"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              updateStatus(b.id, nxt);
+                            }}
+                            title={`Advance to ${nxtLabel}`}
+                            className="inline-flex items-center gap-1 px-2 py-0.5 text-xs font-medium rounded-full border border-blue-200 bg-blue-50 text-blue-700 hover:bg-blue-100"
                           >
-                            <ArchiveRestore className="h-3.5 w-3.5" /> Restore
+                            <ArrowRight className="h-3 w-3" /> {nxtLabel}
                           </button>
                         )}
                       </div>
-                    )}
-                  </td>
-                </tr>
-              ))}
+                    </td>
+                    <td className="px-4 py-3 text-right font-semibold">
+                      €{Number(b.total_amount).toFixed(0)}
+                    </td>
+                    <td className="px-4 py-3 text-right relative">
+                      <button
+                        type="button"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          setOpenMenuId(openMenuId === b.id ? null : b.id);
+                        }}
+                        className="inline-flex items-center gap-1 px-2 py-1 text-xs rounded hover:bg-gray-100"
+                      >
+                        More <ChevronDown className="h-3 w-3" />
+                      </button>
+                      {openMenuId === b.id && (
+                        <div
+                          className="absolute right-4 top-full mt-1 w-48 bg-white rounded-md shadow-lg border border-gray-200 z-20 py-1"
+                          onClick={(e) => e.stopPropagation()}
+                        >
+                          {tab === "active" ? (
+                            <>
+                              {STATUSES.filter((s) => s !== b.status && s !== "cancelled").map((s) => (
+                                <button
+                                  key={s}
+                                  type="button"
+                                  onClick={() => updateStatus(b.id, s)}
+                                  className="w-full text-left px-3 py-1.5 text-sm hover:bg-gray-100 capitalize"
+                                >
+                                  {s.replace(/_/g, " ")}
+                                </button>
+                              ))}
+                              {(b.status === "completed" || b.status === "cancelled") && (
+                                <>
+                                  <div className="h-px bg-gray-200 my-1" />
+                                  <button
+                                    type="button"
+                                    onClick={() => {
+                                      setArchiveConfirm(b);
+                                      setOpenMenuId(null);
+                                    }}
+                                    className="w-full text-left px-3 py-1.5 text-sm hover:bg-gray-100 flex items-center gap-2"
+                                  >
+                                    <Archive className="h-3.5 w-3.5" /> Archive
+                                  </button>
+                                </>
+                              )}
+                              {b.status !== "cancelled" && (
+                                <>
+                                  <div className="h-px bg-gray-200 my-1" />
+                                  <button
+                                    type="button"
+                                    onClick={() => {
+                                      setCancelConfirm(b);
+                                      setOpenMenuId(null);
+                                    }}
+                                    className="w-full text-left px-3 py-1.5 text-sm hover:bg-gray-100 flex items-center gap-2 text-red-600"
+                                  >
+                                    <XIcon className="h-3.5 w-3.5" /> Cancel Booking
+                                  </button>
+                                </>
+                              )}
+                            </>
+                          ) : (
+                            <button
+                              type="button"
+                              onClick={() => setArchived(b.id, false)}
+                              className="w-full text-left px-3 py-1.5 text-sm hover:bg-gray-100 flex items-center gap-2"
+                            >
+                              <ArchiveRestore className="h-3.5 w-3.5" /> Restore
+                            </button>
+                          )}
+                        </div>
+                      )}
+                    </td>
+                  </tr>
+                );
+              })}
           </tbody>
         </table>
       </div>
 
-      {/* Side panel / modal */}
+      {/* Side panel */}
       {selected && (
         <div className="fixed inset-0 z-30 bg-black/40" onClick={() => setSelected(null)}>
           <div
             className="absolute right-0 top-0 h-full w-full max-w-md bg-white shadow-xl overflow-y-auto"
             onClick={(e) => e.stopPropagation()}
           >
-            <div className="sticky top-0 bg-white border-b px-6 py-4 flex items-center justify-between">
+            <div className="sticky top-0 bg-white border-b px-6 py-4 flex items-center justify-between z-10">
               <div>
                 <p className="text-xs text-gray-500">Booking</p>
                 <p className="font-mono font-semibold">{selected.booking_number}</p>
@@ -364,6 +414,75 @@ export default function BookingsNew() {
             </div>
 
             <div className="p-6 space-y-5 text-sm">
+              {/* Prominent action buttons */}
+              {!selected.is_archived && (
+                <div className="space-y-2">
+                  {/* Primary action button — contextual based on status */}
+                  {(selected.status === "pending" || selected.status === "confirmed") && (
+                    <button
+                      type="button"
+                      onClick={() => updateStatus(selected.id, "delivered", "Marked as delivered")}
+                      className="w-full flex items-center justify-center gap-2 bg-green-600 hover:bg-green-700 text-white font-semibold py-3 rounded-lg transition-colors"
+                    >
+                      <Truck className="h-4 w-4" /> Mark Delivered
+                    </button>
+                  )}
+
+                  {selected.status === "delivered" && (
+                    <button
+                      type="button"
+                      onClick={() => updateStatus(selected.id, "completed", "Marked as completed")}
+                      className="w-full flex items-center justify-center gap-2 bg-blue-600 hover:bg-blue-700 text-white font-semibold py-3 rounded-lg transition-colors"
+                    >
+                      <CheckCircle2 className="h-4 w-4" /> Mark Completed
+                    </button>
+                  )}
+
+                  {/* Pending → Confirmed shortcut */}
+                  {selected.status === "pending" && (
+                    <button
+                      type="button"
+                      onClick={() => updateStatus(selected.id, "confirmed", "Booking confirmed")}
+                      className="w-full flex items-center justify-center gap-2 bg-white hover:bg-gray-50 text-blue-700 border border-blue-200 font-semibold py-2.5 rounded-lg transition-colors"
+                    >
+                      <Check className="h-4 w-4" /> Just Confirm (no delivery yet)
+                    </button>
+                  )}
+
+                  {/* Archive button for completed/cancelled */}
+                  {(selected.status === "completed" || selected.status === "cancelled") && (
+                    <button
+                      type="button"
+                      onClick={() => setArchiveConfirm(selected)}
+                      className="w-full flex items-center justify-center gap-2 bg-gray-100 hover:bg-gray-200 text-gray-800 font-semibold py-2.5 rounded-lg transition-colors"
+                    >
+                      <Archive className="h-4 w-4" /> Archive Booking
+                    </button>
+                  )}
+
+                  {/* Cancel button */}
+                  {selected.status !== "cancelled" && selected.status !== "completed" && (
+                    <button
+                      type="button"
+                      onClick={() => setCancelConfirm(selected)}
+                      className="w-full flex items-center justify-center gap-2 bg-white hover:bg-red-50 text-red-600 border border-red-200 font-semibold py-2.5 rounded-lg transition-colors"
+                    >
+                      <XIcon className="h-4 w-4" /> Cancel Booking
+                    </button>
+                  )}
+                </div>
+              )}
+
+              {selected.is_archived && (
+                <button
+                  type="button"
+                  onClick={() => setArchived(selected.id, false)}
+                  className="w-full flex items-center justify-center gap-2 bg-blue-600 hover:bg-blue-700 text-white font-semibold py-3 rounded-lg transition-colors"
+                >
+                  <ArchiveRestore className="h-4 w-4" /> Restore Booking
+                </button>
+              )}
+
               <section>
                 <h3 className="text-xs uppercase tracking-wider text-gray-500 font-semibold mb-2">
                   Customer
@@ -414,9 +533,7 @@ export default function BookingsNew() {
                 <h3 className="text-xs uppercase tracking-wider text-gray-500 font-semibold mb-2">
                   Delivery
                 </h3>
-                <p className="text-gray-700">
-                  {selected.delivery_zones?.name_en ?? "—"}
-                </p>
+                <p className="text-gray-700">{selected.delivery_zones?.name_en ?? "—"}</p>
                 <p className="text-gray-600 text-xs mt-1">{selected.delivery_address ?? "—"}</p>
                 {selected.delivery_notes && (
                   <p className="text-amber-700 text-xs mt-2 bg-amber-50 border border-amber-200 rounded px-2 py-1.5">
@@ -437,21 +554,91 @@ export default function BookingsNew() {
 
               <section>
                 <h3 className="text-xs uppercase tracking-wider text-gray-500 font-semibold mb-2">
-                  Status
+                  Current Status
                 </h3>
-                <span
-                  className={`inline-flex px-2 py-0.5 rounded-full text-xs font-medium ${
-                    statusColors[selected.status] ?? "bg-gray-100 text-gray-800"
-                  }`}
-                >
-                  {selected.status.replace(/_/g, " ")}
-                </span>
-                {selected.is_archived && (
-                  <span className="ml-2 inline-flex px-2 py-0.5 rounded-full text-xs font-medium bg-gray-200 text-gray-700">
-                    archived
+                <div className="flex items-center gap-2">
+                  <span
+                    className={`inline-flex px-2 py-0.5 rounded-full text-xs font-medium ${
+                      statusColors[selected.status] ?? "bg-gray-100 text-gray-800"
+                    }`}
+                  >
+                    {selected.status.replace(/_/g, " ")}
                   </span>
-                )}
+                  {selected.is_archived && (
+                    <span className="inline-flex px-2 py-0.5 rounded-full text-xs font-medium bg-gray-200 text-gray-700">
+                      archived
+                    </span>
+                  )}
+                </div>
               </section>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Archive confirmation modal */}
+      {archiveConfirm && (
+        <div
+          className="fixed inset-0 z-40 bg-black/50 flex items-center justify-center p-4"
+          onClick={() => setArchiveConfirm(null)}
+        >
+          <div
+            className="bg-white rounded-lg shadow-xl max-w-sm w-full p-6"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <h3 className="text-lg font-semibold">Archive this booking?</h3>
+            <p className="text-sm text-gray-600 mt-2">
+              <span className="font-mono">{archiveConfirm.booking_number}</span> will be moved to the Archived tab. You can restore it later.
+            </p>
+            <div className="mt-5 flex gap-2 justify-end">
+              <button
+                type="button"
+                onClick={() => setArchiveConfirm(null)}
+                className="px-4 py-2 text-sm rounded-md border border-gray-300 hover:bg-gray-50"
+              >
+                Cancel
+              </button>
+              <button
+                type="button"
+                onClick={() => setArchived(archiveConfirm.id, true)}
+                className="px-4 py-2 text-sm rounded-md bg-gray-900 text-white hover:bg-gray-800"
+              >
+                Archive
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Cancel confirmation modal */}
+      {cancelConfirm && (
+        <div
+          className="fixed inset-0 z-40 bg-black/50 flex items-center justify-center p-4"
+          onClick={() => setCancelConfirm(null)}
+        >
+          <div
+            className="bg-white rounded-lg shadow-xl max-w-sm w-full p-6"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <h3 className="text-lg font-semibold">Cancel this booking?</h3>
+            <p className="text-sm text-gray-600 mt-2">
+              <span className="font-mono">{cancelConfirm.booking_number}</span> will be marked as cancelled. This cannot be undone.
+            </p>
+            <div className="mt-5 flex gap-2 justify-end">
+              <button
+                type="button"
+                onClick={() => setCancelConfirm(null)}
+                className="px-4 py-2 text-sm rounded-md border border-gray-300 hover:bg-gray-50"
+              >
+                Keep Booking
+              </button>
+              <button
+                type="button"
+                onClick={() => cancelBooking(cancelConfirm.id)}
+                className="px-4 py-2 text-sm rounded-md bg-red-600 text-white hover:bg-red-700"
+              >
+                Yes, Cancel
+              </button>
             </div>
           </div>
         </div>
