@@ -33,6 +33,7 @@ import AdminBookingsPage from "./pages/admin/AdminBookingsPage";
 import AdminInventoryPage from "./pages/admin/AdminInventoryPage";
 import AdminCalendarPage from "./pages/admin/AdminCalendarPage";
 import AdminCustomersPage from "./pages/admin/AdminCustomersPage";
+import BookingsNew from "./pages/admin/BookingsNew";
 import Blog from "./pages/Blog";
 import BlogPost from "./pages/BlogPost";
 import PrivacyPolicy from "./pages/PrivacyPolicy";
@@ -81,6 +82,7 @@ const App = () => (
               <Route element={<AdminRoute><AdminLayout /></AdminRoute>}>
                 <Route path="/admin" element={<Admin />} />
                 <Route path="/admin/bookings" element={<AdminBookingsPage />} />
+              <Route path="/admin/bookings-new" element={<BookingsNew />} />
                 <Route path="/admin/inventory" element={<AdminInventoryPage />} />
                 <Route path="/admin/calendar" element={<AdminCalendarPage />} />
                 <Route path="/admin/customers" element={<AdminCustomersPage />} />
