@@ -17,7 +17,7 @@ import {
 import {
   Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
 } from "@/components/ui/select";
-import { MoreHorizontal, Search, Star, MessageCircle } from "lucide-react";
+import { Archive, ArchiveRestore, MoreHorizontal, Search, Star, MessageCircle } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { cn } from "@/lib/utils";
 import { useToast } from "@/hooks/use-toast";
@@ -53,6 +53,7 @@ interface Booking {
   status: string;
   internal_notes: string | null;
   review_requested_at: string | null;
+  is_archived: boolean;
   delivery_zones: { name_en: string; delivery_fee: number } | null;
   booking_items: {
     quantity: number;
@@ -66,7 +67,9 @@ const AdminBookings = () => {
   const { toast } = useToast();
   const [bookings, setBookings] = useState<Booking[]>([]);
   const [loading, setLoading] = useState(true);
+  const [viewMode, setViewMode] = useState<"active" | "archived">("active");
   const [statusFilter, setStatusFilter] = useState("All");
+  const [archiveTarget, setArchiveTarget] = useState<Booking | null>(null);
   const [search, setSearch] = useState("");
   const [selected, setSelected] = useState<Booking | null>(null);
   const [editStatus, setEditStatus] = useState("");
@@ -81,7 +84,7 @@ const AdminBookings = () => {
       .select(`
         id, booking_number, customer_name, customer_email, customer_phone,
         delivery_address, delivery_notes, rental_start, rental_end,
-        total_amount, payment_status, status, internal_notes,
+        total_amount, payment_status, status, internal_notes, is_archived, review_requested_at,
         delivery_zones ( name_en, delivery_fee ),
         booking_items ( quantity, num_days, subtotal, equipment ( name_en ) )
       `)
@@ -93,6 +96,8 @@ const AdminBookings = () => {
   useEffect(() => { fetchBookings(); }, []);
 
   const filtered = bookings.filter((b) => {
+    if (viewMode === "active" && b.is_archived) return false;
+    if (viewMode === "archived" && !b.is_archived) return false;
     if (statusFilter !== "All" && b.status !== statusFilter) return false;
     if (search) {
       const q = search.toLowerCase();
@@ -104,6 +109,20 @@ const AdminBookings = () => {
     }
     return true;
   });
+
+  const setArchived = async (id: string, archived: boolean) => {
+    const { error } = await supabase
+      .from("bookings")
+      .update({ is_archived: archived })
+      .eq("id", id);
+    if (error) {
+      toast({ title: "Error", description: error.message, variant: "destructive" });
+      return;
+    }
+    toast({ title: archived ? "Booking archived" : "Booking restored" });
+    setArchiveTarget(null);
+    fetchBookings();
+  };
 
   const openDetail = (b: Booking) => {
     setSelected(b);
@@ -303,13 +322,34 @@ const AdminBookings = () => {
                                 : "Request Review"}
                             </DropdownMenuItem>
                           )}
-                          <DropdownMenuSeparator />
-                          <DropdownMenuItem
-                            className="text-destructive focus:text-destructive"
-                            onClick={() => setCancelTarget(b)}
-                          >
-                            Cancel Booking
-                          </DropdownMenuItem>
+                          {b.is_archived ? (
+                            <>
+                              <DropdownMenuSeparator />
+                              <DropdownMenuItem onClick={() => setArchived(b.id, false)} className="gap-2">
+                                <ArchiveRestore className="h-3.5 w-3.5" />
+                                Restore Booking
+                              </DropdownMenuItem>
+                            </>
+                          ) : (
+                            <>
+                              {(b.status === "completed" || b.status === "cancelled") && (
+                                <>
+                                  <DropdownMenuSeparator />
+                                  <DropdownMenuItem onClick={() => setArchiveTarget(b)} className="gap-2">
+                                    <Archive className="h-3.5 w-3.5" />
+                                    Archive
+                                  </DropdownMenuItem>
+                                </>
+                              )}
+                              <DropdownMenuSeparator />
+                              <DropdownMenuItem
+                                className="text-destructive focus:text-destructive"
+                                onClick={() => setCancelTarget(b)}
+                              >
+                                Cancel Booking
+                              </DropdownMenuItem>
+                            </>
+                          )}
                         </DropdownMenuContent>
                       </DropdownMenu>
                     </TableCell>
