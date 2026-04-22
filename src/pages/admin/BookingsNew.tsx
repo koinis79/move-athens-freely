@@ -2,13 +2,16 @@ import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { format } from "date-fns";
+import BookingsCalendar from "./BookingsCalendar";
 import {
   Archive,
   ArchiveRestore,
   ArrowRight,
+  CalendarDays,
   Check,
   CheckCircle2,
   ChevronDown,
+  List,
   MessageCircle,
   Search,
   Truck,
@@ -90,6 +93,8 @@ export default function BookingsNew() {
   const [bookings, setBookings] = useState<Booking[]>([]);
   const [loading, setLoading] = useState(true);
   const [tab, setTab] = useState<"active" | "archived">("active");
+  const [layoutMode, setLayoutMode] = useState<"list" | "calendar">("list");
+  const [calendarDateFilter, setCalendarDateFilter] = useState<string | null>(null);
   const [statusFilter, setStatusFilter] = useState("all");
   const [search, setSearch] = useState("");
   const [selected, setSelected] = useState<Booking | null>(null);
@@ -160,6 +165,7 @@ export default function BookingsNew() {
     if (tab === "active" && b.is_archived) return false;
     if (tab === "archived" && !b.is_archived) return false;
     if (statusFilter !== "all" && b.status !== statusFilter) return false;
+    if (calendarDateFilter && b.rental_start !== calendarDateFilter) return false;
     if (search) {
       const q = search.toLowerCase();
       return (
@@ -207,8 +213,59 @@ export default function BookingsNew() {
         >
           Archived <span className="ml-1 text-xs text-gray-400">({archivedCount})</span>
         </button>
+
+        {/* List / Calendar view toggle */}
+        <div className="ml-auto inline-flex rounded-md border border-gray-300 p-0.5 bg-white self-center">
+          <button
+            type="button"
+            onClick={() => { setLayoutMode("list"); setCalendarDateFilter(null); }}
+            className={`inline-flex items-center gap-1 px-2.5 py-1 text-xs font-medium rounded ${
+              layoutMode === "list" ? "bg-blue-600 text-white" : "text-gray-600 hover:bg-gray-50"
+            }`}
+          >
+            <List className="h-3.5 w-3.5" /> List
+          </button>
+          <button
+            type="button"
+            onClick={() => setLayoutMode("calendar")}
+            className={`inline-flex items-center gap-1 px-2.5 py-1 text-xs font-medium rounded ${
+              layoutMode === "calendar" ? "bg-blue-600 text-white" : "text-gray-600 hover:bg-gray-50"
+            }`}
+          >
+            <CalendarDays className="h-3.5 w-3.5" /> Calendar
+          </button>
+        </div>
       </div>
 
+      {/* Active date filter chip */}
+      {calendarDateFilter && (
+        <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-md bg-blue-50 border border-blue-200 text-sm text-blue-800 self-start">
+          <CalendarDays className="h-3.5 w-3.5" />
+          <span>Showing {new Date(calendarDateFilter + "T00:00:00").toLocaleDateString("en-GB", { day: "numeric", month: "long", year: "numeric" })}</span>
+          <button
+            type="button"
+            onClick={() => setCalendarDateFilter(null)}
+            className="ml-1 text-blue-700 hover:text-blue-900"
+          >
+            <XIcon className="h-3.5 w-3.5" />
+          </button>
+        </div>
+      )}
+
+      {layoutMode === "calendar" ? (
+        <BookingsCalendar
+          bookings={bookings.filter((b) => tab === "active" ? !b.is_archived : b.is_archived)}
+          onSelectDate={(date) => {
+            setCalendarDateFilter(date);
+            setLayoutMode("list");
+          }}
+          onSelectBooking={(id) => {
+            const b = bookings.find((x) => x.id === id);
+            if (b) setSelected(b);
+          }}
+        />
+      ) : (
+      <>
       {/* Filters */}
       <div className="flex flex-col sm:flex-row gap-3">
         <div className="relative flex-1">
@@ -391,6 +448,9 @@ export default function BookingsNew() {
           </tbody>
         </table>
       </div>
+
+      </>
+      )}
 
       {/* Side panel */}
       {selected && (
