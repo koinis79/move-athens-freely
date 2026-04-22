@@ -1,3 +1,4 @@
+// Build trigger: 2026-04-22 09:22 UTC (archive feature)
 import { useEffect, useState } from "react";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
