@@ -2,6 +2,7 @@ import { Menu, Command } from "lucide-react";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { useAuth } from "@/context/AuthContext";
 import NotificationDropdown from "./NotificationDropdown";
+import AdminBookingNotifier from "./AdminBookingNotifier";
 import { useEffect } from "react";
 
 interface AdminTopBarProps {
@@ -53,6 +54,7 @@ const AdminTopBar = ({ onToggleSidebar, onOpenCommand }: AdminTopBarProps) => {
           </kbd>
         </button>
 
+        <AdminBookingNotifier />
         <NotificationDropdown />
 
         <div className="flex items-center gap-2">
