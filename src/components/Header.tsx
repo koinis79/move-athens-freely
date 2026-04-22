@@ -114,15 +114,20 @@ const Header = () => {
                 <span className="max-w-[120px] truncate text-foreground/80">{displayName}</span>
                 <ChevronDown className="h-3.5 w-3.5 text-muted-foreground" />
               </DropdownMenuTrigger>
-              <DropdownMenuContent align="end" className="w-48">
+              <DropdownMenuContent align="end" className="w-52">
+                {isAdmin && (
+                  <>
+                    <DropdownMenuItem asChild>
+                      <Link to="/admin" className="gap-2 text-primary font-semibold bg-primary/5">
+                        <Shield className="h-4 w-4" /> Admin Dashboard
+                      </Link>
+                    </DropdownMenuItem>
+                    <DropdownMenuSeparator />
+                  </>
+                )}
                 <DropdownMenuItem asChild>
                   <Link to="/dashboard" className="gap-2"><LayoutDashboard className="h-4 w-4" /> {t("nav.myBookings")}</Link>
                 </DropdownMenuItem>
-                {isAdmin && (
-                  <DropdownMenuItem asChild>
-                    <Link to="/admin" className="gap-2 text-primary font-medium"><Shield className="h-4 w-4" /> Admin Dashboard</Link>
-                  </DropdownMenuItem>
-                )}
                 <DropdownMenuItem asChild>
                   <Link to="/dashboard" className="gap-2"><User className="h-4 w-4" /> {t("nav.profile")}</Link>
                 </DropdownMenuItem>
@@ -300,6 +305,17 @@ const Header = () => {
           onClick={() => setMenuOpen(false)}
           aria-hidden="true"
         />
+      )}
+    
+      {/* Mobile floating admin button */}
+      {isAdmin && (
+        <Link
+          to="/admin"
+          aria-label="Admin Dashboard"
+          className="lg:hidden fixed bottom-24 left-4 z-40 flex h-11 w-11 items-center justify-center rounded-full bg-primary text-primary-foreground shadow-lg hover:bg-primary/90 transition-colors"
+        >
+          <Shield className="h-5 w-5" />
+        </Link>
       )}
     </header>
   );
