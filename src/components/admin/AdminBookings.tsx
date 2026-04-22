@@ -366,6 +366,26 @@ const AdminBookings = () => {
         </Table>
       </Card>
 
+      {/* Archive confirmation dialog */}
+      <Dialog open={!!archiveTarget} onOpenChange={() => setArchiveTarget(null)}>
+        <DialogContent className="max-w-sm">
+          <DialogHeader>
+            <DialogTitle>Archive this booking?</DialogTitle>
+            <DialogDescription>
+              This will archive <span className="font-mono font-semibold">{archiveTarget?.booking_number}</span> and move it to the Archived tab. You can restore it later.
+            </DialogDescription>
+          </DialogHeader>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setArchiveTarget(null)}>Back</Button>
+            <Button
+              onClick={() => archiveTarget && setArchived(archiveTarget.id, true)}
+            >
+              Archive
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
       {/* Cancel confirmation dialog */}
       <Dialog open={!!cancelTarget} onOpenChange={() => setCancelTarget(null)}>
         <DialogContent className="max-w-sm">
