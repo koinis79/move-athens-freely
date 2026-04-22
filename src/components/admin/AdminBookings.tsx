@@ -210,6 +210,38 @@ const AdminBookings = () => {
     <div className="space-y-6">
       <h1 className="text-2xl font-bold font-heading">All Bookings</h1>
 
+      {/* Active / Archived tabs */}
+      <div className="flex gap-2 border-b">
+        <button
+          type="button"
+          onClick={() => setViewMode("active")}
+          className={`px-4 py-2 text-sm font-medium border-b-2 -mb-px transition-colors ${
+            viewMode === "active"
+              ? "border-primary text-primary"
+              : "border-transparent text-muted-foreground hover:text-foreground"
+          }`}
+        >
+          Active
+          <span className="ml-2 text-xs text-muted-foreground">
+            ({bookings.filter(b => !b.is_archived).length})
+          </span>
+        </button>
+        <button
+          type="button"
+          onClick={() => setViewMode("archived")}
+          className={`px-4 py-2 text-sm font-medium border-b-2 -mb-px transition-colors ${
+            viewMode === "archived"
+              ? "border-primary text-primary"
+              : "border-transparent text-muted-foreground hover:text-foreground"
+          }`}
+        >
+          Archived
+          <span className="ml-2 text-xs text-muted-foreground">
+            ({bookings.filter(b => b.is_archived).length})
+          </span>
+        </button>
+      </div>
+
       {/* Filters */}
       <div className="flex flex-col sm:flex-row gap-3">
         <Select value={statusFilter} onValueChange={setStatusFilter}>
