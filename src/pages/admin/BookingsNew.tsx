@@ -13,6 +13,7 @@ import {
   ChevronDown,
   List,
   MessageCircle,
+  Printer,
   Search,
   Truck,
   X as XIcon,
@@ -159,6 +160,167 @@ export default function BookingsNew() {
     await updateStatus(id, "cancelled", "Booking cancelled");
     setCancelConfirm(null);
     setSelected((prev) => (prev && prev.id === id ? { ...prev, status: "cancelled" } : prev));
+  }
+
+  function printPackingSlip(b: Booking) {
+    const logoUrl = "https://lmgpuqgwkiapgpdsxvmb.supabase.co/storage/v1/object/public/assets/movability-logo.png";
+    const itemsHtml = b.booking_items
+      .map((i) => `
+        <tr>
+          <td style="padding:10px 12px;border-bottom:1px solid #000;font-size:14px;">
+            ${(i.equipment?.name_en ?? "Equipment").replace(/</g, "&lt;")}
+          </td>
+          <td style="padding:10px 12px;border-bottom:1px solid #000;font-size:14px;text-align:center;width:80px;">
+            ${i.quantity}
+          </td>
+          <td style="padding:10px 12px;border-bottom:1px solid #000;font-size:14px;text-align:center;width:80px;">
+            ${i.num_days}
+          </td>
+        </tr>`)
+      .join("");
+
+    const notesBlock = b.delivery_notes
+      ? `<div style="margin:18px 0;padding:12px 14px;border:2px solid #000;background:#fff;">
+           <p style="margin:0;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.5px;">Special Instructions</p>
+           <p style="margin:6px 0 0;font-size:14px;line-height:1.5;">${String(b.delivery_notes).replace(/</g, "&lt;")}</p>
+         </div>`
+      : "";
+
+    const phoneBlock = b.customer_phone
+      ? `<p style="margin:4px 0 0;font-size:14px;">☎ ${String(b.customer_phone).replace(/</g, "&lt;")}</p>`
+      : "";
+
+    const deliveryZone = b.delivery_zones?.name_en ?? "—";
+
+    const html = `<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Packing Slip — ${b.booking_number}</title>
+  <style>
+    @page { size: A4; margin: 18mm 16mm; }
+    * { box-sizing: border-box; }
+    html, body { margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Arial, sans-serif; color: #000; background: #fff; }
+    .header { display: flex; align-items: center; justify-content: space-between; border-bottom: 2px solid #000; padding-bottom: 14px; margin-bottom: 18px; }
+    .header img { height: 48px; width: auto; filter: grayscale(100%); }
+    .header .title { text-align: right; }
+    .header .title h1 { margin: 0; font-size: 14px; font-weight: 700; text-transform: uppercase; letter-spacing: 2px; }
+    .header .title p { margin: 2px 0 0; font-size: 11px; color: #333; }
+    .booking-number { text-align: center; margin: 20px 0 24px; }
+    .booking-number p { margin: 0; font-size: 11px; text-transform: uppercase; letter-spacing: 2px; color: #333; }
+    .booking-number h2 { margin: 4px 0 0; font-size: 32px; font-weight: 800; font-family: "Courier New", monospace; letter-spacing: 4px; }
+    .section { margin-bottom: 18px; }
+    .section h3 { margin: 0 0 6px; font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; color: #333; border-bottom: 1px solid #000; padding-bottom: 4px; }
+    .section p { margin: 4px 0; font-size: 14px; line-height: 1.5; }
+    .two-col { display: flex; gap: 24px; }
+    .two-col > div { flex: 1; }
+    .big-address { font-size: 18px; font-weight: 600; line-height: 1.4; }
+    table { width: 100%; border-collapse: collapse; border: 2px solid #000; }
+    table th { background: #000; color: #fff; padding: 10px 12px; font-size: 11px; text-transform: uppercase; letter-spacing: 1px; text-align: left; }
+    table th.center { text-align: center; }
+    .signature { margin-top: 40px; display: flex; gap: 40px; }
+    .signature > div { flex: 1; }
+    .signature .line { border-bottom: 1px solid #000; margin-top: 40px; }
+    .signature .label { font-size: 10px; text-transform: uppercase; letter-spacing: 1px; color: #333; margin-top: 6px; }
+    .footer { margin-top: 24px; text-align: center; font-size: 10px; color: #555; border-top: 1px solid #000; padding-top: 10px; }
+    @media print { body { print-color-adjust: exact; -webkit-print-color-adjust: exact; } .no-print { display: none; } }
+  </style>
+</head>
+<body>
+  <div class="header">
+    <img src="${logoUrl}" alt="Movability" onerror="this.style.display='none'" />
+    <div class="title">
+      <h1>Packing Slip</h1>
+      <p>Movability · Koinis Healthcare Group</p>
+      <p>Stadiou 31, Athens · +30 697 463 3697</p>
+    </div>
+  </div>
+
+  <div class="booking-number">
+    <p>Booking Reference</p>
+    <h2>${b.booking_number}</h2>
+  </div>
+
+  <div class="two-col">
+    <div class="section">
+      <h3>Customer</h3>
+      <p style="font-size:18px;font-weight:700;margin-top:6px;">${b.customer_name.replace(/</g, "&lt;")}</p>
+      ${phoneBlock}
+      <p style="font-size:12px;color:#555;">${b.customer_email.replace(/</g, "&lt;")}</p>
+    </div>
+    <div class="section">
+      <h3>Rental Period</h3>
+      <p style="font-size:16px;font-weight:600;margin-top:6px;">
+        ${formatDate(b.rental_start)}
+      </p>
+      <p style="font-size:16px;font-weight:600;">
+        → ${formatDate(b.rental_end)}
+      </p>
+    </div>
+  </div>
+
+  <div class="section">
+    <h3>Delivery Address</h3>
+    <p class="big-address">${(b.delivery_address ?? "Store pickup").replace(/</g, "&lt;")}</p>
+    <p style="font-size:13px;color:#555;margin-top:4px;">Zone: ${deliveryZone.replace(/</g, "&lt;")}</p>
+  </div>
+
+  <div class="section">
+    <h3>Equipment</h3>
+    <table>
+      <thead>
+        <tr>
+          <th>Item</th>
+          <th class="center">Qty</th>
+          <th class="center">Days</th>
+        </tr>
+      </thead>
+      <tbody>
+        ${itemsHtml}
+      </tbody>
+    </table>
+  </div>
+
+  ${notesBlock}
+
+  <div class="signature">
+    <div>
+      <div class="line"></div>
+      <p class="label">Delivered by (Signature)</p>
+    </div>
+    <div>
+      <div class="line"></div>
+      <p class="label">Received by (Signature)</p>
+    </div>
+    <div>
+      <div class="line"></div>
+      <p class="label">Date / Time</p>
+    </div>
+  </div>
+
+  <div class="footer">
+    Movability by Koinis Healthcare Group · Athens, Greece · info@movability.gr
+  </div>
+
+  <script>
+    window.onload = function() {
+      setTimeout(function() { window.print(); }, 300);
+    };
+  </script>
+</body>
+</html>`;
+
+    const w = window.open("", "_blank", "width=900,height=1100");
+    if (!w) {
+      toast({
+        title: "Pop-up blocked",
+        description: "Please allow pop-ups to print the packing slip.",
+        variant: "destructive",
+      });
+      return;
+    }
+    w.document.write(html);
+    w.document.close();
   }
 
   const filtered = bookings.filter((b) => {
@@ -474,6 +636,15 @@ export default function BookingsNew() {
             </div>
 
             <div className="p-6 space-y-5 text-sm">
+              {/* Print packing slip */}
+              <button
+                type="button"
+                onClick={() => printPackingSlip(selected)}
+                className="w-full flex items-center justify-center gap-2 bg-gray-900 hover:bg-gray-800 text-white font-semibold py-2.5 rounded-lg transition-colors text-sm"
+              >
+                <Printer className="h-4 w-4" /> Print Packing Slip
+              </button>
+
               {/* Prominent action buttons */}
               {!selected.is_archived && (
                 <div className="space-y-2">
