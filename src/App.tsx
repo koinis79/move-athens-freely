@@ -2,7 +2,7 @@ import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { BrowserRouter, Routes, Route } from "react-router-dom";
+import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { CartProvider } from "@/context/CartContext";
 import { AuthProvider } from "@/context/AuthContext";
 import ProtectedRoute from "@/components/ProtectedRoute";
@@ -29,7 +29,6 @@ import ForgotPassword from "./pages/ForgotPassword";
 import ResetPassword from "./pages/ResetPassword";
 import Dashboard from "./pages/Dashboard";
 import Admin from "./pages/Admin";
-import AdminBookingsPage from "./pages/admin/AdminBookingsPage";
 import AdminInventoryPage from "./pages/admin/AdminInventoryPage";
 import AdminCalendarPage from "./pages/admin/AdminCalendarPage";
 import AdminCustomersPage from "./pages/admin/AdminCustomersPage";
@@ -81,8 +80,8 @@ const App = () => (
               {/* Admin panel — separate layout, no header/footer */}
               <Route element={<AdminRoute><AdminLayout /></AdminRoute>}>
                 <Route path="/admin" element={<Admin />} />
-                <Route path="/admin/bookings" element={<AdminBookingsPage />} />
-              <Route path="/admin/bookings-new" element={<BookingsNew />} />
+                <Route path="/admin/bookings" element={<BookingsNew />} />
+              <Route path="/admin/bookings-new" element={<Navigate to="/admin/bookings" replace />} />
                 <Route path="/admin/inventory" element={<AdminInventoryPage />} />
                 <Route path="/admin/calendar" element={<AdminCalendarPage />} />
                 <Route path="/admin/customers" element={<AdminCustomersPage />} />
