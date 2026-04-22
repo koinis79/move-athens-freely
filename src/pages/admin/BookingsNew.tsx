@@ -11,6 +11,7 @@ import {
   Check,
   CheckCircle2,
   ChevronDown,
+  History,
   List,
   MessageCircle,
   Printer,
@@ -24,6 +25,13 @@ interface BookingItem {
   num_days: number;
   subtotal: number;
   equipment: { name_en: string } | null;
+}
+
+interface StatusHistoryEntry {
+  id: string;
+  status: string;
+  changed_at: string;
+  changed_by_email: string | null;
 }
 
 interface Booking {
@@ -99,6 +107,8 @@ export default function BookingsNew() {
   const [statusFilter, setStatusFilter] = useState("all");
   const [search, setSearch] = useState("");
   const [selected, setSelected] = useState<Booking | null>(null);
+  const [history, setHistory] = useState<StatusHistoryEntry[]>([]);
+  const [loadingHistory, setLoadingHistory] = useState(false);
   const [openMenuId, setOpenMenuId] = useState<string | null>(null);
   const [archiveConfirm, setArchiveConfirm] = useState<Booking | null>(null);
   const [cancelConfirm, setCancelConfirm] = useState<Booking | null>(null);
@@ -126,6 +136,35 @@ export default function BookingsNew() {
   useEffect(() => {
     fetchBookings();
   }, []);
+
+  // Fetch status history when a booking is selected
+  useEffect(() => {
+    if (!selected) {
+      setHistory([]);
+      return;
+    }
+    let cancelled = false;
+    async function loadHistory() {
+      if (!selected) return;
+      setLoadingHistory(true);
+      const { data, error } = await supabase
+        .from("booking_status_history")
+        .select("id, status, changed_at, changed_by_email")
+        .eq("booking_id", selected.id)
+        .order("changed_at", { ascending: true });
+      if (cancelled) return;
+      setLoadingHistory(false);
+      if (error) {
+        console.error("Failed to load status history:", error);
+        setHistory([]);
+        return;
+      }
+      setHistory((data as StatusHistoryEntry[]) ?? []);
+    }
+    loadHistory();
+    return () => { cancelled = true; };
+  }, [selected?.id, selected?.status]);
+
 
   async function updateStatus(id: string, status: string, successMsg?: string) {
     const { error } = await supabase.from("bookings").update({ status }).eq("id", id);
@@ -801,6 +840,59 @@ export default function BookingsNew() {
                     </span>
                   )}
                 </div>
+              </section>
+
+              <section>
+                <h3 className="text-xs uppercase tracking-wider text-gray-500 font-semibold mb-3 flex items-center gap-1.5">
+                  <History className="h-3.5 w-3.5" /> Timeline
+                </h3>
+                {loadingHistory ? (
+                  <p className="text-xs text-gray-400">Loading...</p>
+                ) : (
+                  <ol className="relative border-l-2 border-gray-200 ml-2 space-y-4 py-1">
+                    {/* Creation entry — always shown from booking.created_at */}
+                    <li className="ml-4 relative">
+                      <span className="absolute -left-[22px] top-0.5 h-3 w-3 rounded-full bg-gray-400 border-2 border-white" />
+                      <p className="text-xs font-semibold text-gray-700 capitalize">Created</p>
+                      <p className="text-[11px] text-gray-500">
+                        {new Date(selected.created_at).toLocaleString("en-GB", {
+                          day: "numeric", month: "short", year: "numeric",
+                          hour: "2-digit", minute: "2-digit",
+                        })}
+                      </p>
+                    </li>
+
+                    {history.map((h) => {
+                      const dotColor = statusColors[h.status]?.replace("text-", "bg-").split(" ")[0] ?? "bg-gray-400";
+                      return (
+                        <li key={h.id} className="ml-4 relative">
+                          <span className={`absolute -left-[22px] top-0.5 h-3 w-3 rounded-full border-2 border-white ${
+                            h.status === "pending" ? "bg-yellow-500" :
+                            h.status === "confirmed" ? "bg-blue-500" :
+                            h.status === "preparing" ? "bg-purple-500" :
+                            h.status === "out_for_delivery" ? "bg-indigo-500" :
+                            h.status === "delivered" ? "bg-green-500" :
+                            h.status === "completed" ? "bg-gray-600" :
+                            h.status === "cancelled" ? "bg-red-500" :
+                            "bg-gray-400"
+                          }`} />
+                          <p className="text-xs font-semibold text-gray-700 capitalize">{h.status.replace(/_/g, " ")}</p>
+                          <p className="text-[11px] text-gray-500">
+                            {new Date(h.changed_at).toLocaleString("en-GB", {
+                              day: "numeric", month: "short", year: "numeric",
+                              hour: "2-digit", minute: "2-digit",
+                            })}
+                            {h.changed_by_email && <span className="text-gray-400"> · by {h.changed_by_email}</span>}
+                          </p>
+                        </li>
+                      );
+                    })}
+
+                    {history.length === 0 && !loadingHistory && (
+                      <li className="ml-4 text-xs text-gray-400 italic">No status changes yet</li>
+                    )}
+                  </ol>
+                )}
               </section>
             </div>
           </div>
