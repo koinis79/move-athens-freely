@@ -151,6 +151,8 @@ export type Database = {
       }
       bookings: {
         Row: {
+          amount_due: number | null
+          amount_paid: number | null
           booking_number: string
           created_at: string
           customer_email: string
@@ -165,8 +167,10 @@ export type Database = {
           discount_amount: number
           id: string
           internal_notes: string | null
+          is_archived: boolean
           num_days: number
           payment_status: string
+          payment_type: string | null
           rental_end: string
           rental_start: string
           review_requested_at: string | null
@@ -180,6 +184,8 @@ export type Database = {
           user_id: string | null
         }
         Insert: {
+          amount_due?: number | null
+          amount_paid?: number | null
           booking_number: string
           created_at?: string
           customer_email: string
@@ -194,8 +200,10 @@ export type Database = {
           discount_amount?: number
           id?: string
           internal_notes?: string | null
+          is_archived?: boolean
           num_days: number
           payment_status?: string
+          payment_type?: string | null
           rental_end: string
           rental_start: string
           review_requested_at?: string | null
@@ -209,6 +217,8 @@ export type Database = {
           user_id?: string | null
         }
         Update: {
+          amount_due?: number | null
+          amount_paid?: number | null
           booking_number?: string
           created_at?: string
           customer_email?: string
@@ -223,8 +233,10 @@ export type Database = {
           discount_amount?: number
           id?: string
           internal_notes?: string | null
+          is_archived?: boolean
           num_days?: number
           payment_status?: string
+          payment_type?: string | null
           rental_end?: string
           rental_start?: string
           review_requested_at?: string | null
