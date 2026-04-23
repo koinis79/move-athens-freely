@@ -11,6 +11,7 @@ import {
   Check,
   CheckCircle2,
   ChevronDown,
+  Download,
   History,
   List,
   MessageCircle,
@@ -109,6 +110,8 @@ export default function BookingsNew() {
   const [selected, setSelected] = useState<Booking | null>(null);
   const [history, setHistory] = useState<StatusHistoryEntry[]>([]);
   const [loadingHistory, setLoadingHistory] = useState(false);
+  const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
+  const [bulkArchiveConfirm, setBulkArchiveConfirm] = useState(false);
   const [openMenuId, setOpenMenuId] = useState<string | null>(null);
   const [archiveConfirm, setArchiveConfirm] = useState<Booking | null>(null);
   const [cancelConfirm, setCancelConfirm] = useState<Booking | null>(null);
@@ -136,6 +139,11 @@ export default function BookingsNew() {
   useEffect(() => {
     fetchBookings();
   }, []);
+
+  // Clear selection when tab or filters change
+  useEffect(() => {
+    setSelectedIds(new Set());
+  }, [tab, statusFilter, search, calendarDateFilter, layoutMode]);
 
   // Fetch status history when a booking is selected
   useEffect(() => {
@@ -199,6 +207,79 @@ export default function BookingsNew() {
     await updateStatus(id, "cancelled", "Booking cancelled");
     setCancelConfirm(null);
     setSelected((prev) => (prev && prev.id === id ? { ...prev, status: "cancelled" } : prev));
+  }
+
+  function toggleSelect(id: string) {
+    setSelectedIds((prev) => {
+      const next = new Set(prev);
+      if (next.has(id)) next.delete(id);
+      else next.add(id);
+      return next;
+    });
+  }
+
+  async function bulkSetArchived(archived: boolean) {
+    const ids = Array.from(selectedIds);
+    if (ids.length === 0) return;
+    const { error } = await supabase
+      .from("bookings")
+      .update({ is_archived: archived })
+      .in("id", ids);
+    if (error) {
+      toast({ title: "Error", description: error.message, variant: "destructive" });
+      return;
+    }
+    toast({
+      title: archived ? `${ids.length} booking${ids.length !== 1 ? "s" : ""} archived` : `${ids.length} booking${ids.length !== 1 ? "s" : ""} restored`,
+    });
+    setSelectedIds(new Set());
+    setBulkArchiveConfirm(false);
+    await fetchBookings();
+  }
+
+  function exportCSV() {
+    const ids = selectedIds;
+    const rows = bookings.filter((b) => ids.has(b.id));
+    if (rows.length === 0) return;
+
+    const headers = [
+      "booking_number", "customer_name", "customer_email", "customer_phone",
+      "equipment", "rental_start", "rental_end", "status", "total_amount",
+    ];
+
+    const esc = (v: unknown) => {
+      const s = String(v ?? "");
+      if (/[",\n\r]/.test(s)) return `"${s.replace(/"/g, '""')}"`;
+      return s;
+    };
+
+    const lines = rows.map((b) => {
+      const equipment = b.booking_items
+        .map((i) => `${i.equipment?.name_en ?? "?"} x${i.quantity}`)
+        .join("; ");
+      return [
+        b.booking_number,
+        b.customer_name,
+        b.customer_email,
+        b.customer_phone ?? "",
+        equipment,
+        b.rental_start,
+        b.rental_end,
+        b.status,
+        Number(b.total_amount).toFixed(2),
+      ].map(esc).join(",");
+    });
+
+    const csv = [headers.join(","), ...lines].join("\n");
+    const blob = new Blob(["\uFEFF" + csv], { type: "text/csv;charset=utf-8;" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    const dateStr = new Date().toISOString().slice(0, 10);
+    a.href = url;
+    a.download = `bookings-export-${dateStr}.csv`;
+    a.click();
+    URL.revokeObjectURL(url);
+    toast({ title: `Exported ${rows.length} booking${rows.length !== 1 ? "s" : ""} as CSV` });
   }
 
   function printPackingSlip(b: Booking) {
@@ -498,6 +579,28 @@ export default function BookingsNew() {
         <table className="w-full text-sm">
           <thead className="bg-gray-50 border-b border-gray-200 text-xs uppercase tracking-wider text-gray-600">
             <tr>
+              <th className="px-3 py-3 w-10">
+                <input
+                  type="checkbox"
+                  className="h-4 w-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500 cursor-pointer"
+                  checked={filtered.length > 0 && filtered.every((b) => selectedIds.has(b.id))}
+                  ref={(el) => {
+                    if (el) {
+                      const anySel = filtered.some((b) => selectedIds.has(b.id));
+                      const allSel = filtered.length > 0 && filtered.every((b) => selectedIds.has(b.id));
+                      el.indeterminate = anySel && !allSel;
+                    }
+                  }}
+                  onChange={(e) => {
+                    if (e.target.checked) {
+                      setSelectedIds(new Set(filtered.map((b) => b.id)));
+                    } else {
+                      setSelectedIds(new Set());
+                    }
+                  }}
+                  aria-label="Select all"
+                />
+              </th>
               <th className="px-4 py-3 text-left">Booking #</th>
               <th className="px-4 py-3 text-left">Customer</th>
               <th className="px-4 py-3 text-left">Equipment</th>
@@ -510,14 +613,14 @@ export default function BookingsNew() {
           <tbody className="divide-y divide-gray-200">
             {loading && (
               <tr>
-                <td colSpan={7} className="px-4 py-8 text-center text-gray-500">
+                <td colSpan={8} className="px-4 py-8 text-center text-gray-500">
                   Loading...
                 </td>
               </tr>
             )}
             {!loading && filtered.length === 0 && (
               <tr>
-                <td colSpan={7} className="px-4 py-8 text-center text-gray-500">
+                <td colSpan={8} className="px-4 py-8 text-center text-gray-500">
                   No bookings found
                 </td>
               </tr>
@@ -529,9 +632,18 @@ export default function BookingsNew() {
                 return (
                   <tr
                     key={b.id}
-                    className="hover:bg-gray-50 cursor-pointer"
+                    className={`hover:bg-gray-50 cursor-pointer ${selectedIds.has(b.id) ? "bg-blue-50" : ""}`}
                     onClick={() => setSelected(b)}
                   >
+                    <td className="px-3 py-3 w-10" onClick={(e) => e.stopPropagation()}>
+                      <input
+                        type="checkbox"
+                        className="h-4 w-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500 cursor-pointer"
+                        checked={selectedIds.has(b.id)}
+                        onChange={() => toggleSelect(b.id)}
+                        aria-label={`Select ${b.booking_number}`}
+                      />
+                    </td>
                     <td className="px-4 py-3 font-mono text-xs">{b.booking_number}</td>
                     <td className="px-4 py-3">
                       <div className="font-medium text-gray-900">{b.customer_name}</div>
@@ -651,6 +763,84 @@ export default function BookingsNew() {
       </div>
 
       </>
+      )}
+
+      {/* Floating bulk action bar */}
+      {selectedIds.size > 0 && (
+        <div className="fixed bottom-6 left-1/2 -translate-x-1/2 z-30 max-w-3xl w-[calc(100%-2rem)] rounded-xl bg-gray-900 text-white shadow-2xl border border-gray-800 flex items-center justify-between gap-4 px-4 py-3">
+          <div className="flex items-center gap-3">
+            <span className="font-semibold text-sm">
+              {selectedIds.size} selected
+            </span>
+            <button
+              type="button"
+              onClick={() => setSelectedIds(new Set())}
+              className="text-xs text-gray-400 hover:text-white"
+            >
+              Clear
+            </button>
+          </div>
+          <div className="flex items-center gap-2 flex-wrap justify-end">
+            <button
+              type="button"
+              onClick={exportCSV}
+              className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium rounded-md bg-white/10 hover:bg-white/20 transition-colors"
+            >
+              <Download className="h-3.5 w-3.5" /> Export CSV
+            </button>
+            {tab === "active" ? (
+              <button
+                type="button"
+                onClick={() => setBulkArchiveConfirm(true)}
+                className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium rounded-md bg-white/10 hover:bg-white/20 transition-colors"
+              >
+                <Archive className="h-3.5 w-3.5" /> Archive All
+              </button>
+            ) : (
+              <button
+                type="button"
+                onClick={() => bulkSetArchived(false)}
+                className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium rounded-md bg-white/10 hover:bg-white/20 transition-colors"
+              >
+                <ArchiveRestore className="h-3.5 w-3.5" /> Unarchive All
+              </button>
+            )}
+          </div>
+        </div>
+      )}
+
+      {/* Bulk archive confirmation modal */}
+      {bulkArchiveConfirm && (
+        <div
+          className="fixed inset-0 z-40 bg-black/50 flex items-center justify-center p-4"
+          onClick={() => setBulkArchiveConfirm(false)}
+        >
+          <div
+            className="bg-white rounded-lg shadow-xl max-w-sm w-full p-6"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <h3 className="text-lg font-semibold">Archive {selectedIds.size} booking{selectedIds.size !== 1 ? "s" : ""}?</h3>
+            <p className="text-sm text-gray-600 mt-2">
+              The selected bookings will be moved to the Archived tab. You can restore them later.
+            </p>
+            <div className="mt-5 flex gap-2 justify-end">
+              <button
+                type="button"
+                onClick={() => setBulkArchiveConfirm(false)}
+                className="px-4 py-2 text-sm rounded-md border border-gray-300 hover:bg-gray-50"
+              >
+                Cancel
+              </button>
+              <button
+                type="button"
+                onClick={() => bulkSetArchived(true)}
+                className="px-4 py-2 text-sm rounded-md bg-gray-900 text-white hover:bg-gray-800"
+              >
+                Archive All
+              </button>
+            </div>
+          </div>
+        </div>
       )}
 
       {/* Side panel */}
