@@ -18,9 +18,11 @@ import {
 } from "@/components/ui/dialog";
 import {
   Search, Plus, LayoutGrid, List, Armchair, MoreVertical,
-  Pencil, Wrench, ChevronLeft, ChevronRight,
+  Pencil, Wrench, ChevronLeft, ChevronRight, Phone, CalendarDays, User,
 } from "lucide-react";
 import { useAdminEquipment, type AdminEquipmentItem } from "@/hooks/useAdminEquipment";
+import { useEquipmentRentalStatus, type RentalStatus } from "@/hooks/useEquipmentRentalStatus";
+import { format } from "date-fns";
 
 /* ── Status config ── */
 const statusConfig: Record<string, { label: string; dotClass: string; badgeClass: string }> = {
@@ -32,8 +34,29 @@ const statusConfig: Record<string, { label: string; dotClass: string; badgeClass
 
 const PAGE_SIZE_OPTIONS = [10, 25, 50];
 
+
+/** Determine availability badge from total_quantity + rental status */
+function availabilitySummary(total: number, status: RentalStatus | undefined) {
+  const rented = status?.currentlyRented ?? 0;
+  const available = Math.max(0, total - rented);
+  let color: string;
+  let dotColor: string;
+  if (rented === 0) {
+    color = "bg-emerald-100 text-emerald-800 border-emerald-200";
+    dotColor = "bg-emerald-500";
+  } else if (available === 0) {
+    color = "bg-red-100 text-red-800 border-red-200";
+    dotColor = "bg-red-500";
+  } else {
+    color = "bg-amber-100 text-amber-800 border-amber-200";
+    dotColor = "bg-amber-500";
+  }
+  return { rented, available, total, color, dotColor };
+}
+
 const AdminInventoryPage = () => {
   const { equipment, loading, updateEquipmentAvailability } = useAdminEquipment();
+  const { statusMap } = useEquipmentRentalStatus();
   const [search, setSearch] = useState("");
   const [categoryFilter, setCategoryFilter] = useState("all");
   const [statusFilter, setStatusFilter] = useState("all");
@@ -77,14 +100,26 @@ const AdminInventoryPage = () => {
             <h3 className="font-semibold text-sm leading-tight">{item.name_en}</h3>
             <Badge variant="outline" className="text-[10px] shrink-0">{item.equipment_categories?.name_en ?? "—"}</Badge>
           </div>
-          <div className="flex items-center gap-1.5 text-xs">
-            <span className={`h-2 w-2 rounded-full ${sc.dotClass}`} />
-            <span className="text-muted-foreground">{sc.label}</span>
-          </div>
-          <div className="flex items-center justify-between text-xs">
-            <span className="font-semibold text-foreground">€{item.price_tier1}/day</span>
-            <span className="text-muted-foreground">Qty: {item.quantity_total}</span>
-          </div>
+          {(() => {
+            const avail = availabilitySummary(item.quantity_total, statusMap[item.id]);
+            return (
+              <>
+                <div className="flex items-center gap-1.5 text-xs">
+                  <span className={`h-2 w-2 rounded-full ${avail.dotColor}`} />
+                  <span className="font-medium text-foreground">{avail.available} of {avail.total} available</span>
+                </div>
+                {statusMap[item.id]?.nextReturnDate && avail.rented > 0 && (
+                  <p className="text-[11px] text-muted-foreground">
+                    Returns {format(new Date(statusMap[item.id].nextReturnDate + "T00:00:00"), "dd MMM")}
+                  </p>
+                )}
+                <div className="flex items-center justify-between text-xs pt-1">
+                  <span className="font-semibold text-foreground">€{item.price_tier1}/day</span>
+                  <span className="text-muted-foreground">{avail.total} total</span>
+                </div>
+              </>
+            );
+          })()}
         </CardContent>
       </Card>
     );
@@ -182,10 +217,22 @@ const AdminInventoryPage = () => {
                     <TableCell className="font-medium">{item.name_en}</TableCell>
                     <TableCell><Badge variant="outline" className="text-[10px]">{item.equipment_categories?.name_en ?? "—"}</Badge></TableCell>
                     <TableCell>
-                      <div className="flex items-center gap-1.5">
-                        <span className={`h-2 w-2 rounded-full ${sc.dotClass}`} />
-                        <span className="text-xs">{sc.label}</span>
-                      </div>
+                      {(() => {
+                        const avail = availabilitySummary(item.quantity_total, statusMap[item.id]);
+                        return (
+                          <div className="flex flex-col gap-0.5">
+                            <div className="flex items-center gap-1.5">
+                              <span className={`h-2 w-2 rounded-full ${avail.dotColor}`} />
+                              <span className="text-xs font-medium">{avail.available} of {avail.total}</span>
+                            </div>
+                            {statusMap[item.id]?.nextReturnDate && avail.rented > 0 && (
+                              <span className="text-[10px] text-muted-foreground">
+                                Returns {format(new Date(statusMap[item.id].nextReturnDate + "T00:00:00"), "dd MMM")}
+                              </span>
+                            )}
+                          </div>
+                        );
+                      })()}
                     </TableCell>
                     <TableCell>€{item.price_tier1}</TableCell>
                     <TableCell>{item.quantity_total}</TableCell>
@@ -287,6 +334,82 @@ const AdminInventoryPage = () => {
                 <div><span className="text-muted-foreground">Total Qty:</span> <span className="font-semibold">{selectedItem.quantity_total}</span></div>
                 {selectedItem.is_popular && <Badge className="bg-secondary/10 text-secondary border-secondary/30">Popular</Badge>}
               </div>
+
+              {/* Rental status breakdown */}
+              {(() => {
+                const status = statusMap[selectedItem.id];
+                const avail = availabilitySummary(selectedItem.quantity_total, status);
+                return (
+                  <div className="pt-2 border-t">
+                    <div className="flex items-center gap-3 mb-3">
+                      <h4 className="font-semibold">Rental Status</h4>
+                      <Badge variant="outline" className={avail.color}>
+                        {avail.available} of {avail.total} available
+                      </Badge>
+                    </div>
+
+                    {/* Currently rented */}
+                    <div className="mb-4">
+                      <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground mb-2">
+                        Currently Rented ({status?.currentRentals.length ?? 0})
+                      </p>
+                      {(status?.currentRentals.length ?? 0) === 0 ? (
+                        <p className="text-sm text-muted-foreground italic">No units currently rented.</p>
+                      ) : (
+                        <div className="space-y-1.5">
+                          {status!.currentRentals.map((r) => (
+                            <div key={r.booking_number + r.rental_start} className="flex items-center justify-between rounded-md border bg-muted/20 px-3 py-2 text-xs">
+                              <div className="flex items-center gap-3 min-w-0">
+                                <User className="h-3.5 w-3.5 text-muted-foreground shrink-0" />
+                                <div className="min-w-0">
+                                  <p className="font-medium truncate">{r.customer_name} <span className="text-muted-foreground">× {r.quantity}</span></p>
+                                  <p className="text-[11px] text-muted-foreground flex items-center gap-2">
+                                    <span className="font-mono">{r.booking_number}</span>
+                                    {r.customer_phone && <span className="flex items-center gap-1"><Phone className="h-3 w-3" /> {r.customer_phone}</span>}
+                                  </p>
+                                </div>
+                              </div>
+                              <div className="text-right shrink-0">
+                                <p className="font-semibold">Returns {format(new Date(r.rental_end + "T00:00:00"), "dd MMM")}</p>
+                              </div>
+                            </div>
+                          ))}
+                        </div>
+                      )}
+                    </div>
+
+                    {/* Upcoming rentals */}
+                    <div>
+                      <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground mb-2">
+                        Upcoming Rentals ({status?.upcomingRentals.length ?? 0})
+                      </p>
+                      {(status?.upcomingRentals.length ?? 0) === 0 ? (
+                        <p className="text-sm text-muted-foreground italic">No upcoming rentals scheduled.</p>
+                      ) : (
+                        <div className="space-y-1.5">
+                          {status!.upcomingRentals.map((r) => (
+                            <div key={r.booking_number + r.rental_start} className="flex items-center justify-between rounded-md border bg-muted/20 px-3 py-2 text-xs">
+                              <div className="flex items-center gap-3 min-w-0">
+                                <CalendarDays className="h-3.5 w-3.5 text-muted-foreground shrink-0" />
+                                <div className="min-w-0">
+                                  <p className="font-medium truncate">{r.customer_name} <span className="text-muted-foreground">× {r.quantity}</span></p>
+                                  <p className="text-[11px] text-muted-foreground flex items-center gap-2">
+                                    <span className="font-mono">{r.booking_number}</span>
+                                    {r.customer_phone && <span className="flex items-center gap-1"><Phone className="h-3 w-3" /> {r.customer_phone}</span>}
+                                  </p>
+                                </div>
+                              </div>
+                              <div className="text-right shrink-0">
+                                <p className="font-semibold">{format(new Date(r.rental_start + "T00:00:00"), "dd MMM")} \u2192 {format(new Date(r.rental_end + "T00:00:00"), "dd MMM")}</p>
+                              </div>
+                            </div>
+                          ))}
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                );
+              })()}
             </div>
           </DialogContent>
         )}
