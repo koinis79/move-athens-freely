@@ -11,7 +11,7 @@ const AccessibleAthensSection = () => {
   const { t } = useTranslation();
 
   const guides = [
-    { titleKey: "accessibleAthensSection.acropolisTitle", excerptKey: "accessibleAthensSection.acropolisExcerpt", slug: "acropolis", image: acropolisImg },
+    { titleKey: "accessibleAthensSection.acropolisTitle", excerptKey: "accessibleAthensSection.acropolisExcerpt", slug: "acropolis-wheelchair-guide", image: acropolisImg },
     { titleKey: "accessibleAthensSection.restaurantsTitle", excerptKey: "accessibleAthensSection.restaurantsExcerpt", slug: "restaurants", image: restaurantsImg },
     { titleKey: "accessibleAthensSection.airportTitle", excerptKey: "accessibleAthensSection.airportExcerpt", slug: "athens-airport-wheelchair-guide", image: airportImg },
   ];
