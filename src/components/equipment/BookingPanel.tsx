@@ -212,33 +212,50 @@ const BookingPanel = ({ item }: Props) => {
     <div className="space-y-6">
       {/* Tier pricing table */}
       <div className="rounded-xl border bg-card p-5 space-y-3">
-        <h3 className="font-heading font-semibold text-foreground">Pricing</h3>
-        <div className="divide-y text-sm">
-          {TIER_LABELS.map(({ days, tier }) => (
-            <div key={tier} className="flex items-center justify-between py-2">
-              <span className="text-muted-foreground">{days}</span>
-              <div className="flex items-center gap-2">
-                <span className="font-semibold text-foreground">
-                  €{item[tier]}
-                </span>
-                {tier !== "priceTier1" && (
-                  <span className="text-xs font-medium text-accent">
-                    {(() => {
-                      const pct = Math.round(
-                        ((item.priceTier1 - item[tier] / [3, 7, 14, 30][[
-                          "priceTier1","priceTier2","priceTier3","priceTier4"
-                        ].indexOf(tier)]) / item.priceTier1) * 100
-                      );
-                      return pct > 0 ? `~${pct}% cheaper/day` : "";
-                    })()}
+        <div className="flex items-baseline justify-between">
+          <h3 className="font-heading font-semibold text-foreground">Pricing</h3>
+          <div className="flex items-baseline gap-1">
+            <span className="text-xs text-muted-foreground">from</span>
+            <span className="text-2xl font-bold text-primary">€{item.priceTier1}</span>
+          </div>
+        </div>
+
+        <div className="grid grid-cols-2 gap-2">
+          {TIER_LABELS.map(({ days, tier }, idx) => {
+            const isPopular = tier === "priceTier2"; // 4-7 days — sweet spot
+            const avgPerDay = item[tier] / [3, 7, 14, 30][idx];
+            const tier1PerDay = item.priceTier1 / 3;
+            const savingsPct = idx > 0 ? Math.round((1 - avgPerDay / tier1PerDay) * 100) : 0;
+            return (
+              <div
+                key={tier}
+                className={`relative rounded-lg border p-3 transition-colors ${
+                  isPopular
+                    ? "border-primary bg-primary/5 ring-1 ring-primary/30"
+                    : "border-border bg-card"
+                }`}
+              >
+                {isPopular && (
+                  <span className="absolute -top-2 left-1/2 -translate-x-1/2 rounded-full bg-primary text-primary-foreground px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wider whitespace-nowrap">
+                    Most Popular
                   </span>
                 )}
+                <p className="text-[11px] uppercase tracking-wider text-muted-foreground font-semibold">{days}</p>
+                <p className={`mt-1 text-xl font-bold ${isPopular ? "text-primary" : "text-foreground"}`}>
+                  €{item[tier]}
+                </p>
+                {savingsPct > 0 && (
+                  <p className="mt-0.5 text-[10px] font-medium text-emerald-600">
+                    Save {savingsPct}% per day
+                  </p>
+                )}
               </div>
-            </div>
-          ))}
+            );
+          })}
         </div>
+
         <p className="text-xs text-muted-foreground pt-1">
-          Prices are per rental period, not per day.
+          Prices are per rental period, not per day. Longer stays = better value.
         </p>
       </div>
 
