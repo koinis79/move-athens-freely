@@ -8,6 +8,8 @@ import WhySection from "@/components/home/WhySection";
 import TestimonialsSection from "@/components/home/TestimonialsSection";
 import AccessibleAthensSection from "@/components/home/AccessibleAthensSection";
 import CtaBanner from "@/components/home/CtaBanner";
+import { Link } from "react-router-dom";
+import { Building2, ArrowRight } from "lucide-react";
 
 const Index = () => (
   <>
@@ -23,6 +25,15 @@ const Index = () => (
     <WhySection />
     <TestimonialsSection />
     <AccessibleAthensSection />
+    <section className="bg-muted/30 py-6 border-t border-border">
+      <div className="container">
+        <Link to="/partners" className="flex items-center justify-center gap-2 text-sm text-muted-foreground hover:text-primary transition-colors">
+          <Building2 className="h-4 w-4" />
+          <span>Hotel or Airbnb? Partner with us</span>
+          <ArrowRight className="h-3.5 w-3.5" />
+        </Link>
+      </div>
+    </section>
     <CtaBanner />
   </>
 );
