@@ -73,9 +73,12 @@ const EquipmentCard = ({ item }: { item: EquipmentItem }) => {
             <span className="text-sm text-muted-foreground">/day</span>
           </div>
 
-          <Button variant="outline" className="mt-2 w-full rounded-xl transition-colors duration-200 group-hover:bg-primary group-hover:text-primary-foreground group-hover:border-primary" tabIndex={-1}>
-            {t("equipmentListing.viewDetails")}
+          <Button className="mt-2 w-full rounded-xl bg-primary text-primary-foreground hover:bg-primary/90 font-semibold" tabIndex={-1}>
+            Rent Now
           </Button>
+          <p className="mt-1.5 text-center text-[11px] text-muted-foreground">
+            Takes 2 minutes · No account needed
+          </p>
         </CardContent>
       </Card>
     </Link>
