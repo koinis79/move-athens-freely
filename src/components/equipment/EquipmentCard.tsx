@@ -48,6 +48,11 @@ const EquipmentCard = ({ item }: { item: EquipmentItem }) => {
           <Badge variant="secondary" className={`absolute left-3 top-3 text-xs font-semibold backdrop-blur-sm ${categoryColors[item.category] ?? ""}`}>
             {item.category}
           </Badge>
+          {/* Price badge — top-right corner */}
+          <div className="absolute right-3 top-3 rounded-full bg-primary text-primary-foreground px-3 py-1 text-sm font-bold shadow-md">
+            €{item.priceTier1}
+            <span className="ml-0.5 text-[10px] font-medium opacity-90">/day</span>
+          </div>
         </div>
 
         <CardContent className="flex flex-col gap-2 p-5">
@@ -62,9 +67,10 @@ const EquipmentCard = ({ item }: { item: EquipmentItem }) => {
 
           <p className="text-sm text-muted-foreground line-clamp-2">{item.description}</p>
 
-          <div className="mt-1">
-            <span className="text-lg font-bold text-primary">{t("equipmentListing.from", { price: item.priceTier1 })}</span>
-            <span className="ml-2 text-sm text-muted-foreground">{t("equipmentListing.forDays")}</span>
+          <div className="mt-1 flex items-baseline gap-1">
+            <span className="text-sm text-muted-foreground">From</span>
+            <span className="text-2xl font-bold text-primary">€{item.priceTier1}</span>
+            <span className="text-sm text-muted-foreground">/day</span>
           </div>
 
           <Button variant="outline" className="mt-2 w-full rounded-xl transition-colors duration-200 group-hover:bg-primary group-hover:text-primary-foreground group-hover:border-primary" tabIndex={-1}>
