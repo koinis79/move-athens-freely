@@ -35,6 +35,7 @@ import AdminCustomersPage from "./pages/admin/AdminCustomersPage";
 import BookingsNew from "./pages/admin/BookingsNew";
 import Blog from "./pages/Blog";
 import BlogPost from "./pages/BlogPost";
+import Partners from "./pages/Partners";
 import PrivacyPolicy from "./pages/PrivacyPolicy";
 import TermsOfService from "./pages/TermsOfService";
 import NotFound from "./pages/NotFound";
@@ -62,6 +63,7 @@ const App = () => (
                 <Route path="/accessible-athens/:slug" element={<AccessibleAthensGuide />} />
                 <Route path="/about" element={<About />} />
                 <Route path="/contact" element={<Contact />} />
+                <Route path="/partners" element={<Partners />} />
                 <Route path="/faq" element={<FAQ />} />
                 <Route path="/cart" element={<Cart />} />
                 <Route path="/checkout" element={<Checkout />} />
