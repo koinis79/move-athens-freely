@@ -37,17 +37,20 @@ const HeroSection = () => {
         </p>
 
         <div className="mt-8 flex flex-col gap-4 sm:flex-row">
-          <Button asChild size="lg" className="rounded-xl px-8 text-base font-semibold">
+          <Button asChild size="lg" className="rounded-xl px-8 py-6 text-base font-bold">
             <Link to="/equipment">{t("hero.browseEquipment")}</Link>
           </Button>
           <Button
             asChild
             size="lg"
-            className="rounded-xl bg-transparent border-2 border-white px-8 text-base font-semibold text-white hover:bg-white hover:text-gray-900 transition-colors"
+            className="rounded-xl bg-transparent border-2 border-white px-8 py-6 text-base font-semibold text-white hover:bg-white hover:text-gray-900 transition-colors"
           >
             <Link to="/how-it-works">{t("hero.howItWorks")}</Link>
           </Button>
         </div>
+        <p className="mt-4 text-sm text-white/80">
+          Takes 2 minutes · No account needed · Free cancellation 48h
+        </p>
 
         <div className="mt-10 flex flex-wrap items-center justify-center gap-x-6 gap-y-3 text-sm text-white/85">
           {trustItems.map((item) => (
