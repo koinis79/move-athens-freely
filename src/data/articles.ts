@@ -140,7 +140,7 @@ For flights, wheelchairs travel free. Scooters require advance notice and batter
 Rent from us in Athens and take it with you \u2014 or arrange pickup/dropoff at your island hotel. [Contact us](/contact) to discuss your island plans.
 
 [Browse equipment](/equipment) and let\u2019s make your Greek island dream work.
-\`,
+`,
   },
   {
     slug: "athens-accessible-day-trips",
@@ -236,7 +236,7 @@ A thermal lake fed by underground springs, right on the Athens Riviera. Warm wat
 If you\u2019re planning day trips from Athens, a [mobility scooter](/equipment/electric-mobility-scooter) gives you range and independence. Our [foldable travel scooter](/equipment/foldable-travel-scooter) fits in car trunks for excursions.
 
 [Browse equipment](/equipment) or [contact us](/contact) to plan your Athens adventures.
-\`,
+`,
   },
   {
     slug: "mobility-scooter-rental-athens",
@@ -335,7 +335,7 @@ No hidden fees. No surprise charges.
 Browse our [mobility scooters](/equipment) and choose your dates. We\u2019ll handle the rest.
 
 Questions? [Contact us](/contact) or message us on WhatsApp.
-\`,
+`,
   },
   {
     slug: "athens-accessibility-honest-guide",
