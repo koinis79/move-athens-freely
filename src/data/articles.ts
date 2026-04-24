@@ -27,6 +27,105 @@ export interface Article {
 /* ── Accessible Athens guides ───────────────────────────── */
 export const guides: Article[] = [
   {
+    slug: "mobility-scooter-rental-athens",
+    title: "Mobility Scooter Rental Athens: What You Need to Know",
+    excerpt:
+      "Everything you need to know about renting a mobility scooter in Athens \u2014 pricing, terrain tips, and where to ride.",
+    date: "2026-04-24",
+    image: "https://lmgpuqgwkiapgpdsxvmb.supabase.co/storage/v1/object/public/assets/mobility-scooter-athens.jpg",
+    category: "Transport",
+    takeaways: [
+      "Scooters work great on main streets and pedestrianized zones \u2014 stick to flat areas",
+      "Budget \u20ac120\u2013150/day for a 4-wheel model, with big savings on longer rentals",
+      "Charge overnight (6\u20138 hours) for 30\u201340km of next-day range",
+    ],
+    body: [],
+    content: `
+Thinking about renting a mobility scooter for your Athens trip? Smart choice. A scooter gives you independence to explore at your own pace \u2014 covering more ground than a wheelchair without exhausting yourself or relying on others.
+
+But Athens isn\u2019t flat, and not every neighborhood is scooter-friendly. Here\u2019s everything you need to know before you book.
+
+## Who Should Rent a Mobility Scooter?
+
+A mobility scooter is ideal if you:
+
+- Can sit upright and operate hand controls
+- Want to cover longer distances (museums, markets, waterfront)
+- Have some mobility but tire easily walking
+- Are traveling with a group and want to keep up
+
+If you need full upper body support or have limited hand control, a [power wheelchair](/equipment/foldable-power-wheelchair) might be a better fit.
+
+## What Types of Scooters Are Available?
+
+**4-Wheel Mobility Scooter** \u2014 Stable, comfortable, good for flat terrain. Best for the city center, waterfront promenades, and accessible attractions. Range of 30-40km per charge.
+
+**Foldable Travel Scooter** \u2014 Lightweight, breaks down for transport. Great if you\u2019re island hopping or taking day trips. Fits in a car trunk or ferry cabin.
+
+At Movability, we offer both \u2014 [delivered directly to your Athens hotel](/equipment).
+
+## Athens Terrain: What to Expect
+
+**Scooter-Friendly Areas:**
+- Syntagma Square and the National Garden
+- Stavros Niarchos Foundation Cultural Center
+- The coastal promenade from Faliro to Glyfada
+- Acropolis Museum surroundings (paved, flat)
+- Most major museum areas
+
+**Challenging Areas:**
+- Plaka and Anafiotika (steep, narrow, cobblestones)
+- Monastiraki side streets (uneven surfaces)
+- The Acropolis hill itself (use the elevator access instead)
+
+Stick to main streets and pedestrianized zones.
+
+## How Much Does It Cost?
+
+| Duration | Price Range |
+|----------|-------------|
+| 1-3 days | \u20ac120-150/day |
+| 4-7 days | \u20ac220-250 total |
+| 8-14 days | \u20ac300-350 total |
+| 15-30 days | \u20ac400-450 total |
+
+Longer rentals offer significant savings. Delivery to central Athens hotels is included.
+
+## Charging Your Scooter
+
+- Full charge takes 6-8 hours (overnight is fine)
+- Range is 30-40km depending on terrain and weight
+- Greek outlets are standard European (Type C/F)
+- Hotels are usually happy to let you charge in your room
+
+Charge every night and you\u2019ll never run low mid-sightseeing.
+
+## Where to Ride: Our Top Recommendations
+
+**For First-Timers:** Start at Syntagma Square, ride through the National Garden, and end at the Panathenaic Stadium. Flat, scenic, manageable.
+
+**For Culture Lovers:** The museum triangle \u2014 Acropolis Museum, National Archaeological Museum, and Benaki Museum \u2014 all have step-free access.
+
+**For Seaside Vibes:** The Faliro coastal path runs 5km along the water. Flat, wide, beautiful sunset views.
+
+## What\u2019s Included in Your Rental?
+
+- Scooter fully charged and ready
+- Charger with European plug
+- Brief orientation on controls
+- Phone support during your rental
+- Free pickup when you\u2019re done
+
+No hidden fees. No surprise charges.
+
+## Ready to Book?
+
+Browse our [mobility scooters](/equipment) and choose your dates. We\u2019ll handle the rest.
+
+Questions? [Contact us](/contact) or message us on WhatsApp.
+\`,
+  },
+  {
     slug: "athens-accessibility-honest-guide",
     title: "The Honest Truth About Wheelchair Accessibility in Athens",
     excerpt:
