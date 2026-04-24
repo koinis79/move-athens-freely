@@ -5,7 +5,7 @@ import { useTranslation } from "react-i18next";
 const categories = [
   {
     titleKey: "equipmentSection.manualWheelchairs",
-    price: "10",
+    price: "49",
     slug: "wheelchairs",
     image: "https://lmgpuqgwkiapgpdsxvmb.supabase.co/storage/v1/object/public/assets/wheelchair-rental-plaka-athens.png",
     alt: "Wheelchair rental in Plaka, Athens - elderly woman exploring with caregiver",
@@ -15,7 +15,7 @@ const categories = [
   },
   {
     titleKey: "equipmentSection.mobilityScooters",
-    price: "25",
+    price: "120",
     slug: "mobility-scooters",
     image: "https://lmgpuqgwkiapgpdsxvmb.supabase.co/storage/v1/object/public/assets/mobility-scooter-acropolis-athens.png",
     alt: "Mobility scooter rental near Acropolis, Athens - tourist exploring independently",
@@ -25,7 +25,7 @@ const categories = [
   },
   {
     titleKey: "equipmentSection.rollatorsWalkers",
-    price: "5",
+    price: "49",
     slug: "walking-aids",
     image: "https://lmgpuqgwkiapgpdsxvmb.supabase.co/storage/v1/object/public/assets/rollator-walker-piraeus-harbor.png",
     alt: "Rollator walker rental at Piraeus harbor, Athens - senior enjoying waterfront",
