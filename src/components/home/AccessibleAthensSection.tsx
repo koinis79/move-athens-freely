@@ -13,7 +13,7 @@ const AccessibleAthensSection = () => {
   const guides = [
     { titleKey: "accessibleAthensSection.acropolisTitle", excerptKey: "accessibleAthensSection.acropolisExcerpt", slug: "acropolis", image: acropolisImg },
     { titleKey: "accessibleAthensSection.restaurantsTitle", excerptKey: "accessibleAthensSection.restaurantsExcerpt", slug: "restaurants", image: restaurantsImg },
-    { titleKey: "accessibleAthensSection.airportTitle", excerptKey: "accessibleAthensSection.airportExcerpt", slug: "airport-transfer", image: airportImg },
+    { titleKey: "accessibleAthensSection.airportTitle", excerptKey: "accessibleAthensSection.airportExcerpt", slug: "athens-airport-wheelchair-guide", image: airportImg },
   ];
 
   return (
