@@ -56,9 +56,11 @@ const EquipmentSection = () => {
                   <h3 className="text-lg font-heading font-semibold text-foreground group-hover:text-primary transition-colors">
                     {t(titleKey)}
                   </h3>
-                  <p className="mt-1 text-sm font-semibold text-secondary">
-                    {t("equipmentSection.fromPrice", { price })}
-                  </p>
+                  <div className="mt-2 flex items-baseline gap-1">
+                    <span className="text-xs text-muted-foreground">From</span>
+                    <span className="text-2xl font-bold text-primary">€{price}</span>
+                    <span className="text-sm text-muted-foreground">/day</span>
+                  </div>
                   {guideText && (
                     <p className="mt-2 text-xs text-primary hover:underline">
                       {guideText} &rarr;
