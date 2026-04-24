@@ -32,7 +32,7 @@ export const guides: Article[] = [
     excerpt:
       "Which Greek islands are wheelchair accessible? Your honest guide to island-hopping with mobility equipment.",
     date: "2026-04-25",
-    image: "https://lmgpuqgwkiapgpdsxvmb.supabase.co/storage/v1/object/public/assets/image_2026-04-25_003547692.png",
+    image: "https://lmgpuqgwkiapgpdsxvmb.supabase.co/storage/v1/object/public/assets/image_2026-04-25_003547692.jpg",
     category: "Attractions",
     takeaways: [
       "Aegina is the easiest day trip \u2014 flat harbor, 40-minute ferry from Piraeus",
