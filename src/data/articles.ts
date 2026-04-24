@@ -27,6 +27,122 @@ export interface Article {
 /* ── Accessible Athens guides ───────────────────────────── */
 export const guides: Article[] = [
   {
+    slug: "accessible-greek-islands",
+    title: "Accessible Greek Islands: Where to Go from Athens",
+    excerpt:
+      "Which Greek islands are wheelchair accessible? Your honest guide to island-hopping with mobility equipment.",
+    date: "2026-04-25",
+    image: "https://lmgpuqgwkiapgpdsxvmb.supabase.co/storage/v1/object/public/assets/accessible-greek-islands.jpg",
+    category: "Attractions",
+    takeaways: [
+      "Aegina is the easiest day trip \u2014 flat harbor, 40-minute ferry from Piraeus",
+      "For multi-day stays, Rhodes and Kos offer the best accessibility plus great beaches",
+      "Skip Santorini, Mykonos, and Hydra if full access matters \u2014 they\u2019re built on stairs",
+    ],
+    body: [],
+    content: `
+The Greek islands are a dream \u2014 white villages, blue domes, crystal water. But are they accessible?
+
+Honest answer: it varies wildly. Some islands are surprisingly manageable. Others are beautiful nightmares of cobblestones, stairs, and steep hills.
+
+Here\u2019s what we\u2019ve learned from years of helping visitors with mobility needs.
+
+## The Reality Check
+
+Greek islands were built centuries ago on rocky hillsides. Accessibility wasn\u2019t a consideration. Many iconic destinations \u2014 Santorini\u2019s Oia, Mykonos Town, Hydra \u2014 are genuinely difficult or impossible with a wheelchair or scooter.
+
+That said, things are improving. Newer developments, waterfronts, and some beaches now have accessible infrastructure. And certain islands are far more manageable than others.
+
+## Most Accessible Islands from Athens
+
+### 1. Aegina (Best for Day Trips)
+
+**Ferry:** 40 minutes from Piraeus (conventional ferry)
+
+**Why it works:** The main harbor town is flat and accessible. Waterfront caf\u00e9s and restaurants have step-free access. Taxis can take you around the island.
+
+**Challenges:** The Temple of Aphaia has limited accessibility. Village streets can be narrow.
+
+**Verdict:** Perfect for a day trip. No overnight logistics needed.
+
+### 2. Rhodes (Best for Extended Stays)
+
+**Access:** Flight from Athens (1 hour) or long ferry (13-18 hours)
+
+**Why it works:** Rhodes Town has a accessible waterfront promenade. Many hotels are modern and accessible. Beaches like Faliraki have beach wheelchairs.
+
+**Challenges:** The medieval Old Town has cobblestones and steps \u2014 beautiful to see from the gates, hard to explore inside.
+
+**Verdict:** Best for a multi-day stay. Fly rather than ferry.
+
+### 3. Kos (Best Beaches)
+
+**Access:** Flight from Athens (1 hour) or ferry via Rhodes
+
+**Why it works:** Flat terrain, modern resort infrastructure, several beaches with accessibility features. The town center is manageable.
+
+**Challenges:** Some archaeological sites have limited access.
+
+**Verdict:** Great for beach-focused holidays with good accessibility.
+
+### 4. Corfu (Best Variety)
+
+**Access:** Flight from Athens (1 hour)
+
+**Why it works:** Mix of accessible beaches, flat coastal areas, and modern hotels. Achilleion Palace has partial access.
+
+**Challenges:** Corfu Old Town is steep and cobbled in places.
+
+**Verdict:** Good for combining beach and culture.
+
+## Islands to Approach with Caution
+
+### Santorini
+
+The iconic caldera views come with a price: everything is built on cliffs. Oia and Fira involve endless steps. The cable car from the port is not wheelchair accessible. Even accessible hotels require navigating steep village paths.
+
+**If you must go:** Stay in a hotel with caldera views and private transfers. Accept that you\u2019ll see less than able-bodied visitors. Consider it a \u201cview from the terrace\u201d trip rather than an exploration.
+
+### Mykonos
+
+The charming Cycladic streets are narrow, stepped, and paved with uneven flagstones. Beach clubs vary in accessibility.
+
+**If you must go:** Stick to accessible beach resorts and don\u2019t expect to explore Mykonos Town independently.
+
+### Hydra
+
+No vehicles allowed \u2014 transport is by donkey or on foot. Steep paths everywhere. Not recommended for wheelchair or scooter users.
+
+## Ferry Accessibility
+
+**Conventional ferries** (Blue Star, Anek Lines) are generally accessible. They have elevators, accessible cabins on overnight routes, and can accommodate wheelchairs/scooters.
+
+**Hydrofoils and catamarans** are harder. Boarding is often via narrow gangways. Check with the specific operator.
+
+**Always book assistance in advance.** Call the ferry company and arrive at the port early.
+
+## Our Recommendations
+
+**For a day trip:** Aegina. Easy ferry, flat harbor, back in Athens by dinner.
+
+**For a beach holiday:** Kos or Rhodes. Fly for convenience, stay in modern accessible hotels.
+
+**For island atmosphere without the obstacles:** Skip the islands and visit Nafplio instead \u2014 it has the beauty without the stairs.
+
+## Taking Equipment to the Islands
+
+Your rental scooter or wheelchair can travel with you on conventional ferries.
+
+For flights, wheelchairs travel free. Scooters require advance notice and battery documentation (we provide this).
+
+## Need Mobility Equipment?
+
+Rent from us in Athens and take it with you \u2014 or arrange pickup/dropoff at your island hotel. [Contact us](/contact) to discuss your island plans.
+
+[Browse equipment](/equipment) and let\u2019s make your Greek island dream work.
+\`,
+  },
+  {
     slug: "athens-accessible-day-trips",
     title: "Athens Accessible Day Trips: 5 Easy Excursions",
     excerpt:
