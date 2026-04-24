@@ -148,7 +148,7 @@ Rent from us in Athens and take it with you \u2014 or arrange pickup/dropoff at 
     excerpt:
       "Five wheelchair-friendly day trips from Athens \u2014 from coastal temples to island escapes, all doable with mobility equipment.",
     date: "2026-04-25",
-    image: "https://lmgpuqgwkiapgpdsxvmb.supabase.co/storage/v1/object/public/assets/athens-day-trips.jpg",
+    image: "https://lmgpuqgwkiapgpdsxvmb.supabase.co/storage/v1/object/public/assets/image_2026-04-25_003211566.png",
     category: "Attractions",
     takeaways: [
       "Lake Vouliagmeni and the Nafplio waterfront are the most accessible \u2014 great for relaxed days",
