@@ -4,8 +4,9 @@ import { Badge } from "@/components/ui/badge";
 import { ArrowRight, Clock } from "lucide-react";
 import type { Article } from "@/data/articles";
 
-function readingTime(body: string[]): number {
-  return Math.max(1, Math.ceil(body.join(" ").split(/\s+/).length / 200));
+function readingTime(article: Article): number {
+  const text = article.content ?? article.body.join(" ");
+  return Math.max(1, Math.ceil(text.split(/\s+/).length / 200));
 }
 
 interface ArticleListingProps {
@@ -70,7 +71,7 @@ const ArticleListing = ({
                   <span>·</span>
                   <span className="inline-flex items-center gap-1">
                     <Clock className="h-3 w-3" />
-                    {readingTime(a.body)} min read
+                    {readingTime(a)} min read
                   </span>
                 </div>
                 <h2 className="mt-2 text-lg font-heading font-semibold text-foreground group-hover:text-primary">
