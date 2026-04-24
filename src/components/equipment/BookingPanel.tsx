@@ -394,13 +394,16 @@ const BookingPanel = ({ item }: Props) => {
 
         <Button
           size="lg"
-          className="w-full rounded-xl text-base"
+          className="w-full rounded-xl text-lg py-6 font-bold"
           disabled={!startDate || !endDate || numDays === 0}
           onClick={handleRentNow}
         >
           Rent Now
           <ArrowRight className="ml-2 h-5 w-5" />
         </Button>
+        <p className="text-center text-xs text-muted-foreground -mt-2">
+          Takes 2 minutes · No account needed
+        </p>
 
         <Button
           variant="outline"
