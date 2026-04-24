@@ -121,7 +121,12 @@ const Footer = () => {
 
         {/* Bottom bar */}
         <div className="mt-12 pt-8 flex flex-col sm:flex-row items-center justify-between gap-4 text-xs" style={{ borderTop: `1px solid ${footerFg10}`, color: footerFg50 }}>
-          <p>© 2026 Movability</p>
+          <div>
+            <p>© 2026 Movability</p>
+            <p className="mt-0.5 text-[11px] opacity-75">
+              A <a href="https://koinis.gr" target="_blank" rel="noopener noreferrer" className="hover:underline font-medium">Koinis Healthcare Group</a> company
+            </p>
+          </div>
           <div className="flex gap-6">
             <Link to="/privacy-policy" className="hover:opacity-100 transition-colors">{t("footer.privacyPolicy")}</Link>
             <Link to="/terms-of-service" className="hover:opacity-100 transition-colors">{t("footer.termsOfService")}</Link>
