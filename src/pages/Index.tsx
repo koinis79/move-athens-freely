@@ -1,6 +1,7 @@
 import SEOHead from "@/components/SEOHead";
 import { LocalBusiness } from "@/components/StructuredData";
 import HeroSection from "@/components/home/HeroSection";
+import KoinisTrust from "@/components/home/KoinisTrust";
 import HowItWorksSection from "@/components/home/HowItWorksSection";
 import EquipmentSection from "@/components/home/EquipmentSection";
 import WhySection from "@/components/home/WhySection";
@@ -16,6 +17,7 @@ const Index = () => (
     />
     <LocalBusiness />
     <HeroSection />
+    <KoinisTrust />
     <HowItWorksSection />
     <EquipmentSection />
     <WhySection />
