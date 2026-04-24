@@ -136,60 +136,6 @@ We deliver wheelchairs, scooters, and rollators directly to your hotel. Free del
 `,
   },
   {
-    slug: "acropolis",
-    title: "Is the Acropolis Wheelchair Accessible?",
-    excerpt:
-      "Everything you need to know about visiting the Acropolis with a wheelchair or mobility aid — ramps, elevators, and what to expect.",
-    date: "2026-01-15",
-    image: acropolisImg,
-    category: "Attractions",
-    takeaways: [
-      "Use the elevator at the North Slope entrance — it's free and fits wheelchairs and scooters",
-      "Arrive before 10am to avoid crowds on the accessible concrete pathways",
-      "The original marble surfaces are uneven — stick to the modern paved routes",
-    ],
-    body: [],
-    content: `
-## Getting There: The Accessible Entrance
-
-Forget the main tourist entrance with its steep, marble steps. Head to the **North Slope entrance** near the Acropolis Museum instead.
-
-- **Dedicated pathway**: A smooth, paved route leads directly to the elevator
-- **Glass elevator**: Free to use, fits standard wheelchairs and most mobility scooters
-- **Operating hours**: Same as the site — opens 8am in summer, 8:30am in winter
-
-## Navigating the Top
-
-Once you're up, the Greek Ministry of Culture has installed **wide concrete pathways** that loop around the major monuments.
-
-### What's Accessible
-
-- **The Parthenon**: Full loop around the exterior on paved paths
-- **The Erechtheion**: Accessible viewing area with the famous Caryatid porch
-- **The Propylaea**: Partial access to the monumental gateway
-
-### What to Avoid
-
-- **Original marble surfaces**: Extremely uneven and slippery — do not leave the concrete paths
-- **The south slope**: Steeper grades, better suited for walking visitors
-
-## Recommended Equipment
-
-Standard small-wheeled manual wheelchairs will struggle here. We recommend:
-
-1. **4-Wheel Mobility Scooter**: Best stability over gaps in the ancient paving
-2. **Heavy-duty wheelchair**: Larger wheels handle the terrain better
-3. **Power-assist attachment**: If using a manual chair, a front-wheel motor helps with inclines
-
-## Practical Tips
-
-- **Tickets**: Free entry for visitors with disabilities + one companion
-- **Restrooms**: Accessible facilities near the elevator entrance
-- **Water**: Bring your own — the cafe at the top has steps
-- **Best time**: Early morning or late afternoon for cooler temperatures and fewer crowds
-`,
-  },
-  {
     slug: "museums",
     title: "Accessible Museums in Athens",
     excerpt:
