@@ -11,14 +11,6 @@ const availabilityStyles: Record<string, string> = {
   Unavailable: "bg-destructive/15 text-destructive border-destructive/30",
 };
 
-const categoryColors: Record<string, string> = {
-  Wheelchair: "bg-primary/10 text-primary",
-  "Power Wheelchair": "bg-primary/10 text-primary",
-  "Mobility Scooter": "bg-secondary/10 text-secondary",
-  Rollator: "bg-accent/10 text-accent",
-  "Walking Aid": "bg-accent/10 text-accent",
-};
-
 const categoryEmoji: Record<string, string> = {
   Wheelchair: "♿",
   "Power Wheelchair": "⚡",
@@ -45,7 +37,7 @@ const EquipmentCard = ({ item }: { item: EquipmentItem }) => {
           ) : (
             <span className="text-7xl text-primary/40 select-none" aria-hidden="true">{categoryEmoji[item.category] ?? "♿"}</span>
           )}
-          <Badge variant="secondary" className={`absolute left-3 top-3 text-xs font-semibold backdrop-blur-sm ${categoryColors[item.category] ?? ""}`}>
+          <Badge variant="secondary" className="absolute left-3 top-3 text-xs font-semibold bg-primary text-white hover:bg-primary/90 border-transparent shadow-sm">
             {item.category}
           </Badge>
           {/* Price badge — top-right corner */}
