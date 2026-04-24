@@ -27,6 +27,112 @@ export interface Article {
 /* ── Accessible Athens guides ───────────────────────────── */
 export const guides: Article[] = [
   {
+    slug: "piraeus-cruise-port-wheelchair-guide",
+    title: "Cruise Port Athens: Wheelchair & Scooter Guide",
+    excerpt:
+      "Arriving at Piraeus cruise port with a wheelchair or scooter? Everything you need to know about getting to Athens.",
+    date: "2026-04-25",
+    image: "https://lmgpuqgwkiapgpdsxvmb.supabase.co/storage/v1/object/public/assets/piraeus-cruise-port.png",
+    category: "Transport",
+    takeaways: [
+      "Book accessible disembark assistance with guest services before port day",
+      "Metro Line 1 from Piraeus to Monastiraki is fully accessible \u2014 25 minutes",
+      "We deliver rental wheelchairs and scooters to Piraeus terminals for \u20ac25",
+    ],
+    body: [],
+    content: `
+Piraeus is the main cruise port serving Athens \u2014 one of the busiest in the Mediterranean. Thousands of passengers dock here daily, including many with mobility needs.
+
+If you\u2019re arriving by cruise ship and using a wheelchair or scooter, here\u2019s your complete guide.
+
+## The Port Layout
+
+Piraeus has multiple cruise terminals:
+
+- **Terminal A (Miaoulis)** \u2014 Largest, handles biggest ships
+- **Terminal B (Themistocles)** \u2014 Medium ships
+- **Terminal C (Alkimos)** \u2014 Smaller vessels
+
+All terminals are accessible, with ramps and elevators where needed.
+
+## Getting Off the Ship
+
+Cruise ships provide accessible gangways. If you need wheelchair assistance:
+
+1. Register with guest services before your port day
+2. Accessible passengers usually disembark first or last
+3. Ship crew will assist with gangways and ramps
+4. Port staff can provide wheelchairs at the terminal
+
+**Scooters:** You can take your mobility scooter ashore. Ships have elevators to the gangway level.
+
+## Your Options Once Ashore
+
+### Option 1: Ship-Organized Accessible Tour
+
+Easiest but most expensive. Major cruise lines offer accessible shore excursions to the Acropolis and city highlights. Expect \u20ac100-200 per person.
+
+### Option 2: Rent Equipment + Explore Independently
+
+More flexible, often cheaper:
+
+1. [Rent a wheelchair or scooter](/equipment) \u2014 We deliver to Piraeus port (\u20ac25 delivery fee)
+2. Take the metro to Athens \u2014 Line 1 from Piraeus station is accessible
+3. Explore at your pace
+4. Return by ship\u2019s departure time
+
+### Option 3: Accessible Private Tour
+
+Book a private accessible van with driver/guide. [Contact us](/contact) for recommendations.
+
+## Metro from Piraeus to Athens
+
+**Accessibility:** Piraeus and Monastiraki stations have elevators. Trains have wheelchair spaces.
+
+**Journey:** 25 minutes to Monastiraki (Acropolis area)
+
+**Tickets:** \u20ac1.20 per ride
+
+## Our Piraeus Delivery Service
+
+For cruise passengers, we offer:
+
+- Delivery to Piraeus port terminals (\u20ac25 fee)
+- Equipment waiting when you disembark
+- Pickup before you re-board
+- Flexible timing matched to your schedule
+
+[Book at least 48 hours before arrival.](/equipment)
+
+## What You Can See in a Day
+
+**Short Visit (4-5 hours):**
+- Metro to Monastiraki (25 min)
+- Acropolis Museum (2 hours)
+- Lunch in Plaka (1 hour)
+- Metro back (25 min)
+
+**Full Day (7-8 hours):**
+- Morning: Acropolis + Museum
+- Lunch: Plaka or Monastiraki
+- Afternoon: National Garden or Syntagma Square
+
+## Tips for Cruise Day
+
+1. **Disembark early** \u2014 Beat the crowds
+2. **Know your departure time** \u2014 Ships don\u2019t wait
+3. **Carry ship ID** \u2014 Needed to re-board
+4. **Have euros** \u2014 Some places don\u2019t take cards
+5. **Book Acropolis tickets online** \u2014 Skip the line
+
+## Ready to Book?
+
+Don\u2019t stay on the ship while others explore. With the right equipment, Piraeus is your gateway to Athens.
+
+[Browse equipment](/equipment) | [Contact us](/contact) | WhatsApp: +30 697 463 3697
+`,
+  },
+  {
     slug: "athens-summer-wheelchair-tips",
     title: "Athens in Summer: Tips for Wheelchair Users",
     excerpt:
