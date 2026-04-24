@@ -68,6 +68,13 @@ const About = () => (
             Athens the way it deserves to be experienced: freely, independently, and
             without barriers.
           </p>
+          <p className="mt-4 leading-relaxed text-muted-foreground">
+            Movability is part of the <a href="https://koinis.gr" target="_blank" rel="noopener noreferrer" className="font-medium text-primary hover:underline">Koinis Healthcare Group</a>,
+            with over 30 years of experience providing medical and mobility equipment
+            across Greece. That decades-long foundation means certified equipment,
+            trained staff, and a service standard backed by a family business that
+            has served the Greek community since 1982.
+          </p>
         </div>
 
         <div className="overflow-hidden rounded-2xl border border-border shadow-md">
