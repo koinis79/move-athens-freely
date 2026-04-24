@@ -14,16 +14,6 @@ import { Facebook, Twitter, LinkIcon, ArrowRight, Clock, Lightbulb } from "lucid
 import { toast } from "@/hooks/use-toast";
 import type { Article } from "@/data/articles";
 
-const categoryColors: Record<string, string> = {
-  Attractions: "bg-primary/15 text-primary border-primary/30",
-  Dining:      "bg-orange-500/15 text-orange-600 border-orange-500/30",
-  Transport:   "bg-blue-500/15 text-blue-600 border-blue-500/30",
-  Outdoors:    "bg-green-500/15 text-green-600 border-green-500/30",
-  Tips:        "bg-violet-500/15 text-violet-600 border-violet-500/30",
-  Athens:      "bg-secondary/15 text-secondary border-secondary/30",
-  Accessibility: "bg-teal-500/15 text-teal-600 border-teal-500/30",
-};
-
 function readingTime(article: Article): number {
   const text = article.content ?? article.body.join(" ");
   return Math.max(1, Math.ceil(text.split(/\s+/).length / 200));
@@ -189,7 +179,7 @@ const ArticleDetail = ({
             {article.category && (
               <Badge
                 variant="outline"
-                className={`mb-4 text-xs font-medium ${categoryColors[article.category] ?? "bg-muted text-muted-foreground border-border"}`}
+                className="mb-4 text-xs font-semibold bg-primary text-white hover:bg-primary/90 border-transparent"
               >
                 {article.category}
               </Badge>
@@ -320,7 +310,7 @@ const ArticleDetail = ({
                       {r.category && (
                         <Badge
                           variant="outline"
-                          className={`absolute left-2 top-2 text-xs font-medium ${categoryColors[r.category] ?? "bg-muted text-muted-foreground border-border"}`}
+                          className="absolute left-2 top-2 text-xs font-semibold bg-primary text-white hover:bg-primary/90 border-transparent shadow-sm"
                         >
                           {r.category}
                         </Badge>
