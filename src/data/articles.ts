@@ -27,6 +27,102 @@ export interface Article {
 /* ── Accessible Athens guides ───────────────────────────── */
 export const guides: Article[] = [
   {
+    slug: "athens-accessible-day-trips",
+    title: "Athens Accessible Day Trips: 5 Easy Excursions",
+    excerpt:
+      "Five wheelchair-friendly day trips from Athens \u2014 from coastal temples to island escapes, all doable with mobility equipment.",
+    date: "2026-04-25",
+    image: "https://lmgpuqgwkiapgpdsxvmb.supabase.co/storage/v1/object/public/assets/athens-day-trips.jpg",
+    category: "Attractions",
+    takeaways: [
+      "Lake Vouliagmeni and the Nafplio waterfront are the most accessible \u2014 great for relaxed days",
+      "Aegina ferry trips work well if you take a scooter \u2014 use the conventional boats, not hydrofoils",
+      "Book an accessible taxi or van in advance for Sounion, Delphi, and Nafplio",
+    ],
+    body: [],
+    content: `
+Athens is brilliant, but after a few days you might want a change of scenery. Good news: several day trips from Athens are wheelchair and scooter accessible \u2014 no need to limit yourself to the city.
+
+Here are five excursions we recommend, all tested for accessibility.
+
+## 1. Cape Sounion & the Temple of Poseidon
+
+**Distance:** 70km south (1.5 hours by car)
+
+The Temple of Poseidon sits on a cliff overlooking the Aegean Sea. Dramatic, ancient, unforgettable \u2014 especially at sunset.
+
+**Accessibility:** The site has a paved path from the parking area to a viewpoint near the temple. Full access to the temple platform is limited due to ancient stones, but you can get close enough for photos and the experience. The visitor center and caf\u00e9 are accessible.
+
+**Best for:** Mobility scooter users or those who can manage some uneven ground with assistance.
+
+**Tip:** Book an accessible taxi or van for the trip. We can recommend drivers who carry ramps.
+
+## 2. Aegina Island
+
+**Distance:** 40 minutes by ferry from Piraeus
+
+A quick escape to island life without the long journey. Aegina has a charming harbor town, pistachio groves, and the ancient Temple of Aphaia.
+
+**Accessibility:** The main harbor area and waterfront are flat and accessible. Taxis on the island can take you to beaches and the temple. The Aegina-Piraeus ferry (conventional, not hydrofoil) has accessible boarding.
+
+**Best for:** Wheelchair users who want an island taste without overnight stays.
+
+**Tip:** Take your rental scooter on the ferry \u2014 it\u2019s allowed on the conventional boats.
+
+## 3. Nafplio
+
+**Distance:** 140km southwest (2 hours by car)
+
+Greece\u2019s first capital is one of the most beautiful towns in the country. Venetian architecture, seaside promenades, and excellent restaurants.
+
+**Accessibility:** The waterfront promenade is fully accessible and stunning. The old town has some cobblestones but main streets are manageable. Palamidi Fortress on the hill is not accessible (999 steps!), but the town itself has plenty to offer.
+
+**Best for:** A leisurely day of seaside strolling and Greek food.
+
+**Tip:** Arrive by 10am to get parking near the waterfront.
+
+## 4. Delphi
+
+**Distance:** 180km northwest (2.5 hours by car)
+
+The ancient sanctuary where Greeks consulted the Oracle. A UNESCO World Heritage site in a dramatic mountain setting.
+
+**Accessibility:** Challenging but partially possible. The Delphi Museum is fully accessible and excellent \u2014 you can spend hours here. The archaeological site itself has steep paths and stairs, but a lower accessible route reaches the main temple terrace. Ask at the entrance for the accessible path.
+
+**Best for:** History lovers willing to accept partial site access.
+
+**Tip:** Visit the museum first, then assess energy levels for the site.
+
+## 5. Lake Vouliagmeni
+
+**Distance:** 25km south (30 minutes by car)
+
+A thermal lake fed by underground springs, right on the Athens Riviera. Warm water year-round (22-29\u00b0C), surrounded by cliffs and pine trees.
+
+**Accessibility:** The facility is designed for accessibility. Ramps lead to the water, and beach wheelchairs are available for entering the lake. Changing rooms and caf\u00e9 are accessible.
+
+**Best for:** A relaxing half-day escape, especially therapeutic for joint or muscle pain.
+
+**Tip:** Go on a weekday to avoid crowds. Bring your swimsuit.
+
+## Planning Your Accessible Day Trip
+
+**Transport:** Most day trips require a car or private transfer. Public buses are hit-or-miss for accessibility. We can recommend accessible taxi services.
+
+**Equipment:** Take your rental scooter or wheelchair. For ferry trips, confirm accessible boarding when you book.
+
+**Timing:** Start early to avoid heat and crowds. Most sites are best in the morning.
+
+**Energy:** Don\u2019t try to do too much. Pick one destination and enjoy it fully.
+
+## Need Mobility Equipment?
+
+If you\u2019re planning day trips from Athens, a [mobility scooter](/equipment/electric-mobility-scooter) gives you range and independence. Our [foldable travel scooter](/equipment/foldable-travel-scooter) fits in car trunks for excursions.
+
+[Browse equipment](/equipment) or [contact us](/contact) to plan your Athens adventures.
+\`,
+  },
+  {
     slug: "mobility-scooter-rental-athens",
     title: "Mobility Scooter Rental Athens: What You Need to Know",
     excerpt:
