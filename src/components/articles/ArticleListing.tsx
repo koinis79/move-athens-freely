@@ -4,15 +4,6 @@ import { Badge } from "@/components/ui/badge";
 import { ArrowRight, Clock } from "lucide-react";
 import type { Article } from "@/data/articles";
 
-const categoryColors: Record<string, string> = {
-  Attractions: "bg-primary/15 text-primary border-primary/30",
-  Dining:      "bg-orange-500/15 text-orange-600 border-orange-500/30",
-  Transport:   "bg-blue-500/15 text-blue-600 border-blue-500/30",
-  Outdoors:    "bg-green-500/15 text-green-600 border-green-500/30",
-  Tips:        "bg-violet-500/15 text-violet-600 border-violet-500/30",
-  Athens:      "bg-secondary/15 text-secondary border-secondary/30",
-};
-
 function readingTime(body: string[]): number {
   return Math.max(1, Math.ceil(body.join(" ").split(/\s+/).length / 200));
 }
@@ -60,7 +51,7 @@ const ArticleListing = ({
                 {a.category && (
                   <Badge
                     variant="outline"
-                    className={`absolute left-3 top-3 text-xs font-medium ${categoryColors[a.category] ?? "bg-muted text-muted-foreground border-border"}`}
+                    className="absolute left-3 top-3 text-xs font-semibold bg-primary text-white hover:bg-primary/90 border-transparent shadow-sm"
                   >
                     {a.category}
                   </Badge>
