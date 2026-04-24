@@ -27,6 +27,136 @@ export interface Article {
 /* ── Accessible Athens guides ───────────────────────────── */
 export const guides: Article[] = [
   {
+    slug: "athens-summer-wheelchair-tips",
+    title: "Athens in Summer: Tips for Wheelchair Users",
+    excerpt:
+      "Visiting Athens in summer with a wheelchair or scooter? Beat the heat with these practical tips from locals.",
+    date: "2026-04-25",
+    image: "https://lmgpuqgwkiapgpdsxvmb.supabase.co/storage/v1/object/public/assets/athens-summer-wheelchair-tips.jpg",
+    category: "Practical",
+    takeaways: [
+      "Sightsee before noon or after 5pm \u2014 midday temperatures in July and August are brutal",
+      "Prioritize air-conditioned attractions: Acropolis Museum, National Archaeological Museum, Benaki",
+      "Carry 1L+ of water, a hat, SPF, and a cloth to cover hot metal wheelchair parts",
+    ],
+    body: [],
+    content: `
+Athens in summer is hot. Really hot. July and August regularly hit 35-40\u00b0C, and the sun is intense.
+
+But millions of visitors come anyway \u2014 and so can you. Here\u2019s how to enjoy Athens in summer while staying safe and comfortable with a wheelchair or mobility scooter.
+
+## The Heat Reality
+
+Athens summer heat is serious. Temperatures above 35\u00b0C are common. The sun reflects off marble and concrete. Air conditioning is essential, not optional.
+
+For wheelchair and scooter users, heat matters more:
+- You can\u2019t cool down by walking in shade as easily
+- Metal wheelchair parts get hot in direct sun
+- Battery life on scooters can decrease in extreme heat
+- Dehydration happens faster when you\u2019re less mobile
+
+None of this means you can\u2019t visit. It means you need to plan.
+
+## Golden Rules for Summer Visits
+
+### 1. Embrace the Siesta Schedule
+
+Plan your day like a local:
+
+- **7am - 12pm:** Active sightseeing (museums, sites, exploring)
+- **12pm - 5pm:** Indoor time (lunch, hotel, air-conditioned spaces)
+- **5pm - 10pm:** Evening sightseeing, dinner, nightlife
+
+The Acropolis opens at 8am. Be there when doors open. By noon, you should be somewhere cool.
+
+### 2. Water, Water, Water
+
+Carry more water than you think you need. Athens has public water fountains that are safe to drink.
+
+Signs of dehydration:
+- Headache
+- Dizziness
+- Fatigue
+- Confusion
+
+If you feel any of these, get to shade and hydrate immediately.
+
+### 3. Choose Air-Conditioned Routes
+
+Best summer sightseeing happens indoors:
+
+- **Acropolis Museum** \u2014 World-class collection, perfect air conditioning, fully accessible
+- **National Archaeological Museum** \u2014 Hours of cool, accessible galleries
+- **Benaki Museum** \u2014 Art and history with a great rooftop caf\u00e9
+- **Stavros Niarchos Foundation** \u2014 Modern cultural center with gardens
+
+### 4. Mornings at Outdoor Sites
+
+If you want to see the Acropolis or Ancient Agora:
+
+- Book the 8am slot
+- Bring a hat and sunscreen
+- Carry a small spray bottle to mist yourself
+- Take breaks in any available shade
+- Leave before you need to
+
+### 5. Evenings Are Magic
+
+Athens comes alive after dark. Summer evenings are warm but bearable:
+
+- Outdoor cinemas (some accessible)
+- Rooftop bars with Acropolis views
+- Dinner in Psyrri or Koukaki starting at 9pm
+- Night walks through illuminated ancient sites
+
+## Scooter and Wheelchair Tips for Heat
+
+**For wheelchair users:**
+- Cover metal armrests with cloth in direct sun
+- Wear light, breathable clothing
+- Attach an umbrella or parasol if possible
+- Gloves protect hands from hot push rims
+
+**For scooter users:**
+- Park in shade when possible
+- Charge overnight when it\u2019s cooler
+- Carry a light cloth to cover the seat when parked
+
+## Best Summer Cooling Spots
+
+- **The National Garden** \u2014 Shaded paths, fountains, benches
+- **Stavros Niarchos Park** \u2014 Designed for accessibility, some shaded areas
+- **Any museum caf\u00e9** \u2014 Order a freddo cappuccino and cool down
+- **Shopping malls** \u2014 No shame in a mall break
+- **Hotel pool** \u2014 If your hotel has one, use it midday
+
+## What to Pack
+
+Summer wheelchair essentials:
+- Wide-brim hat
+- High SPF sunscreen
+- Refillable water bottle (1L minimum)
+- Small battery-powered fan
+- Cooling towel
+- Light scarf (for covering hot surfaces)
+- Sunglasses
+
+## When NOT to Visit
+
+If you have health conditions affected by heat, consider May-June or September-October instead. The weather is still warm but manageable.
+
+August is the hottest month AND when many locals leave. Some smaller shops close.
+
+## Ready to Visit?
+
+Athens in summer is absolutely doable with the right approach. Embrace the siesta rhythm, prioritize air-conditioned attractions, and save outdoor exploration for early morning and evening.
+
+Need mobility equipment? Our [scooters and wheelchairs](/equipment) are delivered to your hotel.
+
+[Browse equipment](/equipment) or [contact us](/contact) with questions.
+`,
+  },
+  {
     slug: "accessible-greek-islands",
     title: "Accessible Greek Islands: Where to Go from Athens",
     excerpt:
