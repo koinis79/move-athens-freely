@@ -16,6 +16,7 @@ import {
   PackageCheck,
   MapPin,
   Ship,
+  Store,
   Plane,
   ArrowRight,
   CheckCircle,
@@ -95,31 +96,31 @@ const steps = [
 
 const zones = [
   {
-    Icon: MapPin,
-    name: "Athens City Center",
-    areas: "Plaka, Syntagma, Monastiraki, Kolonaki",
+    Icon: Store,
+    name: "Store Pickup",
+    areas: "Stadiou 31 · Kallithea · Chalandri",
     fee: "FREE",
     color: "bg-green-100 text-green-800 dark:bg-green-900/40 dark:text-green-300",
   },
   {
     Icon: MapPin,
-    name: "Greater Athens",
-    areas: "Kifisia, Glyfada, Marousi, Piraeus suburbs",
-    fee: "€15",
+    name: "Athens City",
+    areas: "Syntagma, Plaka, Monastiraki, greater metro area",
+    fee: "€10",
     color: "bg-blue-100 text-blue-800 dark:bg-blue-900/40 dark:text-blue-300",
   },
   {
     Icon: Ship,
-    name: "Piraeus Port",
+    name: "Piraeus Cruise Terminal",
     areas: "Cruise terminal & ferry port",
-    fee: "€20",
+    fee: "€25",
     color: "bg-blue-100 text-blue-800 dark:bg-blue-900/40 dark:text-blue-300",
   },
   {
     Icon: Plane,
     name: "Athens Airport",
     areas: "Eleftherios Venizelos (ATH)",
-    fee: "€25",
+    fee: "€50",
     color: "bg-blue-100 text-blue-800 dark:bg-blue-900/40 dark:text-blue-300",
   },
 ];
