@@ -50,6 +50,7 @@ interface Booking {
   status: string;
   internal_notes: string | null;
   is_archived: boolean;
+  review_requested_at: string | null;
   created_at: string;
   delivery_zones: { name_en: string } | null;
   booking_items: BookingItem[];
@@ -123,7 +124,7 @@ export default function BookingsNew() {
       .select(`
         id, booking_number, customer_name, customer_email, customer_phone,
         delivery_address, delivery_notes, rental_start, rental_end,
-        total_amount, payment_status, status, internal_notes, is_archived, created_at,
+        total_amount, payment_status, status, internal_notes, is_archived, review_requested_at, created_at,
         delivery_zones ( name_en ),
         booking_items ( quantity, num_days, subtotal, equipment ( name_en ) )
       `)
@@ -175,15 +176,48 @@ export default function BookingsNew() {
 
 
   async function updateStatus(id: string, status: string, successMsg?: string) {
+    // Capture pre-update booking so we can decide whether to send review request
+    const prev = bookings.find((b) => b.id === id);
+
     const { error } = await supabase.from("bookings").update({ status }).eq("id", id);
     if (error) {
       toast({ title: "Error", description: error.message, variant: "destructive" });
       return;
     }
     toast({ title: successMsg ?? `Status: ${status.replace(/_/g, " ")}` });
+
+    // Fire-and-forget review request when transitioning into "completed"
+    // only if a review hasn't already been requested.
+    if (status === "completed" && prev && prev.status !== "completed" && !prev.review_requested_at) {
+      const internalKey = import.meta.env.VITE_INTERNAL_API_KEY;
+      if (internalKey) {
+        fetch(
+          "https://lmgpuqgwkiapgpdsxvmb.supabase.co/functions/v1/send-review-request",
+          {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+              "Authorization": `Bearer ${internalKey}`,
+            },
+            body: JSON.stringify({ booking_id: id }),
+          }
+        )
+          .then(async (res) => {
+            if (res.ok) {
+              toast({ title: "Review request sent to customer \u2b50" });
+            } else {
+              const err = await res.json().catch(() => ({}));
+              console.warn("Review request failed:", err);
+            }
+          })
+          .catch((err) => console.warn("Review request fetch failed:", err));
+      } else {
+        console.warn("VITE_INTERNAL_API_KEY not set \u2014 review request skipped");
+      }
+    }
+
     await fetchBookings();
-    // Update selected booking if it's the same one
-    setSelected((prev) => (prev && prev.id === id ? { ...prev, status } : prev));
+    setSelected((p) => (p && p.id === id ? { ...p, status } : p));
     setOpenMenuId(null);
   }
 
