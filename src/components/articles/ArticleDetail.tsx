@@ -10,9 +10,12 @@ import {
   BreadcrumbPage,
   BreadcrumbSeparator,
 } from "@/components/ui/breadcrumb";
-import { Facebook, Twitter, LinkIcon, ArrowRight, Clock, Lightbulb } from "lucide-react";
+import { Facebook, Twitter, LinkIcon, ArrowRight, Clock, Lightbulb, Sparkles } from "lucide-react";
 import { toast } from "@/hooks/use-toast";
 import type { Article } from "@/data/articles";
+import ArticleCTABanner from "./ArticleCTABanner";
+import EquipmentCTA from "./EquipmentCTA";
+import StickyMobileCTA from "./StickyMobileCTA";
 
 function readingTime(article: Article): number {
   const text = article.content ?? article.body.join(" ");
@@ -34,13 +37,15 @@ function inlineMd(text: string): string {
     );
 }
 
-/** Render a markdown string into JSX nodes */
-function renderMarkdown(md: string): React.ReactNode[] {
+/** Render a markdown string into JSX nodes. Optionally inject a banner after N paragraphs. */
+function renderMarkdown(md: string, midBanner?: { node: React.ReactNode; afterParagraph: number }): React.ReactNode[] {
   const lines = md.split("\n");
   const nodes: React.ReactNode[] = [];
   let listType: "ul" | "ol" | null = null;
   let listItems: string[] = [];
   let key = 0;
+  let paragraphCount = 0;
+  let bannerInjected = false;
 
   const flushList = () => {
     if (!listType || listItems.length === 0) return;
@@ -104,6 +109,11 @@ function renderMarkdown(md: string): React.ReactNode[] {
           dangerouslySetInnerHTML={{ __html: inlineMd(line) }}
         />
       );
+      paragraphCount++;
+      if (midBanner && !bannerInjected && paragraphCount >= midBanner.afterParagraph) {
+        nodes.push(<div key={`mid-banner-${key++}`}>{midBanner.node}</div>);
+        bannerInjected = true;
+      }
     }
   }
 
@@ -250,7 +260,7 @@ const ArticleDetail = ({
           {/* Body — markdown or plain paragraphs */}
           <div className="mx-auto mt-10 max-w-prose space-y-6">
             {article.content
-              ? renderMarkdown(article.content)
+              ? renderMarkdown(article.content, { node: <ArticleCTABanner />, afterParagraph: 3 })
               : article.body.map((p, i) => (
                   <p key={i} className="text-lg leading-relaxed text-muted-foreground">
                     {p}
@@ -289,6 +299,26 @@ const ArticleDetail = ({
           )}
         </div>
       </article>
+
+      {/* Recommended Equipment for this article */}
+      {article.recommendedEquipment && article.recommendedEquipment.length > 0 && (
+        <section className="bg-background py-12 md:py-16 border-t border-border">
+          <div className="container max-w-3xl">
+            <div className="flex items-center gap-2 mb-2">
+              <Sparkles className="h-4 w-4 text-primary" />
+              <p className="text-xs uppercase tracking-wider text-primary font-semibold">For This Trip</p>
+            </div>
+            <h2 className="text-2xl font-heading font-bold text-foreground md:text-3xl mb-6">
+              Recommended Equipment for This Trip
+            </h2>
+            <div className="grid gap-4 sm:grid-cols-2">
+              {article.recommendedEquipment.map((slug) => (
+                <EquipmentCTA key={slug} equipmentSlug={slug} />
+              ))}
+            </div>
+          </div>
+        </section>
+      )}
 
       {/* Related */}
       {related.length > 0 && (
@@ -354,6 +384,8 @@ const ArticleDetail = ({
           </div>
         </section>
       )}
+    {/* Mobile-only sticky CTA */}
+    <StickyMobileCTA />
     </>
   );
 };
