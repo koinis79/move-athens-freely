@@ -22,6 +22,8 @@ export interface Article {
   takeaways?: string[];
   /** Raw markdown — rendered instead of body[] when present */
   content?: string;
+  /** Equipment slugs to show as CTAs at the end of the article */
+  recommendedEquipment?: string[];
 }
 
 /* ── Accessible Athens guides ───────────────────────────── */
@@ -34,6 +36,7 @@ export const guides: Article[] = [
     date: "2026-04-25",
     image: "https://lmgpuqgwkiapgpdsxvmb.supabase.co/storage/v1/object/public/assets/piraeus-cruise-port.png",
     category: "Transport",
+    recommendedEquipment: ["transit-wheelchair", "foldable-travel-scooter"],
     takeaways: [
       "Book accessible disembark assistance with guest services before port day",
       "Metro Line 1 from Piraeus to Monastiraki is fully accessible \u2014 25 minutes",
@@ -140,6 +143,7 @@ Don\u2019t stay on the ship while others explore. With the right equipment, Pira
     date: "2026-04-25",
     image: "https://lmgpuqgwkiapgpdsxvmb.supabase.co/storage/v1/object/public/assets/athens-summer-wheelchair-tips.jpg",
     category: "Practical",
+    recommendedEquipment: ["electric-mobility-scooter", "lightweight-folding-wheelchair"],
     takeaways: [
       "Sightsee before noon or after 5pm \u2014 midday temperatures in July and August are brutal",
       "Prioritize air-conditioned attractions: Acropolis Museum, National Archaeological Museum, Benaki",
@@ -270,6 +274,7 @@ Need mobility equipment? Our [scooters and wheelchairs](/equipment) are delivere
     date: "2026-04-25",
     image: "https://lmgpuqgwkiapgpdsxvmb.supabase.co/storage/v1/object/public/assets/accessible-greek-islands.jpg",
     category: "Attractions",
+    recommendedEquipment: ["foldable-travel-scooter", "lightweight-folding-wheelchair"],
     takeaways: [
       "Aegina is the easiest day trip \u2014 flat harbor, 40-minute ferry from Piraeus",
       "For multi-day stays, Rhodes and Kos offer the best accessibility plus great beaches",
@@ -386,6 +391,7 @@ Rent from us in Athens and take it with you \u2014 or arrange pickup/dropoff at 
     date: "2026-04-25",
     image: "https://lmgpuqgwkiapgpdsxvmb.supabase.co/storage/v1/object/public/assets/athens-day-trips.jpg",
     category: "Attractions",
+    recommendedEquipment: ["foldable-travel-scooter", "electric-mobility-scooter"],
     takeaways: [
       "Lake Vouliagmeni and the Nafplio waterfront are the most accessible \u2014 great for relaxed days",
       "Aegina ferry trips work well if you take a scooter \u2014 use the conventional boats, not hydrofoils",
@@ -482,6 +488,7 @@ If you\u2019re planning day trips from Athens, a [mobility scooter](/equipment/e
     date: "2026-04-24",
     image: "https://lmgpuqgwkiapgpdsxvmb.supabase.co/storage/v1/object/public/assets/mobility-scooter-athens.jpg",
     category: "Transport",
+    recommendedEquipment: ["electric-mobility-scooter", "foldable-travel-scooter"],
     takeaways: [
       "Scooters work great on main streets and pedestrianized zones \u2014 stick to flat areas",
       "Budget \u20ac120\u2013150/day for a 4-wheel model, with big savings on longer rentals",
@@ -690,6 +697,7 @@ We deliver wheelchairs, scooters, and rollators directly to your hotel. Free del
     date: "2026-01-28",
     image: museumsImg,
     category: "Attractions",
+    recommendedEquipment: ["lightweight-folding-wheelchair", "rollator-walker"],
     takeaways: [
       "The Acropolis Museum is fully step-free with tactile exhibits and wheelchair loans",
       "Most major museums offer free entry for visitors with disabilities",
@@ -747,6 +755,7 @@ A beautifully renovated neoclassical building:
     date: "2026-02-10",
     image: restaurantsImg,
     category: "Dining",
+    recommendedEquipment: ["manual-wheelchair", "rollator-walker"],
     takeaways: [
       "Plaka's pedestrian streets are mostly flat cobblestone — manageable with larger wheels",
       "Rooftop restaurants rarely have elevators — call ahead to confirm",
@@ -920,6 +929,7 @@ Standard Athens taxis are **not accessible** — they're small sedans.
     date: "2026-03-10",
     image: restaurantsImg,
     category: "Dining",
+    recommendedEquipment: ["manual-wheelchair", "rollator-walker"],
     takeaways: [
       "Most Plaka and Monastiraki restaurants have ground-floor outdoor seating — easier access than going inside",
       "Always call ahead to confirm step-free access, especially for rooftop spots",
@@ -1021,6 +1031,7 @@ We've personally visited and checked the accessibility of every restaurant on th
     date: "2026-03-15",
     image: "https://lmgpuqgwkiapgpdsxvmb.supabase.co/storage/v1/object/public/assets/mobility-scooter-acropolis-athens.png",
     category: "Attractions",
+    recommendedEquipment: ["lightweight-folding-wheelchair", "rollator-walker"],
     takeaways: [
       "Free elevator access to the top \u2014 use the northeast entrance near the Acropolis Museum",
       "Wheelchair users + 1 companion enter FREE \u2014 no ticket needed",
@@ -1135,6 +1146,7 @@ We deliver wheelchairs and mobility scooters directly to your Athens hotel. Free
     date: "2026-03-20",
     image: airportTransferImg,
     category: "Transport",
+    recommendedEquipment: ["foldable-travel-scooter", "transit-wheelchair"],
     takeaways: [
       "Request PRM airport assistance through your airline at least 48 hours before travel",
       "The Metro Line 3 to Syntagma is fully step-free with elevators at every station",
@@ -1228,6 +1240,7 @@ Don't want to travel with bulky mobility equipment?
     date: "2026-03-25",
     image: beachesImg,
     category: "Outdoors",
+    recommendedEquipment: ["electric-mobility-scooter"],
     takeaways: [
       "Seatrac autonomous sea-access lifts are free to use and installed at multiple Athens-area beaches",
       "Voula A, Alimos, Glyfada, and Varkiza beaches all have Seatrac systems and accessible facilities",
