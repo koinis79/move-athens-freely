@@ -1323,6 +1323,141 @@ After a beach day, don't worry about returning equipment. Pickup is free from al
 `,
   },
 ];
+{
+    slug: "electric-wheelchair-rental-athens",
+    title: "Electric Wheelchair Rental in Athens: Complete Guide 2026",
+    excerpt:
+      "Rent electric wheelchairs in Athens from €150/day. Free hotel delivery, joystick control, all-day battery. Perfect for exploring the Acropolis and Plaka.",
+    date: "2026-06-04",
+    image: "https://lmgpuqgwkiapgpdsxvmb.supabase.co/storage/v1/object/public/assets/mobility-scooter-acropolis-athens.png",
+    category: "Equipment Guides",
+    recommendedEquipment: ["foldable-power-wheelchair"],
+    takeaways: [
+      "Electric wheelchairs give you 15-20km range per charge — enough for a full day of Athens sightseeing",
+      "Our foldable power wheelchair fits in taxi trunks and folds in 3 seconds",
+      "The Acropolis, museums, and coastal promenades are all accessible with an electric wheelchair",
+    ],
+    body: [],
+    content: `
+Planning to visit Athens but worried about the walking distances and hilly terrain? An electric wheelchair can transform your trip, giving you the freedom to explore ancient ruins, vibrant neighborhoods, and scenic coastlines without exhaustion.
+
+## Why Rent an Electric Wheelchair in Athens?
+
+Athens is a city of hills. From the Acropolis perched above the city to the winding streets of Plaka, getting around can be challenging. An electric wheelchair gives you:
+
+**Independence** — Control your own movement with a simple joystick. No need to rely on someone pushing you.
+
+**Extended range** — Cover more ground without fatigue. Visit the Acropolis Museum in the morning, lunch in Monastiraki, and sunset at the Temple of Poseidon.
+
+**All-day battery** — Our electric wheelchairs run 15-20km on a single charge, more than enough for a full day of sightseeing.
+
+**Comfort** — Padded seats, adjustable armrests, and smooth suspension make long days comfortable.
+
+## Our Electric Wheelchair Option
+
+### Foldable Power Wheelchair
+
+Our most popular choice for tourists. This wheelchair folds compactly for transport in taxis or storage at your hotel.
+
+**Features:**
+- Joystick control (left or right hand)
+- 20km range per charge
+- Maximum speed: 6 km/h
+- Weight capacity: 120kg
+- Folds in 3 seconds
+- Fits in car trunks
+
+**Price:** From €150/day (discounts for weekly rentals)
+
+## Where Can You Go With an Electric Wheelchair?
+
+### The Acropolis
+
+Yes, the Acropolis is accessible! There's an elevator from the base to the top, and paved pathways around the Parthenon. The electric wheelchair handles the slight inclines with ease. [Read our full Acropolis accessibility guide →](/accessible-athens/acropolis-wheelchair-guide)
+
+### Acropolis Museum
+
+Fully accessible with ramps, elevators, and wide corridors. The smooth marble floors are perfect for electric wheelchairs.
+
+### Plaka & Monastiraki
+
+The historic neighborhoods have a mix of surfaces. Stick to the main pedestrian streets (Adrianou, Ermou) for the smoothest ride. Some cobblestones exist, but an electric wheelchair handles them better than a manual chair.
+
+### National Garden
+
+Flat, shaded paths make this a perfect escape from the summer heat. The electric wheelchair lets you explore all 15 hectares without tiring.
+
+### Piraeus & the Coast
+
+The coastal tram line and seaside promenades are fully accessible. Roll along the Athens Riviera from Faliro to Glyfada.
+
+## Practical Tips for Electric Wheelchair Users in Athens
+
+### Charging
+
+We provide a charger with every rental. Most hotels can accommodate overnight charging — just ask reception for a socket near your room. A full charge takes 4-6 hours.
+
+### Transport
+
+**Taxis:** Athens taxis can fit a folded electric wheelchair in the trunk. Book through the BEAT or Uber app and mention you have mobility equipment.
+
+**Metro:** All metro stations have elevators and ramps. The trains have designated wheelchair spaces.
+
+**Airport:** Athens Airport is fully accessible. We offer delivery and pickup directly at the airport (€50 fee). [See our airport guide →](/accessible-athens/athens-airport-wheelchair-guide)
+
+### Weather Considerations
+
+Athens summers are hot (35°C+). Our electric wheelchairs handle the heat, but we recommend:
+- Carry water
+- Use a sun umbrella attachment (available as accessory)
+- Plan indoor breaks during midday (12-4pm)
+
+## How to Rent an Electric Wheelchair in Athens
+
+1. **Browse our equipment** — Check availability online
+2. **Choose your dates** — Minimum 1-day rental
+3. **Book and pay** — Secure online payment via Stripe
+4. **We deliver** — Equipment arrives at your hotel, sanitized and fully charged
+5. **We demonstrate** — Our team shows you how to operate everything safely
+6. **Explore Athens** — Enjoy your trip!
+7. **We collect** — Return pickup at your accommodation
+
+### Delivery Zones
+
+| Zone | Delivery Fee |
+|------|--------------|
+| Athens City Center | €10 |
+| Piraeus Port | €25 |
+| Athens Airport | €50 |
+| Store Pickup (free) | €0 |
+
+## Frequently Asked Questions
+
+**Do I need a license to operate an electric wheelchair?**
+No. Electric wheelchairs for personal mobility don't require any license in Greece.
+
+**What if it breaks down?**
+Call us immediately. We offer same-day replacement anywhere in Athens.
+
+**Can I take it on a cruise ship?**
+Yes. We regularly serve cruise passengers at Piraeus Port. We can deliver when your ship docks and collect before departure.
+
+**Is insurance included?**
+Basic equipment insurance is included. You're covered for normal use.
+
+## Why Rent From Movability?
+
+**Local expertise** — We're Athens-based with 30+ years of healthcare experience through Koinis Healthcare Group.
+
+**Quality equipment** — Every wheelchair is inspected, sanitized, and fully charged before delivery.
+
+**Responsive support** — Reach us 24/7 via WhatsApp at +30 697 463 3697.
+
+**No hassle** — We deliver to your door and pick up when you're done.
+
+Ready to explore Athens with complete freedom? Browse our electric wheelchair options and book online today.
+    `,
+  },
 
 /* ── Blog posts ─────────────────────────────────────────── */
 export const blogPosts: Article[] = [
