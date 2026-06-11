@@ -684,7 +684,7 @@ We\u2019re here to help make that happen.
 
 ## Need Mobility Equipment for Your Athens Trip?
 
-We deliver wheelchairs, scooters, and rollators directly to your hotel. Free delivery in the city center.
+We deliver wheelchairs, scooters, and rollators directly to your hotel. Free store pickup in central Athens.
 
 [Browse Equipment \u2192](/equipment) | [Contact Us \u2192](/contact)
 `,
@@ -1133,7 +1133,7 @@ Don\u2019t skip it because you\u2019re worried about access. It\u2019s worth it.
 
 ## Need a Wheelchair for Your Visit?
 
-We deliver wheelchairs and mobility scooters directly to your Athens hotel. Free delivery in the city center.
+We deliver wheelchairs and mobility scooters directly to your Athens hotel. Free store pickup in central Athens.
 
 [Browse Wheelchairs \u2192](/equipment/wheelchairs) | [Browse Mobility Scooters \u2192](/equipment/mobility-scooters)
 `,

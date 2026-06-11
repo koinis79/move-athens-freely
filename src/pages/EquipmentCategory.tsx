@@ -9,7 +9,7 @@ const validSlugs = Object.keys(categorySlugMap);
 const categoryMeta: Record<string, { title: string; description: string }> = {
   wheelchairs: {
     title: "Wheelchair Rental Athens – Delivery to Your Hotel | Movability",
-    description: "Rent lightweight folding wheelchairs in Athens from €35/day. Free delivery in city center. Airport pickup available.",
+    description: "Rent lightweight folding wheelchairs in Athens from €35/day. Free store pickup in central Athens. Airport pickup available.",
   },
   "power-wheelchairs": {
     title: "Electric Wheelchair Hire Athens | Movability",

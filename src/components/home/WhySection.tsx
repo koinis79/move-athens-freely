@@ -4,7 +4,7 @@ const features = [
   {
     Icon: Truck,
     heading: "Delivered to Your Door",
-    text: "We bring the equipment to your hotel, Airbnb, or cruise port. Free in Athens city center.",
+    text: "We bring the equipment to your hotel, Airbnb, or cruise port. Free store pickup available.",
   },
   {
     Icon: ShieldCheck,

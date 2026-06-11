@@ -317,9 +317,9 @@ const BookingConfirmation = () => {
             </a>
           </Button>
           <Button asChild variant="outline" className="rounded-xl">
-            <a href="mailto:info@moveability.gr">
+            <a href="mailto:info@movability.gr">
               <Mail className="mr-2 h-4 w-4" />
-              info@moveability.gr
+              info@movability.gr
             </a>
           </Button>
           <Button asChild variant="outline" className="rounded-xl">

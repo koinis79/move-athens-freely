@@ -1,6 +1,6 @@
 import { Helmet } from "react-helmet-async";
 
-const DEFAULT_OG_IMAGE = "https://moveability.gr/og-image.png";
+const DEFAULT_OG_IMAGE = "https://movability.gr/og-image.png";
 const SITE_NAME = "Movability";
 
 interface SEOHeadProps {
@@ -31,7 +31,7 @@ const SEOHead = ({
     <meta name="twitter:title" content={title} />
     <meta name="twitter:description" content={description} />
     <meta name="twitter:image" content={image} />
-    <meta name="twitter:site" content="@moveability_gr" />
+    <meta name="twitter:site" content="@movability_gr" />
   </Helmet>
 );
 
