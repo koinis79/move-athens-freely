@@ -39,7 +39,7 @@
     "powerWheelchairs": "Ηλεκτρικά Αμαξίδια",
     "mobilityScooters": "Σκούτερ Κινητικότητας",
     "rollatorsWalkers": "Ρολέιτορ & Περπατούρες",
-    "fromPrice": "Από €{{price}}/ημέρα"
+    "fromPrice": "Από €{{price}}"
   },
   "whySection": {
     "title": "Γιατί Movability;",

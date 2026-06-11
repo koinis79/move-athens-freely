@@ -491,7 +491,7 @@ If you\u2019re planning day trips from Athens, a [mobility scooter](/equipment/e
     recommendedEquipment: ["electric-mobility-scooter", "foldable-travel-scooter"],
     takeaways: [
       "Scooters work great on main streets and pedestrianized zones \u2014 stick to flat areas",
-      "Budget \u20ac120\u2013150/day for a 4-wheel model, with big savings on longer rentals",
+      "Budget \u20ac120\u2013150 for a 1\u20133 day rental, with big savings on longer rentals",
       "Charge overnight (6\u20138 hours) for 30\u201340km of next-day range",
     ],
     body: [],
@@ -539,7 +539,7 @@ Stick to main streets and pedestrianized zones.
 
 | Duration | Price Range |
 |----------|-------------|
-| 1-3 days | \u20ac120-150/day |
+| 1-3 days | \u20ac120-150 |
 | 4-7 days | \u20ac220-250 total |
 | 8-14 days | \u20ac300-350 total |
 | 15-30 days | \u20ac400-450 total |
@@ -1327,7 +1327,7 @@ After a beach day, don't worry about returning equipment. Pickup is free from al
     slug: "electric-wheelchair-rental-athens",
     title: "Electric Wheelchair Rental in Athens: Complete Guide 2026",
     excerpt:
-      "Rent electric wheelchairs in Athens from €150/day. Free hotel delivery, joystick control, all-day battery. Perfect for exploring the Acropolis and Plaka.",
+      "Rent electric wheelchairs in Athens from €150 (1–3 days). Free hotel delivery, joystick control, all-day battery. Perfect for exploring the Acropolis and Plaka.",
     date: "2026-06-04",
     image: "https://lmgpuqgwkiapgpdsxvmb.supabase.co/storage/v1/object/public/assets/mobility-scooter-acropolis-athens.png",
     category: "Equipment Guides",
@@ -1367,7 +1367,7 @@ Our most popular choice for tourists. This wheelchair folds compactly for transp
 - Folds in 3 seconds
 - Fits in car trunks
 
-**Price:** From €150/day (discounts for weekly rentals)
+**Price:** From €150 (1–3 days, discounts for weekly rentals)
 
 ## Where Can You Go With an Electric Wheelchair?
 

@@ -39,7 +39,7 @@ export default function EquipmentCTA({ equipmentSlug, context }: Props) {
         <p className="text-sm text-muted-foreground line-clamp-2 mt-0.5">{eq.shortDesc}</p>
         <div className="mt-2 flex items-center justify-between gap-2">
           <span className="text-base font-bold text-primary">
-            From €{eq.price}<span className="text-xs font-medium text-muted-foreground">/day</span>
+            From €{eq.price}
           </span>
           <span className="inline-flex items-center gap-1 text-sm font-semibold text-primary">
             Rent Now <ArrowRight className="h-3.5 w-3.5" />

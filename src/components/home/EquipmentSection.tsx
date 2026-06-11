@@ -59,7 +59,7 @@ const EquipmentSection = () => {
                   <div className="mt-2 flex items-baseline gap-1">
                     <span className="text-xs text-muted-foreground">From</span>
                     <span className="text-2xl font-bold text-primary">€{price}</span>
-                    <span className="text-sm text-muted-foreground">/day</span>
+                    <span className="text-xs text-muted-foreground ml-1">per rental period</span>
                   </div>
                   {guideText && (
                     <p className="mt-2 text-xs text-primary hover:underline">

@@ -39,7 +39,7 @@
     "powerWheelchairs": "Power Wheelchairs",
     "mobilityScooters": "Mobility Scooters",
     "rollatorsWalkers": "Rollators & Walkers",
-    "fromPrice": "From €{{price}}/day"
+    "fromPrice": "From €{{price}}"
   },
   "whySection": {
     "title": "Why Movability?",

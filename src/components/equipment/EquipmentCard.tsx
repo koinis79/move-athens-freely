@@ -43,7 +43,7 @@ const EquipmentCard = ({ item }: { item: EquipmentItem }) => {
           {/* Price badge — top-right corner */}
           <div className="absolute right-3 top-3 rounded-full bg-primary text-primary-foreground px-3 py-1 text-sm font-bold shadow-md">
             €{item.priceTier1}
-            <span className="ml-0.5 text-[10px] font-medium opacity-90">/day</span>
+
           </div>
         </div>
 
@@ -62,7 +62,7 @@ const EquipmentCard = ({ item }: { item: EquipmentItem }) => {
           <div className="mt-1 flex items-baseline gap-1">
             <span className="text-sm text-muted-foreground">From</span>
             <span className="text-2xl font-bold text-primary">€{item.priceTier1}</span>
-            <span className="text-sm text-muted-foreground">/day</span>
+            <span className="text-xs text-muted-foreground ml-1">per rental period</span>
           </div>
 
           <Button className="mt-2 w-full rounded-xl bg-primary text-primary-foreground hover:bg-primary/90 font-semibold" tabIndex={-1}>

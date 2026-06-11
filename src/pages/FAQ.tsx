@@ -25,7 +25,7 @@ const sections = [
       },
       {
         q: "What are your prices?",
-        a: "Prices are per rental period, not per day. Rollators start from €20 for 1–3 days. Manual wheelchairs from €35. Mobility scooters from €100. Power wheelchairs from €150. The longer you rent, the lower your daily cost — see the Equipment page for full pricing.",
+        a: "Prices are per rental period, not per day. Manual wheelchairs and rollators start from €49 (1–3 days), mobility scooters from €120, and power wheelchairs from €150. Longer rentals cost less per day — see the Equipment page for full pricing.",
       },
       {
         q: "Do I need to pay a deposit?",

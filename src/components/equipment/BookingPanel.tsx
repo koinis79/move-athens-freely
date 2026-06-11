@@ -441,7 +441,7 @@ const BookingPanel = ({ item }: Props) => {
             ) : (
               <>
                 <span className="text-xs text-muted-foreground">From</span>
-                <span className="text-xl font-bold text-primary">€{item.priceTier1}/day</span>
+                <span className="text-xl font-bold text-primary">€{item.priceTier1}</span>
               </>
             )}
           </div>
