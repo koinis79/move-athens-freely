@@ -1322,8 +1322,7 @@ After a beach day, don't worry about returning equipment. Pickup is free from al
 *Need a wheelchair or scooter for your beach trip? [Browse our equipment →](/equipment)*
 `,
   },
-];
-{
+  {
     slug: "electric-wheelchair-rental-athens",
     title: "Electric Wheelchair Rental in Athens: Complete Guide 2026",
     excerpt:
@@ -1458,6 +1457,7 @@ Basic equipment insurance is included. You're covered for normal use.
 Ready to explore Athens with complete freedom? Browse our electric wheelchair options and book online today.
     `,
   },
+];
 
 /* ── Blog posts ─────────────────────────────────────────── */
 export const blogPosts: Article[] = [
