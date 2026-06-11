@@ -335,10 +335,10 @@ const Contact = () => {
               <div>
                 <p className="font-semibold text-foreground">Email</p>
                 <a
-                  href="mailto:info@moveability.gr"
+                  href="mailto:info@movability.gr"
                   className="text-sm text-primary underline underline-offset-2"
                 >
-                  info@moveability.gr
+                  info@movability.gr
                 </a>
               </div>
             </div>
