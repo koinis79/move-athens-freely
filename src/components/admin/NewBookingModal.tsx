@@ -279,7 +279,7 @@ const NewBookingModal = ({ open, onOpenChange, defaultDate }: Props) => {
 
   return (
     <Dialog open={open} onOpenChange={handleClose}>
-      <DialogContent className="sm:max-w-[640px] max-h-[90vh] overflow-hidden p-0 gap-0">
+      <DialogContent className="sm:max-w-[640px] max-h-[100dvh] sm:max-h-[90vh] overflow-hidden p-0 gap-0">
         <DialogHeader className="px-6 pt-5 pb-0">
           <DialogTitle className="text-base">New Booking</DialogTitle>
         </DialogHeader>
@@ -315,7 +315,7 @@ const NewBookingModal = ({ open, onOpenChange, defaultDate }: Props) => {
         <Separator />
 
         {/* Body */}
-        <div className="px-6 py-4 overflow-y-auto max-h-[calc(90vh-220px)] min-h-[280px]">
+        <div className="px-4 sm:px-6 py-4 overflow-y-auto max-h-[calc(100dvh-220px)] sm:max-h-[calc(90vh-220px)] min-h-[200px] sm:min-h-[280px]">
 
           {/* ─── Step 1: Customer ─── */}
           {step === 1 && (

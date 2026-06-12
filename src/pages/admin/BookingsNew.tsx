@@ -500,7 +500,7 @@ export default function BookingsNew() {
   const archivedCount = bookings.filter((b) => b.is_archived).length;
 
   return (
-    <div className="p-6 space-y-6">
+    <div className="p-4 md:p-6 space-y-4 md:space-y-6">
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-2xl font-bold">Bookings</h1>
@@ -511,7 +511,7 @@ export default function BookingsNew() {
         <button
           type="button"
           onClick={() => setNewBookingOpen(true)}
-          className="inline-flex items-center gap-1.5 px-4 py-2 rounded-lg bg-blue-600 text-white text-sm font-medium shadow-sm hover:bg-blue-700 transition-colors"
+          className="inline-flex items-center gap-1.5 px-3 md:px-4 py-2.5 md:py-2 rounded-lg bg-blue-600 text-white text-sm font-medium shadow-sm hover:bg-blue-700 transition-colors min-h-[44px]"
         >
           <Plus className="h-4 w-4" />
           New Booking
@@ -527,11 +527,11 @@ export default function BookingsNew() {
       />
 
       {/* Tabs */}
-      <div className="flex gap-4 border-b">
+      <div className="flex flex-wrap gap-2 md:gap-4 border-b">
         <button
           type="button"
           onClick={() => setTab("active")}
-          className={`px-4 py-2 text-sm font-medium border-b-2 -mb-px transition-colors ${
+          className={`px-3 md:px-4 py-2.5 md:py-2 text-sm font-medium border-b-2 -mb-px transition-colors min-h-[44px] md:min-h-0 ${
             tab === "active"
               ? "border-blue-600 text-blue-600"
               : "border-transparent text-gray-500 hover:text-gray-900"
@@ -542,7 +542,7 @@ export default function BookingsNew() {
         <button
           type="button"
           onClick={() => setTab("archived")}
-          className={`px-4 py-2 text-sm font-medium border-b-2 -mb-px transition-colors ${
+          className={`px-3 md:px-4 py-2.5 md:py-2 text-sm font-medium border-b-2 -mb-px transition-colors min-h-[44px] md:min-h-0 ${
             tab === "archived"
               ? "border-blue-600 text-blue-600"
               : "border-transparent text-gray-500 hover:text-gray-900"
@@ -556,7 +556,7 @@ export default function BookingsNew() {
           <button
             type="button"
             onClick={() => { setLayoutMode("list"); setCalendarDateFilter(null); }}
-            className={`inline-flex items-center gap-1 px-2.5 py-1 text-xs font-medium rounded ${
+            className={`inline-flex items-center gap-1 px-2.5 py-1.5 md:py-1 text-xs font-medium rounded min-h-[36px] md:min-h-0 ${
               layoutMode === "list" ? "bg-blue-600 text-white" : "text-gray-600 hover:bg-gray-50"
             }`}
           >
@@ -565,7 +565,7 @@ export default function BookingsNew() {
           <button
             type="button"
             onClick={() => setLayoutMode("calendar")}
-            className={`inline-flex items-center gap-1 px-2.5 py-1 text-xs font-medium rounded ${
+            className={`inline-flex items-center gap-1 px-2.5 py-1.5 md:py-1 text-xs font-medium rounded min-h-[36px] md:min-h-0 ${
               layoutMode === "calendar" ? "bg-blue-600 text-white" : "text-gray-600 hover:bg-gray-50"
             }`}
           >
@@ -612,13 +612,13 @@ export default function BookingsNew() {
             placeholder="Search by booking #, name, or email..."
             value={search}
             onChange={(e) => setSearch(e.target.value)}
-            className="w-full h-10 pl-10 pr-3 rounded-md border border-gray-300 bg-white text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+            className="w-full h-11 md:h-10 pl-10 pr-3 rounded-md border border-gray-300 bg-white text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
           />
         </div>
         <select
           value={statusFilter}
           onChange={(e) => setStatusFilter(e.target.value)}
-          className="h-10 px-3 rounded-md border border-gray-300 bg-white text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 sm:w-[180px]"
+          className="h-11 md:h-10 px-3 rounded-md border border-gray-300 bg-white text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 sm:w-[180px]"
         >
           <option value="all">All statuses</option>
           {STATUSES.map((s) => (
@@ -629,8 +629,69 @@ export default function BookingsNew() {
         </select>
       </div>
 
-      {/* Table */}
-      <div className="rounded-lg border border-gray-200 bg-white overflow-hidden">
+      {/* ─── Mobile Card View (< md) ─── */}
+      <div className="md:hidden space-y-3">
+        {loading && (
+          <div className="px-4 py-8 text-center text-gray-500 bg-white rounded-lg border border-gray-200">Loading...</div>
+        )}
+        {!loading && filtered.length === 0 && (
+          <div className="px-4 py-8 text-center text-gray-500 bg-white rounded-lg border border-gray-200">No bookings found</div>
+        )}
+        {!loading && filtered.map((b) => {
+          const nxt = nextStatus(b.status);
+          const nxtLabel = nextStatusLabel(b.status);
+          return (
+            <div
+              key={b.id}
+              className="bg-white rounded-lg border border-gray-200 shadow-sm overflow-hidden"
+            >
+              {/* Card header — tap to open detail */}
+              <button
+                type="button"
+                className="w-full text-left p-4 active:bg-gray-50"
+                onClick={() => setSelected(b)}
+              >
+                <div className="flex items-start justify-between gap-2">
+                  <div className="min-w-0 flex-1">
+                    <p className="font-semibold text-gray-900 truncate">{b.customer_name}</p>
+                    <p className="font-mono text-[11px] text-gray-500 mt-0.5">{b.booking_number}</p>
+                  </div>
+                  <span
+                    className={`inline-flex px-2 py-1 rounded-full text-xs font-medium whitespace-nowrap ${
+                      statusColors[b.status] ?? "bg-gray-100 text-gray-800"
+                    }`}
+                  >
+                    {b.status.replace(/_/g, " ")}
+                  </span>
+                </div>
+                <div className="mt-2 flex items-center justify-between text-xs text-gray-600">
+                  <span>{formatDate(b.rental_start)} → {formatDate(b.rental_end)}</span>
+                  <span className="font-semibold text-gray-900">€{Number(b.total_amount).toFixed(0)}</span>
+                </div>
+                <p className="text-xs text-gray-500 mt-1 truncate">
+                  {b.booking_items.map((i) => `${i.equipment?.name_en ?? "?"} ×${i.quantity}`).join(", ")}
+                </p>
+              </button>
+
+              {/* Quick action bar */}
+              {tab === "active" && nxt && (
+                <div className="border-t border-gray-100 px-4 py-2.5">
+                  <button
+                    type="button"
+                    onClick={() => updateStatus(b.id, nxt)}
+                    className="w-full inline-flex items-center justify-center gap-1.5 px-3 py-2.5 text-sm font-medium rounded-lg border border-blue-200 bg-blue-50 text-blue-700 hover:bg-blue-100 active:bg-blue-200 min-h-[44px]"
+                  >
+                    <ArrowRight className="h-4 w-4" /> {nxtLabel}
+                  </button>
+                </div>
+              )}
+            </div>
+          );
+        })}
+      </div>
+
+      {/* ─── Desktop Table (≥ md) ─── */}
+      <div className="hidden md:block rounded-lg border border-gray-200 bg-white overflow-hidden">
         <table className="w-full text-sm">
           <thead className="bg-gray-50 border-b border-gray-200 text-xs uppercase tracking-wider text-gray-600">
             <tr>
@@ -902,7 +963,7 @@ export default function BookingsNew() {
       {selected && (
         <div className="fixed inset-0 z-30 bg-black/40" onClick={() => setSelected(null)}>
           <div
-            className="absolute right-0 top-0 h-full w-full max-w-md bg-white shadow-xl overflow-y-auto"
+            className="absolute inset-0 md:inset-auto md:right-0 md:top-0 md:h-full md:w-full md:max-w-md bg-white shadow-xl overflow-y-auto"
             onClick={(e) => e.stopPropagation()}
           >
             <div className="sticky top-0 bg-white border-b px-6 py-4 flex items-center justify-between z-10">
@@ -924,7 +985,7 @@ export default function BookingsNew() {
               <button
                 type="button"
                 onClick={() => printPackingSlip(selected)}
-                className="w-full flex items-center justify-center gap-2 bg-gray-900 hover:bg-gray-800 text-white font-semibold py-2.5 rounded-lg transition-colors text-sm"
+                className="w-full flex items-center justify-center gap-2 bg-gray-900 hover:bg-gray-800 text-white font-semibold py-3 md:py-2.5 rounded-lg transition-colors text-sm min-h-[44px]"
               >
                 <Printer className="h-4 w-4" /> Print Packing Slip
               </button>
@@ -937,7 +998,7 @@ export default function BookingsNew() {
                     <button
                       type="button"
                       onClick={() => updateStatus(selected.id, "delivered", "Marked as delivered")}
-                      className="w-full flex items-center justify-center gap-2 bg-green-600 hover:bg-green-700 text-white font-semibold py-3 rounded-lg transition-colors"
+                      className="w-full flex items-center justify-center gap-2 bg-green-600 hover:bg-green-700 text-white font-semibold py-3 rounded-lg transition-colors min-h-[44px]"
                     >
                       <Truck className="h-4 w-4" /> Mark Delivered
                     </button>
@@ -947,7 +1008,7 @@ export default function BookingsNew() {
                     <button
                       type="button"
                       onClick={() => updateStatus(selected.id, "completed", "Marked as completed")}
-                      className="w-full flex items-center justify-center gap-2 bg-blue-600 hover:bg-blue-700 text-white font-semibold py-3 rounded-lg transition-colors"
+                      className="w-full flex items-center justify-center gap-2 bg-blue-600 hover:bg-blue-700 text-white font-semibold py-3 rounded-lg transition-colors min-h-[44px]"
                     >
                       <CheckCircle2 className="h-4 w-4" /> Mark Completed
                     </button>
@@ -958,7 +1019,7 @@ export default function BookingsNew() {
                     <button
                       type="button"
                       onClick={() => updateStatus(selected.id, "confirmed", "Booking confirmed")}
-                      className="w-full flex items-center justify-center gap-2 bg-white hover:bg-gray-50 text-blue-700 border border-blue-200 font-semibold py-2.5 rounded-lg transition-colors"
+                      className="w-full flex items-center justify-center gap-2 bg-white hover:bg-gray-50 text-blue-700 border border-blue-200 font-semibold py-3 md:py-2.5 rounded-lg transition-colors min-h-[44px]"
                     >
                       <Check className="h-4 w-4" /> Just Confirm (no delivery yet)
                     </button>
@@ -969,7 +1030,7 @@ export default function BookingsNew() {
                     <button
                       type="button"
                       onClick={() => setArchiveConfirm(selected)}
-                      className="w-full flex items-center justify-center gap-2 bg-gray-100 hover:bg-gray-200 text-gray-800 font-semibold py-2.5 rounded-lg transition-colors"
+                      className="w-full flex items-center justify-center gap-2 bg-gray-100 hover:bg-gray-200 text-gray-800 font-semibold py-3 md:py-2.5 rounded-lg transition-colors min-h-[44px]"
                     >
                       <Archive className="h-4 w-4" /> Archive Booking
                     </button>
@@ -980,7 +1041,7 @@ export default function BookingsNew() {
                     <button
                       type="button"
                       onClick={() => setCancelConfirm(selected)}
-                      className="w-full flex items-center justify-center gap-2 bg-white hover:bg-red-50 text-red-600 border border-red-200 font-semibold py-2.5 rounded-lg transition-colors"
+                      className="w-full flex items-center justify-center gap-2 bg-white hover:bg-red-50 text-red-600 border border-red-200 font-semibold py-3 md:py-2.5 rounded-lg transition-colors min-h-[44px]"
                     >
                       <XIcon className="h-4 w-4" /> Cancel Booking
                     </button>
@@ -992,7 +1053,7 @@ export default function BookingsNew() {
                 <button
                   type="button"
                   onClick={() => setArchived(selected.id, false)}
-                  className="w-full flex items-center justify-center gap-2 bg-blue-600 hover:bg-blue-700 text-white font-semibold py-3 rounded-lg transition-colors"
+                  className="w-full flex items-center justify-center gap-2 bg-blue-600 hover:bg-blue-700 text-white font-semibold py-3 rounded-lg transition-colors min-h-[44px]"
                 >
                   <ArchiveRestore className="h-4 w-4" /> Restore Booking
                 </button>
