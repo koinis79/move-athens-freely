@@ -25,7 +25,7 @@ const sections = [
       },
       {
         q: "What are your prices?",
-        a: "Prices are per rental period, not per day. Manual wheelchairs and rollators start from €49 (1–3 days), mobility scooters from €120, and power wheelchairs from €150. Longer rentals cost less per day — see the Equipment page for full pricing.",
+        a: "Prices are per rental period, not per day. Manual and transit wheelchairs start from €49 (1–3 days), lightweight folding wheelchairs from €79, mobility scooters from €120, and power wheelchairs and foldable travel scooters from €150. Rollators also start from €49. Longer rental periods offer significantly lower rates — see the Equipment page for the full tier pricing.",
       },
       {
         q: "Do I need to pay a deposit?",
@@ -92,7 +92,7 @@ const sections = [
     items: [
       {
         q: "Is Athens wheelchair accessible?",
-        a: "Athens has made significant improvements in recent years. The Acropolis has ramps and an elevator, the metro system is accessible, and many museums are fully adapted. Visit our Accessible Athens guide for detailed local information.",
+        a: "Athens has made significant improvements in recent years. The Acropolis has a wheelchair lift on its north slope, most metro stations on Lines 2 and 3 have elevators, and many museums are fully adapted. Visit our Accessible Athens guide for detailed local information.",
       },
       {
         q: "Can you help me plan an accessible trip?",
