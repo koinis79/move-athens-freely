@@ -5,7 +5,7 @@ const SUPABASE_URL = Deno.env.get("SUPABASE_URL")!;
 const SUPABASE_SERVICE_ROLE_KEY = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
 const RESEND_API_KEY = Deno.env.get("RESEND_API_KEY")!;
 const INTERNAL_API_KEY = Deno.env.get("INTERNAL_API_KEY")!;
-const GOOGLE_REVIEW_URL = "https://g.page/r/CRIC4z0HieHaEBM/review";
+const GOOGLE_REVIEW_URL = "https://movability.gr/review";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -133,7 +133,8 @@ Deno.serve(async (req: Request) => {
       "Content-Type": "application/json",
     },
     body: JSON.stringify({
-      from: "Movability <noreply@movability.gr>",
+      from: "Vasilis from Movability <hello@movability.gr>",
+      reply_to: "info@movability.gr",
       to: [booking.customer_email],
       subject: `⭐ How was your Movability experience, ${firstName}?`,
       html: emailHtml,

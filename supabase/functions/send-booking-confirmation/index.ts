@@ -255,7 +255,8 @@ Deno.serve(async (req) => {
         "Content-Type": "application/json",
       },
       body: JSON.stringify({
-        from: "Movability Bookings <noreply@movability.gr>",
+        from: "Movability <hello@movability.gr>",
+        reply_to: "info@movability.gr",
         to: [b.customer_email],
         subject: `Booking Confirmed – ${b.booking_number} | Movability`,
         html: buildCustomerHtml(b),

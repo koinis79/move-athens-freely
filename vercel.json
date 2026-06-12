@@ -1,4 +1,7 @@
 {
+  "redirects": [
+    { "source": "/review", "destination": "https://g.page/r/CRIC4z0HieHaEBM/review", "permanent": false }
+  ],
   "rewrites": [
     { "source": "/(.*)", "destination": "/" }
   ]
