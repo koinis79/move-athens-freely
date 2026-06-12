@@ -202,7 +202,7 @@ export default function BookingsNew() {
               "Content-Type": "application/json",
               "Authorization": `Bearer ${internalKey}`,
             },
-            body: JSON.stringify({ booking_number: prev.booking_number }),
+            body: JSON.stringify({ booking_id: prev.id }),
           }
         )
           .then(async (res) => {
