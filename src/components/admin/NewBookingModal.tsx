@@ -1,8 +1,8 @@
-import { useState, useMemo } from "react";
-import { format, addDays } from "date-fns";
+import { useState, useEffect, useMemo } from "react";
+import { format, addDays, differenceInDays } from "date-fns";
 import {
-  Search, User, UserPlus, Check, ChevronRight, ChevronLeft,
-  Package, CalendarIcon, CreditCard, Minus, Plus, X,
+  User, Check, ChevronRight, ChevronLeft,
+  Package, CalendarIcon, CreditCard, Minus, Plus, MapPin, Loader2,
 } from "lucide-react";
 import {
   Dialog, DialogContent, DialogHeader, DialogTitle,
@@ -13,7 +13,6 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
-import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import {
   Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
 } from "@/components/ui/select";
@@ -22,34 +21,10 @@ import {
 } from "@/components/ui/popover";
 import { Calendar } from "@/components/ui/calendar";
 import { cn } from "@/lib/utils";
-import { customers, getCustomerStats, getFlag, type Customer } from "@/data/adminCustomersMockData";
-import { inventoryItems, type InventoryItem } from "@/data/adminInventoryMockData";
 import { toast } from "@/hooks/use-toast";
+import { supabase } from "@/integrations/supabase/client";
 
-const DELIVERY_FEE = 15;
-
-const COUNTRY_CODES = [
-  { code: "+1", label: "US +1" },
-  { code: "+44", label: "UK +44" },
-  { code: "+49", label: "DE +49" },
-  { code: "+33", label: "FR +33" },
-  { code: "+39", label: "IT +39" },
-  { code: "+34", label: "ES +34" },
-  { code: "+81", label: "JP +81" },
-  { code: "+86", label: "CN +86" },
-  { code: "+61", label: "AU +61" },
-  { code: "+353", label: "IE +353" },
-  { code: "+46", label: "SE +46" },
-  { code: "+48", label: "PL +48" },
-  { code: "+45", label: "DK +45" },
-  { code: "+30", label: "GR +30" },
-];
-
-const NATIONALITIES = [
-  "American", "Australian", "British", "Chinese", "Danish", "Dutch",
-  "French", "German", "Greek", "Irish", "Italian", "Japanese",
-  "Polish", "Spanish", "Swedish", "Other",
-];
+/* ── Static helpers ─────────────────────────────────────── */
 
 const TIME_SLOTS = [
   { value: "morning", label: "Morning (08:00 – 12:00)" },
@@ -57,7 +32,36 @@ const TIME_SLOTS = [
   { value: "evening", label: "Evening (17:00 – 21:00)" },
 ];
 
-const CATEGORIES = ["All", "Wheelchairs", "Scooters", "Rollators", "Accessories"];
+/** Pick the correct price tier for a given number of rental days */
+function tierPrice(eq: EquipmentRow, days: number): number {
+  if (days <= 3) return eq.price_tier1;
+  if (days <= 7) return eq.price_tier2;
+  if (days <= 14) return eq.price_tier3;
+  return eq.price_tier4;
+}
+
+/* ── Types ──────────────────────────────────────────────── */
+
+interface EquipmentRow {
+  id: string;
+  name_en: string;
+  slug: string;
+  is_active: boolean;
+  price_tier1: number;
+  price_tier2: number;
+  price_tier3: number;
+  price_tier4: number;
+  quantity_total: number;
+  equipment_categories: { name_en: string } | null;
+}
+
+interface DeliveryZoneRow {
+  id: string;
+  name_en: string;
+  slug: string;
+  delivery_fee: number;
+  is_active: boolean;
+}
 
 interface Props {
   open: boolean;
@@ -65,106 +69,200 @@ interface Props {
   defaultDate?: Date;
 }
 
+/* ── Component ──────────────────────────────────────────── */
+
 const NewBookingModal = ({ open, onOpenChange, defaultDate }: Props) => {
   const [step, setStep] = useState(1);
+  const [submitting, setSubmitting] = useState(false);
+
+  // Data loaded from Supabase
+  const [equipmentList, setEquipmentList] = useState<EquipmentRow[]>([]);
+  const [deliveryZones, setDeliveryZones] = useState<DeliveryZoneRow[]>([]);
+  const [dataLoading, setDataLoading] = useState(false);
 
   // Step 1 — Customer
-  const [isNewCustomer, setIsNewCustomer] = useState(false);
-  const [customerSearch, setCustomerSearch] = useState("");
-  const [selectedCustomer, setSelectedCustomer] = useState<Customer | null>(null);
-  const [newCustomer, setNewCustomer] = useState({
-    firstName: "", lastName: "", email: "", countryCode: "+44", phone: "", nationality: "British",
-  });
+  const [customerName, setCustomerName] = useState("");
+  const [customerEmail, setCustomerEmail] = useState("");
+  const [customerPhone, setCustomerPhone] = useState("");
 
-  // Step 2 — Equipment
-  const [equipCategory, setEquipCategory] = useState("All");
-  const [equipSearch, setEquipSearch] = useState("");
-  const [selectedEquipment, setSelectedEquipment] = useState<InventoryItem | null>(null);
+  // Step 2 — Equipment & Dates
+  const [selectedEquipmentId, setSelectedEquipmentId] = useState<string>("");
   const [quantity, setQuantity] = useState(1);
-
-  // Step 3 — Rental
   const tomorrow = useMemo(() => addDays(new Date(), 1), []);
   const [startDate, setStartDate] = useState<Date>(defaultDate ?? tomorrow);
   const [endDate, setEndDate] = useState<Date>(addDays(defaultDate ?? tomorrow, 3));
+  const [deliveryZoneId, setDeliveryZoneId] = useState<string>("");
   const [deliveryAddress, setDeliveryAddress] = useState("");
   const [deliveryTime, setDeliveryTime] = useState("morning");
-  const [specialInstructions, setSpecialInstructions] = useState("");
+  const [deliveryNotes, setDeliveryNotes] = useState("");
 
-  // Step 4 — Summary
-  const [paymentMethod, setPaymentMethod] = useState("cash");
+  // Step 3 — Summary
   const [internalNotes, setInternalNotes] = useState("");
 
-  // Computed
+  // Load data when dialog opens
+  useEffect(() => {
+    if (!open) return;
+    let cancelled = false;
+    async function load() {
+      setDataLoading(true);
+      const [eqRes, dzRes] = await Promise.all([
+        supabase
+          .from("equipment")
+          .select("id, name_en, slug, is_active, price_tier1, price_tier2, price_tier3, price_tier4, quantity_total, equipment_categories(name_en)")
+          .eq("is_active", true)
+          .order("name_en"),
+        supabase
+          .from("delivery_zones")
+          .select("id, name_en, slug, delivery_fee, is_active")
+          .eq("is_active", true)
+          .order("delivery_fee"),
+      ]);
+      if (cancelled) return;
+      setEquipmentList((eqRes.data as EquipmentRow[]) ?? []);
+      setDeliveryZones((dzRes.data as DeliveryZoneRow[]) ?? []);
+      setDataLoading(false);
+    }
+    load();
+    return () => { cancelled = true; };
+  }, [open]);
+
+  // Computed values
+  const selectedEquipment = equipmentList.find((e) => e.id === selectedEquipmentId) ?? null;
+  const selectedZone = deliveryZones.find((z) => z.id === deliveryZoneId) ?? null;
+
   const duration = useMemo(() => {
-    const ms = endDate.getTime() - startDate.getTime();
-    return Math.max(1, Math.round(ms / 86400000));
+    return Math.max(1, differenceInDays(endDate, startDate));
   }, [startDate, endDate]);
 
-  const subtotal = selectedEquipment ? selectedEquipment.dailyRate * duration * quantity : 0;
-  const total = subtotal + DELIVERY_FEE;
+  const unitPrice = selectedEquipment ? tierPrice(selectedEquipment, duration) : 0;
+  const subtotal = unitPrice * quantity;
+  const deliveryFee = selectedZone?.delivery_fee ?? 0;
+  const total = subtotal + deliveryFee;
 
-  // Search results
-  const customerResults = useMemo(() => {
-    if (!customerSearch || customerSearch.length < 2) return [];
-    const q = customerSearch.toLowerCase();
-    return customers.filter(
-      (c) =>
-        c.name.toLowerCase().includes(q) ||
-        c.email.toLowerCase().includes(q) ||
-        c.phone.includes(q)
-    ).slice(0, 5);
-  }, [customerSearch]);
-
-  const availableEquipment = useMemo(() => {
-    let list = inventoryItems.filter((i) => i.status === "available");
-    if (equipCategory !== "All") list = list.filter((i) => i.category === equipCategory);
-    if (equipSearch) {
-      const q = equipSearch.toLowerCase();
-      list = list.filter((i) => i.name.toLowerCase().includes(q));
-    }
-    return list;
-  }, [equipCategory, equipSearch]);
+  const tierLabel = duration <= 3 ? "1–3 days" : duration <= 7 ? "4–7 days" : duration <= 14 ? "8–14 days" : "15–30 days";
 
   // Validation
-  const step1Valid = isNewCustomer
-    ? !!(newCustomer.firstName && newCustomer.lastName && newCustomer.email)
-    : !!selectedCustomer;
-  const step2Valid = !!selectedEquipment;
-  const step3Valid = !!deliveryAddress && startDate < endDate;
-
+  const step1Valid = !!(customerName.trim() && customerEmail.trim());
+  const step2Valid = !!selectedEquipment && !!deliveryZoneId && startDate < endDate;
   const canProceed = (s: number) => {
     if (s === 1) return step1Valid;
     if (s === 2) return step2Valid;
-    if (s === 3) return step3Valid;
     return true;
   };
 
   const reset = () => {
     setStep(1);
-    setIsNewCustomer(false);
-    setCustomerSearch("");
-    setSelectedCustomer(null);
-    setNewCustomer({ firstName: "", lastName: "", email: "", countryCode: "+44", phone: "", nationality: "British" });
-    setEquipCategory("All");
-    setEquipSearch("");
-    setSelectedEquipment(null);
+    setSubmitting(false);
+    setCustomerName("");
+    setCustomerEmail("");
+    setCustomerPhone("");
+    setSelectedEquipmentId("");
     setQuantity(1);
     setStartDate(defaultDate ?? tomorrow);
     setEndDate(addDays(defaultDate ?? tomorrow, 3));
+    setDeliveryZoneId("");
     setDeliveryAddress("");
     setDeliveryTime("morning");
-    setSpecialInstructions("");
-    setPaymentMethod("cash");
+    setDeliveryNotes("");
     setInternalNotes("");
   };
 
-  const handleCreate = () => {
-    toast({
-      title: "Booking Created",
-      description: `New booking for ${isNewCustomer ? `${newCustomer.firstName} ${newCustomer.lastName}` : selectedCustomer?.name} has been created.`,
-    });
-    reset();
-    onOpenChange(false);
+  const handleCreate = async () => {
+    if (!selectedEquipment || !deliveryZoneId) return;
+    setSubmitting(true);
+    try {
+      const numDays = duration;
+
+      // Build items payload (same structure as Checkout.tsx)
+      const itemsPayload = [
+        {
+          equipment_id: selectedEquipment.id,
+          quantity,
+          num_days: numDays,
+          price_per_day: unitPrice,
+          subtotal: subtotal,
+        },
+      ];
+
+      // Build availability payload — one record per day per equipment
+      const availabilityPayload: { equipment_id: string; date: string; quantity_booked: number }[] = [];
+      for (let d = 0; d < numDays; d++) {
+        availabilityPayload.push({
+          equipment_id: selectedEquipment.id,
+          date: format(addDays(startDate, d), "yyyy-MM-dd"),
+          quantity_booked: quantity,
+        });
+      }
+
+      // 1. Call the server-validated create_booking RPC
+      const { data, error: rpcErr } = await supabase.rpc("create_booking", {
+        p_booking_number: "",
+        p_user_id: null,
+        p_customer_name: customerName.trim(),
+        p_customer_email: customerEmail.trim(),
+        p_customer_phone: customerPhone.trim() || null,
+        p_delivery_zone_id: deliveryZoneId,
+        p_delivery_address: deliveryAddress.trim() || null,
+        p_delivery_time_slot: deliveryTime,
+        p_delivery_notes: deliveryNotes.trim() || null,
+        p_rental_start: format(startDate, "yyyy-MM-dd"),
+        p_rental_end: format(endDate, "yyyy-MM-dd"),
+        p_num_days: numDays,
+        p_subtotal: subtotal,
+        p_delivery_fee: deliveryFee,
+        p_total_amount: total,
+        p_items: itemsPayload,
+        p_availability: availabilityPayload,
+      });
+
+      if (rpcErr || !data || (Array.isArray(data) && data.length === 0)) {
+        throw new Error(rpcErr?.message ?? "Failed to create booking");
+      }
+
+      const row = Array.isArray(data) ? data[0] : data;
+      const bookingId = row?.booking_id;
+      const bookingNumber = row?.booking_number;
+
+      if (!bookingId) throw new Error("No booking_id returned from RPC");
+
+      // 2. Immediately mark as confirmed + paid (manual booking, no Stripe)
+      const notesText = [
+        "Manual booking (admin)",
+        internalNotes.trim() || null,
+      ].filter(Boolean).join(" — ");
+
+      const { error: updateErr } = await supabase
+        .from("bookings")
+        .update({
+          status: "confirmed",
+          payment_status: "paid",
+          internal_notes: notesText,
+        })
+        .eq("id", bookingId);
+
+      if (updateErr) {
+        console.error("Failed to update booking status:", updateErr);
+        // Non-fatal — booking was created, just stuck at pending
+      }
+
+      toast({
+        title: "Booking Created",
+        description: `${bookingNumber ?? "New booking"} for ${customerName.trim()} — confirmed & paid.`,
+      });
+
+      reset();
+      onOpenChange(false);
+    } catch (err: unknown) {
+      const msg = err instanceof Error ? err.message : "Unknown error";
+      console.error("Create booking error:", err);
+      toast({
+        title: "Failed to create booking",
+        description: msg,
+        variant: "destructive",
+      });
+    } finally {
+      setSubmitting(false);
+    }
   };
 
   const handleClose = (v: boolean) => {
@@ -172,16 +270,11 @@ const NewBookingModal = ({ open, onOpenChange, defaultDate }: Props) => {
     onOpenChange(v);
   };
 
-  const customerName = isNewCustomer
-    ? `${newCustomer.firstName} ${newCustomer.lastName}`.trim()
-    : selectedCustomer?.name ?? "";
-
   // ─── Steps ──────────────────────────────────────────────
   const STEPS = [
     { num: 1, label: "Customer", icon: User },
     { num: 2, label: "Equipment", icon: Package },
-    { num: 3, label: "Details", icon: CalendarIcon },
-    { num: 4, label: "Confirm", icon: CreditCard },
+    { num: 3, label: "Confirm", icon: CreditCard },
   ];
 
   return (
@@ -212,7 +305,7 @@ const NewBookingModal = ({ open, onOpenChange, defaultDate }: Props) => {
                   </span>
                 </div>
                 {i < STEPS.length - 1 && (
-                  <div className={cn("h-px w-12 sm:w-20 mx-1 mt-[-14px]", step > s.num ? "bg-primary" : "bg-border")} />
+                  <div className={cn("h-px w-16 sm:w-24 mx-1 mt-[-14px]", step > s.num ? "bg-primary" : "bg-border")} />
                 )}
               </div>
             ))}
@@ -223,316 +316,238 @@ const NewBookingModal = ({ open, onOpenChange, defaultDate }: Props) => {
 
         {/* Body */}
         <div className="px-6 py-4 overflow-y-auto max-h-[calc(90vh-220px)] min-h-[280px]">
+
           {/* ─── Step 1: Customer ─── */}
           {step === 1 && (
             <div className="space-y-4">
-              {/* Toggle */}
-              <div className="flex gap-2">
-                <Button
-                  variant={!isNewCustomer ? "default" : "outline"}
-                  size="sm"
-                  className="text-xs"
-                  onClick={() => { setIsNewCustomer(false); setSelectedCustomer(null); }}
-                >
-                  <Search className="h-3 w-3 mr-1" /> Existing Customer
-                </Button>
-                <Button
-                  variant={isNewCustomer ? "default" : "outline"}
-                  size="sm"
-                  className="text-xs"
-                  onClick={() => { setIsNewCustomer(true); setSelectedCustomer(null); setCustomerSearch(""); }}
-                >
-                  <UserPlus className="h-3 w-3 mr-1" /> New Customer
-                </Button>
+              <div className="grid grid-cols-2 gap-3">
+                <div className="space-y-1.5 col-span-2">
+                  <Label className="text-xs">Full Name *</Label>
+                  <Input
+                    className="h-9 text-sm"
+                    placeholder="e.g. John Smith"
+                    value={customerName}
+                    onChange={(e) => setCustomerName(e.target.value)}
+                  />
+                </div>
+                <div className="space-y-1.5 col-span-2">
+                  <Label className="text-xs">Email *</Label>
+                  <Input
+                    type="email"
+                    className="h-9 text-sm"
+                    placeholder="customer@example.com"
+                    value={customerEmail}
+                    onChange={(e) => setCustomerEmail(e.target.value)}
+                  />
+                </div>
+                <div className="space-y-1.5 col-span-2">
+                  <Label className="text-xs">Phone (optional)</Label>
+                  <Input
+                    className="h-9 text-sm"
+                    placeholder="+44 7700 900000"
+                    value={customerPhone}
+                    onChange={(e) => setCustomerPhone(e.target.value)}
+                  />
+                </div>
               </div>
+            </div>
+          )}
 
-              {!isNewCustomer ? (
-                <div className="space-y-2">
-                  <div className="relative">
-                    <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                    <Input
-                      placeholder="Search by name, email or phone…"
-                      value={customerSearch}
-                      onChange={(e) => { setCustomerSearch(e.target.value); setSelectedCustomer(null); }}
-                      className="pl-9 h-9 text-sm"
-                    />
-                  </div>
-
-                  {/* Search results */}
-                  {customerResults.length > 0 && !selectedCustomer && (
-                    <div className="border border-border rounded-lg divide-y divide-border overflow-hidden">
-                      {customerResults.map((c) => {
-                        const st = getCustomerStats(c.id);
-                        return (
-                          <button
-                            key={c.id}
-                            onClick={() => { setSelectedCustomer(c); setCustomerSearch(c.name); }}
-                            className="w-full text-left px-3 py-2.5 hover:bg-muted/50 transition-colors flex items-center justify-between"
-                          >
-                            <div>
-                              <span className="text-sm font-medium text-foreground">{getFlag(c.countryCode)} {c.name}</span>
-                              <span className="block text-xs text-muted-foreground">{c.email} · {c.phone}</span>
-                            </div>
-                            <Badge variant="secondary" className="text-[10px] h-5">{st.totalBookings} bookings</Badge>
-                          </button>
-                        );
-                      })}
-                    </div>
-                  )}
-
-                  {/* Selected */}
-                  {selectedCustomer && (
-                    <div className="bg-muted/50 rounded-lg p-3 flex items-center justify-between">
-                      <div>
-                        <span className="text-sm font-medium text-foreground">
-                          {getFlag(selectedCustomer.countryCode)} {selectedCustomer.name}
-                        </span>
-                        <span className="block text-xs text-muted-foreground">{selectedCustomer.email}</span>
-                      </div>
-                      <div className="flex items-center gap-2">
-                        <Badge variant="secondary" className="text-[10px]">
-                          {getCustomerStats(selectedCustomer.id).totalBookings} bookings
-                        </Badge>
-                        <Button variant="ghost" size="icon" className="h-6 w-6" onClick={() => { setSelectedCustomer(null); setCustomerSearch(""); }}>
-                          <X className="h-3 w-3" />
-                        </Button>
-                      </div>
-                    </div>
-                  )}
+          {/* ─── Step 2: Equipment & Details ─── */}
+          {step === 2 && (
+            <div className="space-y-4">
+              {dataLoading ? (
+                <div className="flex items-center justify-center py-12">
+                  <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
                 </div>
               ) : (
-                <div className="grid grid-cols-2 gap-3">
+                <>
+                  {/* Equipment selector */}
                   <div className="space-y-1.5">
-                    <Label className="text-xs">First Name *</Label>
-                    <Input className="h-9 text-sm" value={newCustomer.firstName} onChange={(e) => setNewCustomer((p) => ({ ...p, firstName: e.target.value }))} />
-                  </div>
-                  <div className="space-y-1.5">
-                    <Label className="text-xs">Last Name *</Label>
-                    <Input className="h-9 text-sm" value={newCustomer.lastName} onChange={(e) => setNewCustomer((p) => ({ ...p, lastName: e.target.value }))} />
-                  </div>
-                  <div className="space-y-1.5 col-span-2">
-                    <Label className="text-xs">Email *</Label>
-                    <Input type="email" className="h-9 text-sm" value={newCustomer.email} onChange={(e) => setNewCustomer((p) => ({ ...p, email: e.target.value }))} />
-                  </div>
-                  <div className="space-y-1.5 col-span-2">
-                    <Label className="text-xs">Phone</Label>
-                    <div className="flex gap-2">
-                      <Select value={newCustomer.countryCode} onValueChange={(v) => setNewCustomer((p) => ({ ...p, countryCode: v }))}>
-                        <SelectTrigger className="w-[100px] h-9 text-xs">
-                          <SelectValue />
-                        </SelectTrigger>
-                        <SelectContent>
-                          {COUNTRY_CODES.map((cc) => (
-                            <SelectItem key={cc.code} value={cc.code} className="text-xs">{cc.label}</SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
-                      <Input className="h-9 text-sm flex-1" value={newCustomer.phone} onChange={(e) => setNewCustomer((p) => ({ ...p, phone: e.target.value }))} />
-                    </div>
-                  </div>
-                  <div className="space-y-1.5 col-span-2">
-                    <Label className="text-xs">Nationality</Label>
-                    <Select value={newCustomer.nationality} onValueChange={(v) => setNewCustomer((p) => ({ ...p, nationality: v }))}>
-                      <SelectTrigger className="h-9 text-xs">
-                        <SelectValue />
+                    <Label className="text-xs">Equipment *</Label>
+                    <Select value={selectedEquipmentId} onValueChange={setSelectedEquipmentId}>
+                      <SelectTrigger className="h-9 text-sm">
+                        <SelectValue placeholder="Select equipment…" />
                       </SelectTrigger>
                       <SelectContent>
-                        {NATIONALITIES.map((n) => (
-                          <SelectItem key={n} value={n} className="text-xs">{n}</SelectItem>
+                        {equipmentList.map((eq) => (
+                          <SelectItem key={eq.id} value={eq.id} className="text-sm">
+                            {eq.name_en}
+                            <span className="text-muted-foreground ml-1">
+                              — €{eq.price_tier1}
+                            </span>
+                          </SelectItem>
                         ))}
                       </SelectContent>
                     </Select>
                   </div>
-                </div>
-              )}
-            </div>
-          )}
 
-          {/* ─── Step 2: Equipment ─── */}
-          {step === 2 && (
-            <div className="space-y-3">
-              <div className="flex gap-2">
-                <div className="relative flex-1">
-                  <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                  <Input
-                    placeholder="Search equipment…"
-                    value={equipSearch}
-                    onChange={(e) => setEquipSearch(e.target.value)}
-                    className="pl-9 h-9 text-sm"
-                  />
-                </div>
-                <Select value={equipCategory} onValueChange={setEquipCategory}>
-                  <SelectTrigger className="w-[140px] h-9 text-xs">
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {CATEGORIES.map((c) => (
-                      <SelectItem key={c} value={c} className="text-xs">{c}</SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
+                  {/* Quantity */}
+                  {selectedEquipment && (
+                    <div className="flex items-center justify-between bg-muted/40 rounded-lg px-3 py-2">
+                      <div>
+                        <p className="text-sm font-medium text-foreground">{selectedEquipment.name_en}</p>
+                        <p className="text-xs text-muted-foreground">
+                          €{unitPrice} ({tierLabel}) × {quantity}
+                        </p>
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <span className="text-xs text-muted-foreground">Qty:</span>
+                        <Button variant="outline" size="icon" className="h-7 w-7" onClick={() => setQuantity((q) => Math.max(1, q - 1))}>
+                          <Minus className="h-3 w-3" />
+                        </Button>
+                        <span className="text-sm font-semibold w-6 text-center text-foreground">{quantity}</span>
+                        <Button variant="outline" size="icon" className="h-7 w-7" onClick={() => setQuantity((q) => q + 1)}>
+                          <Plus className="h-3 w-3" />
+                        </Button>
+                      </div>
+                    </div>
+                  )}
 
-              <div className="grid grid-cols-2 gap-2 max-h-[250px] overflow-y-auto pr-1">
-                {availableEquipment.map((item) => (
-                  <button
-                    key={item.id}
-                    onClick={() => setSelectedEquipment(item)}
-                    className={cn(
-                      "text-left border rounded-lg p-3 transition-all hover:border-primary/40",
-                      selectedEquipment?.id === item.id
-                        ? "border-primary bg-primary/5 ring-2 ring-primary/20"
-                        : "border-border",
-                    )}
-                  >
-                    <div className="w-full h-14 bg-muted rounded-md flex items-center justify-center mb-2">
-                      <Package className="h-6 w-6 text-muted-foreground/50" />
+                  {/* Dates */}
+                  <div className="grid grid-cols-2 gap-3">
+                    <div className="space-y-1.5">
+                      <Label className="text-xs">Start Date *</Label>
+                      <Popover>
+                        <PopoverTrigger asChild>
+                          <Button variant="outline" className="w-full justify-start text-left h-9 text-sm font-normal">
+                            <CalendarIcon className="h-3.5 w-3.5 mr-2 text-muted-foreground" />
+                            {format(startDate, "dd MMM yyyy")}
+                          </Button>
+                        </PopoverTrigger>
+                        <PopoverContent className="w-auto p-0" align="start">
+                          <Calendar
+                            mode="single"
+                            selected={startDate}
+                            onSelect={(d) => {
+                              if (d) {
+                                setStartDate(d);
+                                if (d >= endDate) setEndDate(addDays(d, 1));
+                              }
+                            }}
+                            disabled={(d) => d < new Date()}
+                            className="p-3 pointer-events-auto"
+                          />
+                        </PopoverContent>
+                      </Popover>
                     </div>
-                    <p className="text-xs font-medium text-foreground truncate">{item.name}</p>
-                    <div className="flex items-center justify-between mt-1">
-                      <Badge variant="outline" className="text-[9px] h-4 px-1">{item.category}</Badge>
-                      <span className="text-xs font-semibold text-foreground">€{item.dailyRate}/day</span>
+                    <div className="space-y-1.5">
+                      <Label className="text-xs">End Date *</Label>
+                      <Popover>
+                        <PopoverTrigger asChild>
+                          <Button variant="outline" className="w-full justify-start text-left h-9 text-sm font-normal">
+                            <CalendarIcon className="h-3.5 w-3.5 mr-2 text-muted-foreground" />
+                            {format(endDate, "dd MMM yyyy")}
+                          </Button>
+                        </PopoverTrigger>
+                        <PopoverContent className="w-auto p-0" align="start">
+                          <Calendar
+                            mode="single"
+                            selected={endDate}
+                            onSelect={(d) => d && setEndDate(d)}
+                            disabled={(d) => d <= startDate}
+                            className="p-3 pointer-events-auto"
+                          />
+                        </PopoverContent>
+                      </Popover>
                     </div>
-                  </button>
-                ))}
-                {availableEquipment.length === 0 && (
-                  <div className="col-span-2 py-8 text-center text-sm text-muted-foreground">
-                    No available equipment matches your filters.
                   </div>
-                )}
-              </div>
 
-              {selectedEquipment && (
-                <>
-                  <Separator />
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <p className="text-sm font-medium text-foreground">{selectedEquipment.name}</p>
-                      <p className="text-xs text-muted-foreground">€{selectedEquipment.dailyRate}/day</p>
-                    </div>
-                    <div className="flex items-center gap-2">
-                      <span className="text-xs text-muted-foreground">Qty:</span>
-                      <Button variant="outline" size="icon" className="h-7 w-7" onClick={() => setQuantity((q) => Math.max(1, q - 1))}>
-                        <Minus className="h-3 w-3" />
-                      </Button>
-                      <span className="text-sm font-semibold w-6 text-center text-foreground">{quantity}</span>
-                      <Button variant="outline" size="icon" className="h-7 w-7" onClick={() => setQuantity((q) => q + 1)}>
-                        <Plus className="h-3 w-3" />
-                      </Button>
-                    </div>
+                  <div className="bg-muted/50 rounded-lg px-3 py-2 text-center">
+                    <span className="text-sm font-semibold text-foreground">{duration} day{duration > 1 ? "s" : ""}</span>
+                    <span className="text-xs text-muted-foreground ml-1">· {tierLabel} pricing tier</span>
+                  </div>
+
+                  {/* Delivery zone */}
+                  <div className="space-y-1.5">
+                    <Label className="text-xs">Delivery Zone *</Label>
+                    <Select value={deliveryZoneId} onValueChange={setDeliveryZoneId}>
+                      <SelectTrigger className="h-9 text-sm">
+                        <SelectValue placeholder="Select delivery zone…" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {deliveryZones.map((zone) => (
+                          <SelectItem key={zone.id} value={zone.id} className="text-sm">
+                            {zone.name_en}
+                            <span className="text-muted-foreground ml-1">
+                              {zone.delivery_fee > 0 ? `— €${zone.delivery_fee}` : "— Free"}
+                            </span>
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+
+                  {/* Address */}
+                  <div className="space-y-1.5">
+                    <Label className="text-xs">Delivery Address</Label>
+                    <Input
+                      placeholder="Hotel name and full address…"
+                      className="h-9 text-sm"
+                      value={deliveryAddress}
+                      onChange={(e) => setDeliveryAddress(e.target.value)}
+                    />
+                  </div>
+
+                  {/* Time slot */}
+                  <div className="space-y-1.5">
+                    <Label className="text-xs">Preferred Delivery Time</Label>
+                    <Select value={deliveryTime} onValueChange={setDeliveryTime}>
+                      <SelectTrigger className="h-9 text-xs">
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {TIME_SLOTS.map((t) => (
+                          <SelectItem key={t.value} value={t.value} className="text-xs">{t.label}</SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+
+                  {/* Delivery notes */}
+                  <div className="space-y-1.5">
+                    <Label className="text-xs">Delivery Notes</Label>
+                    <Textarea
+                      placeholder="Ground floor, no steps, leave with reception…"
+                      value={deliveryNotes}
+                      onChange={(e) => setDeliveryNotes(e.target.value)}
+                      className="text-sm min-h-[60px]"
+                    />
                   </div>
                 </>
               )}
             </div>
           )}
 
-          {/* ─── Step 3: Rental Details ─── */}
+          {/* ─── Step 3: Summary & Confirm ─── */}
           {step === 3 && (
             <div className="space-y-4">
-              <div className="grid grid-cols-2 gap-3">
-                <div className="space-y-1.5">
-                  <Label className="text-xs">Start Date *</Label>
-                  <Popover>
-                    <PopoverTrigger asChild>
-                      <Button variant="outline" className="w-full justify-start text-left h-9 text-sm font-normal">
-                        <CalendarIcon className="h-3.5 w-3.5 mr-2 text-muted-foreground" />
-                        {format(startDate, "dd MMM yyyy")}
-                      </Button>
-                    </PopoverTrigger>
-                    <PopoverContent className="w-auto p-0" align="start">
-                      <Calendar
-                        mode="single"
-                        selected={startDate}
-                        onSelect={(d) => {
-                          if (d) {
-                            setStartDate(d);
-                            if (d >= endDate) setEndDate(addDays(d, 1));
-                          }
-                        }}
-                        disabled={(d) => d < new Date()}
-                        className="p-3 pointer-events-auto"
-                      />
-                    </PopoverContent>
-                  </Popover>
-                </div>
-                <div className="space-y-1.5">
-                  <Label className="text-xs">End Date *</Label>
-                  <Popover>
-                    <PopoverTrigger asChild>
-                      <Button variant="outline" className="w-full justify-start text-left h-9 text-sm font-normal">
-                        <CalendarIcon className="h-3.5 w-3.5 mr-2 text-muted-foreground" />
-                        {format(endDate, "dd MMM yyyy")}
-                      </Button>
-                    </PopoverTrigger>
-                    <PopoverContent className="w-auto p-0" align="start">
-                      <Calendar
-                        mode="single"
-                        selected={endDate}
-                        onSelect={(d) => d && setEndDate(d)}
-                        disabled={(d) => d <= startDate}
-                        className="p-3 pointer-events-auto"
-                      />
-                    </PopoverContent>
-                  </Popover>
-                </div>
-              </div>
-
-              <div className="bg-muted/50 rounded-lg px-3 py-2 text-center">
-                <span className="text-sm font-semibold text-foreground">{duration} day{duration > 1 ? "s" : ""}</span>
-                <span className="text-xs text-muted-foreground ml-1">rental period</span>
-              </div>
-
-              <div className="space-y-1.5">
-                <Label className="text-xs">Delivery Address *</Label>
-                <Input
-                  placeholder="Hotel name and full address…"
-                  className="h-9 text-sm"
-                  value={deliveryAddress}
-                  onChange={(e) => setDeliveryAddress(e.target.value)}
-                />
-              </div>
-
-              <div className="space-y-1.5">
-                <Label className="text-xs">Preferred Delivery Time</Label>
-                <Select value={deliveryTime} onValueChange={setDeliveryTime}>
-                  <SelectTrigger className="h-9 text-xs">
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {TIME_SLOTS.map((t) => (
-                      <SelectItem key={t.value} value={t.value} className="text-xs">{t.label}</SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
-
-              <div className="space-y-1.5">
-                <Label className="text-xs">Special Instructions</Label>
-                <Textarea
-                  placeholder="Ground floor, no steps, leave with reception…"
-                  value={specialInstructions}
-                  onChange={(e) => setSpecialInstructions(e.target.value)}
-                  className="text-sm min-h-[60px]"
-                />
-              </div>
-            </div>
-          )}
-
-          {/* ─── Step 4: Summary ─── */}
-          {step === 4 && (
-            <div className="space-y-4">
-              {/* Order summary */}
               <div className="bg-muted/40 rounded-xl p-4 space-y-3">
                 <h4 className="text-xs font-semibold text-muted-foreground uppercase tracking-wide">Order Summary</h4>
 
                 <div className="flex items-center justify-between text-sm">
                   <span className="text-muted-foreground">Customer</span>
-                  <span className="font-medium text-foreground">{customerName}</span>
+                  <span className="font-medium text-foreground">{customerName.trim()}</span>
                 </div>
+                {customerEmail && (
+                  <div className="flex items-center justify-between text-sm">
+                    <span className="text-muted-foreground">Email</span>
+                    <span className="font-medium text-foreground text-xs">{customerEmail.trim()}</span>
+                  </div>
+                )}
+                {customerPhone && (
+                  <div className="flex items-center justify-between text-sm">
+                    <span className="text-muted-foreground">Phone</span>
+                    <span className="font-medium text-foreground text-xs">{customerPhone.trim()}</span>
+                  </div>
+                )}
+
+                <Separator />
+
                 <div className="flex items-center justify-between text-sm">
                   <span className="text-muted-foreground">Equipment</span>
                   <span className="font-medium text-foreground">
-                    {selectedEquipment?.name}{quantity > 1 ? ` ×${quantity}` : ""}
+                    {selectedEquipment?.name_en}{quantity > 1 ? ` ×${quantity}` : ""}
                   </span>
                 </div>
                 <div className="flex items-center justify-between text-sm">
@@ -542,21 +557,27 @@ const NewBookingModal = ({ open, onOpenChange, defaultDate }: Props) => {
                   </span>
                 </div>
                 <div className="flex items-center justify-between text-sm">
-                  <span className="text-muted-foreground">Delivery</span>
-                  <span className="font-medium text-foreground truncate max-w-[200px]">{deliveryAddress}</span>
+                  <span className="text-muted-foreground">Delivery Zone</span>
+                  <span className="font-medium text-foreground">{selectedZone?.name_en ?? "—"}</span>
                 </div>
+                {deliveryAddress && (
+                  <div className="flex items-center justify-between text-sm">
+                    <span className="text-muted-foreground">Address</span>
+                    <span className="font-medium text-foreground truncate max-w-[200px]">{deliveryAddress}</span>
+                  </div>
+                )}
 
                 <Separator />
 
                 <div className="flex items-center justify-between text-sm">
                   <span className="text-muted-foreground">
-                    €{selectedEquipment?.dailyRate} × {duration} days{quantity > 1 ? ` × ${quantity}` : ""}
+                    €{unitPrice} ({tierLabel}){quantity > 1 ? ` × ${quantity}` : ""}
                   </span>
                   <span className="text-foreground">€{subtotal}</span>
                 </div>
                 <div className="flex items-center justify-between text-sm">
                   <span className="text-muted-foreground">Delivery Fee</span>
-                  <span className="text-foreground">€{DELIVERY_FEE}</span>
+                  <span className="text-foreground">{deliveryFee > 0 ? `€${deliveryFee}` : "Free"}</span>
                 </div>
                 <Separator />
                 <div className="flex items-center justify-between text-base font-bold">
@@ -565,40 +586,20 @@ const NewBookingModal = ({ open, onOpenChange, defaultDate }: Props) => {
                 </div>
               </div>
 
-              {/* Payment method */}
-              <div className="space-y-2">
-                <Label className="text-xs">Payment Method</Label>
-                <RadioGroup value={paymentMethod} onValueChange={setPaymentMethod} className="space-y-1.5">
-                  {[
-                    { value: "cash", label: "Cash on Delivery" },
-                    { value: "card", label: "Card on Delivery" },
-                    { value: "online", label: "Online Payment" },
-                  ].map((pm) => (
-                    <label
-                      key={pm.value}
-                      className={cn(
-                        "flex items-center gap-3 px-3 py-2.5 rounded-lg border cursor-pointer transition-colors",
-                        paymentMethod === pm.value
-                          ? "border-primary bg-primary/5"
-                          : "border-border hover:bg-muted/30",
-                      )}
-                    >
-                      <RadioGroupItem value={pm.value} />
-                      <span className="text-sm text-foreground">{pm.label}</span>
-                    </label>
-                  ))}
-                </RadioGroup>
-              </div>
-
               {/* Internal notes */}
               <div className="space-y-1.5">
                 <Label className="text-xs text-muted-foreground">Internal Notes (admin only)</Label>
                 <Textarea
-                  placeholder="Notes visible only to the team…"
+                  placeholder="e.g. Phone order, paid cash, repeat customer…"
                   value={internalNotes}
                   onChange={(e) => setInternalNotes(e.target.value)}
                   className="text-sm min-h-[50px]"
                 />
+              </div>
+
+              <div className="bg-blue-50 border border-blue-200 rounded-lg p-3 text-xs text-blue-700">
+                <strong>Note:</strong> This booking will be created as <strong>Confirmed + Paid</strong> (manual/phone order).
+                It will appear in the bookings list immediately and follow the normal status workflow.
               </div>
             </div>
           )}
@@ -612,6 +613,7 @@ const NewBookingModal = ({ open, onOpenChange, defaultDate }: Props) => {
             variant="outline"
             size="sm"
             className="text-xs"
+            disabled={submitting}
             onClick={() => (step === 1 ? handleClose(false) : setStep((s) => s - 1))}
           >
             {step === 1 ? (
@@ -621,7 +623,7 @@ const NewBookingModal = ({ open, onOpenChange, defaultDate }: Props) => {
             )}
           </Button>
 
-          {step < 4 ? (
+          {step < 3 ? (
             <Button
               size="sm"
               className="text-xs"
@@ -634,9 +636,14 @@ const NewBookingModal = ({ open, onOpenChange, defaultDate }: Props) => {
             <Button
               size="sm"
               className="text-xs bg-primary text-primary-foreground hover:bg-primary/90"
+              disabled={submitting}
               onClick={handleCreate}
             >
-              Create Booking
+              {submitting ? (
+                <><Loader2 className="h-3 w-3 mr-1 animate-spin" /> Creating…</>
+              ) : (
+                "Create Booking"
+              )}
             </Button>
           )}
         </div>
