@@ -50,7 +50,7 @@ const sections = [
       },
       {
         q: "Do you deliver to the airport?",
-        a: "Yes, we deliver and pick up at Athens International Airport (Eleftherios Venizelos) for a €30 delivery fee.",
+        a: "Yes, we deliver and pick up at Athens International Airport (Eleftherios Venizelos) for a €50 delivery fee.",
       },
       {
         q: "Do you deliver to cruise ports?",
