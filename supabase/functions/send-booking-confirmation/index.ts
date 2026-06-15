@@ -189,8 +189,9 @@ function buildAdminHtml(b: Booking): string {
 }
 
 Deno.serve(async (req) => {
-  const authHeader = req.headers.get("Authorization");
-  if (authHeader !== `Bearer ${Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")}`) {
+  const INTERNAL_API_KEY = Deno.env.get("INTERNAL_API_KEY")!;
+  const token = (req.headers.get("Authorization") ?? "").replace(/^Bearer\s+/i, "");
+  if (!token || token !== INTERNAL_API_KEY) {
     return new Response(JSON.stringify({ error: "Unauthorized" }), {
       status: 401,
       headers: { "Content-Type": "application/json" },
