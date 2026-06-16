@@ -283,7 +283,11 @@ const BookingPanel = ({ item }: Props) => {
                 {dateRangeLabel()}
               </Button>
             </PopoverTrigger>
-            <PopoverContent className="w-auto p-0" align="start">
+            <PopoverContent
+              className="w-auto p-0 z-50 bg-background border border-border shadow-lg"
+              align="start"
+              sideOffset={8}
+            >
               <Calendar
                 mode="range"
                 selected={dateRange}
@@ -294,7 +298,7 @@ const BookingPanel = ({ item }: Props) => {
                 disabled={(d) => d < today}
                 numberOfMonths={1}
                 initialFocus
-                className="p-3 pointer-events-auto"
+                className="p-3 pointer-events-auto max-w-[calc(100vw-2rem)]"
               />
             </PopoverContent>
           </Popover>
