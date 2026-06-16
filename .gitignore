@@ -27,3 +27,6 @@ dist-ssr
 .env
 .env.*
 !.env.example
+
+# Browser "Save Page As" dumps (e.g. Page Name_files/)
+*_files/
