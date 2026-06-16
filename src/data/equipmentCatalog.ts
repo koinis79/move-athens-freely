@@ -69,6 +69,14 @@ export const equipmentCatalog: Record<string, EquipmentMeta> = {
     price: 49,
     image: "https://lmgpuqgwkiapgpdsxvmb.supabase.co/storage/v1/object/public/assets/rollator-walker-piraeus-harbor.png",
   },
+  "knee-walker": {
+    slug: "knee-walker",
+    categorySlug: "walking-aids",
+    name: "Knee Walker (Knee Scooter)",
+    shortDesc: "A comfortable alternative to crutches for foot and ankle injury recovery.",
+    price: 49,
+    image: "https://lmgpuqgwkiapgpdsxvmb.supabase.co/storage/v1/object/public/assets/knee-walker-strolly.jpg",
+  },
 };
 
 export function getEquipmentMeta(slug: string): EquipmentMeta | null {
