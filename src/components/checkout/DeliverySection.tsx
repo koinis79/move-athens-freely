@@ -75,7 +75,7 @@ interface ZoneInfo {
 
 const ZONES: ZoneInfo[] = [
   { slug: "store-pickup", label: "Store Pickup", fee: 0 },
-  { slug: "athens-city", label: "Athens City", fee: 10 },
+  { slug: "athens-city", label: "Athens City", fee: 20 },
   { slug: "athens-airport", label: "Athens Airport", fee: 50 },
   { slug: "piraeus-port", label: "Piraeus Cruise Terminal", fee: 25 },
 ];

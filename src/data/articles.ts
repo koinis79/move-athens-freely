@@ -1425,7 +1425,7 @@ Athens summers are hot (35°C+). Our electric wheelchairs handle the heat, but w
 
 | Zone | Delivery Fee |
 |------|--------------|
-| Athens City Center | €10 |
+| Athens City Center | €20 |
 | Piraeus Port | €25 |
 | Athens Airport | €50 |
 | Store Pickup (free) | €0 |

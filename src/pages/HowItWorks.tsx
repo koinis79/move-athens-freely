@@ -106,7 +106,7 @@ const zones = [
     Icon: MapPin,
     name: "Athens City",
     areas: "Syntagma, Plaka, Monastiraki, greater metro area",
-    fee: "€10",
+    fee: "€20",
     color: "bg-blue-100 text-blue-800 dark:bg-blue-900/40 dark:text-blue-300",
   },
   {
