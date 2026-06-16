@@ -1,0 +1,14 @@
+.blog-category.has-blog-image .ybc_item_img {
+    margin-bottom: 20px;
+}
+#footer_account_list > li {
+  padding: 0;
+  width: 100% !important;
+}
+#footer_account_list > li .ss_icon_group {
+ display:none;
+}
+#footer_account_list li {
+    width: 100%;
+    padding: 0;
+}

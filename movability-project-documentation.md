@@ -1,13 +1,13 @@
 # MOVABILITY.GR — Project Documentation
 
-> **Single source of truth** for the Movability project. Updated: June 16, 2026.
+> **Single source of truth** for the Movability project. Updated: June 16, 2026 (evening).
 > Drop this file in the repo root and have any AI tool (Antigravity, Claude Code, Claude) read it FIRST for full project context.
 
 ---
 
 ## 1. PROJECT OVERVIEW
 
-**What:** Movability (movability.gr) — Athens-based mobility equipment rental for tourists and locals. Wheelchairs, power wheelchairs, mobility scooters, rollators — delivered to hotels or picked up in-store.
+**What:** Movability (movability.gr) — Athens-based mobility equipment rental for tourists and locals. Wheelchairs, power wheelchairs, mobility scooters, rollators, **knee walkers** — delivered to hotels or picked up in-store.
 
 **Owner:** Vasilis (vasileios@koinis.gr) — part of **Koinis Healthcare Group** (founded 1982, Corinth; verified). Stores: Athens Center (Stadiou 31), Kallithea (Davaki 16), Chalandri (Kolokotroni 22).
 
@@ -15,40 +15,33 @@
 
 ---
 
-## 2. ⚠️ READ THIS FIRST — HARD-WON LESSONS (June 2026)
+## 2. ⚠️ READ THIS FIRST — HARD-WON LESSONS
 
-These caused a multi-hour outage. Do not repeat them.
+1. **A PRICE LIVES IN MORE THAN ONE PLACE.** Changing a price/fee in the Supabase DB is NOT enough — values are also hardcoded in the frontend. After ANY price/fee change, sweep the frontend for hardcoded copies. Confirmed cases:
+   - Equipment prices: DB + `equipmentCatalog.ts` (article CTAs)
+   - **Delivery fees: DB `delivery_zones` table + hardcoded `ZONES` array in `src/components/checkout/DeliverySection.tsx` (this is the actual CHECKOUT calculation) + How It Works table + article tables.** Changing only the DB makes the dropdown show the new price but checkout charge the old one.
+   - Always test the real checkout total after a price change.
 
-1. **`INTERNAL_API_KEY` must be IDENTICAL in TWO places:**
-   - Supabase → Edge Functions → Secrets → `INTERNAL_API_KEY` (what the functions CHECK)
-   - Vercel → Environment Variables → `VITE_INTERNAL_API_KEY` (what the admin FRONTEND sends)
-   - If these drift apart → review emails fail with **401**. Server-to-server calls (webhook → confirmation) use the Supabase secret; browser calls (admin → review) use the Vercel value. **Change one, change both, then redeploy both.**
+2. **`INTERNAL_API_KEY` must be IDENTICAL in TWO places:** Supabase Edge Function Secrets (`INTERNAL_API_KEY`) AND Vercel env (`VITE_INTERNAL_API_KEY`). Drift → 401 → emails fail. Change one, change both, redeploy both.
 
-2. **NEVER use `SUPABASE_`-prefixed secrets for function-to-function auth.** Supabase's edge runtime rewrites the Authorization header on internal calls, so `SUPABASE_SERVICE_ROLE_KEY` as a bearer token gets replaced → receiving function sees a wrong token → **401**. Use `INTERNAL_API_KEY` for all inter-function auth.
+3. **NEVER use `SUPABASE_`-prefixed secrets for function-to-function auth** — the edge runtime rewrites the Authorization header. Use `INTERNAL_API_KEY`.
 
-3. **When redeploying functions via the dashboard, paste the RIGHT code into the RIGHT function.** They got swapped once (stripe-webhook code ended up in send-booking-confirmation → "Missing stripe-signature" errors). The first line tells you which is which: `import Stripe` = stripe-webhook; `import { createClient }` + buildCustomerHtml = send-booking-confirmation.
+4. **Edge functions do NOT deploy from git.** After pushing, manually redeploy in Supabase Dashboard (GitHub → Raw → copy → paste → Deploy). Make sure the right code goes in the right function slot (first line: `import Stripe` = stripe-webhook; `import { createClient }` + buildCustomerHtml = send-booking-confirmation).
 
-4. **ONE repo only:** `~/Desktop/move-athens-freely`. A duplicate clone at `~/Desktop/KOINIS/` caused code confusion — now retired. Assets archived in `~/Desktop/KOINIS-assets/`. The old `KOINIS/` folder is stale (delete when convenient).
+5. **ONE repo only:** `~/Desktop/move-athens-freely`. (Old duplicate clone at `~/Desktop/KOINIS/` retired; assets in `~/Desktop/KOINIS-assets/`.)
 
-5. **Always `npm run build` locally before pushing**, and **always confirm Vercel shows "Ready" (green)** after. A failing build means the live site silently stays on the last good version.
+6. **Always `npm run build` locally before pushing; always confirm Vercel "Ready" (green) after.**
 
-6. **Edge functions do NOT deploy from git.** After pushing, manually redeploy in Supabase Dashboard (GitHub → Raw → copy → paste → Deploy).
+7. **Products & delivery zones live in the Supabase DB**, not code. Adding/editing them is a SQL/admin task, not a code push. Read the real schema before writing INSERT/UPDATE — don't guess columns.
+
+8. **Equipment images** go in the `equipment-images` bucket, `equipment/` folder, as `.webp` (NOT the `assets` bucket). Store filenames with real spaces in the DB; the browser encodes `%20` automatically.
 
 ---
 
 ## 3. TECH STACK
 
-| Layer | Tech |
-|---|---|
-| Frontend | React + Vite + Tailwind (built originally in Lovable, now independent) |
-| Backend | Supabase (PostgreSQL + Auth + Edge Functions + Storage) |
-| Payments | Stripe (LIVE) |
-| Email | Resend (`hello@movability.gr` customer-facing) |
-| Hosting | Vercel (auto-deploys from GitHub `main`) |
-| Analytics | GA4 (G-8RD4VHF74X) + Search Console |
-| Domain / email forwarding | Papaki (DNS) + ImprovMX (forwarding; catch-all alias active) |
-| Local repo path | **`~/Desktop/move-athens-freely`** (the ONLY valid path) |
-| Local tooling | Node v20 (reinstall to /tmp each session — not permanent); GitHub CLI authed as koinis79 |
+React + Vite + Tailwind · Supabase (Postgres + Auth + Edge Functions + Storage) · Stripe (LIVE) · Resend (sender `hello@movability.gr`) · Vercel (auto-deploy from GitHub `main`) · GA4 (G-8RD4VHF74X) + Search Console · Papaki DNS + ImprovMX forwarding (catch-all active) · EN/GR i18n.
+Local repo: `~/Desktop/move-athens-freely`. Node v20 reinstalled to /tmp each session (not permanent). GitHub CLI authed as koinis79.
 
 ---
 
@@ -62,7 +55,7 @@ These caused a multi-hour outage. Do not repeat them.
 | Supabase | https://supabase.com/dashboard/project/lmgpuqgwkiapgpdsxvmb |
 | Stripe | https://dashboard.stripe.com |
 | Resend | https://resend.com/emails |
-| Google Review link | https://g.page/r/CRIC4z0HieHaEBM/review (also via https://movability.gr/review) |
+| Google Review | https://g.page/r/CRIC4z0HieHaEBM/review (also https://movability.gr/review) |
 
 **Supabase Project ID:** `lmgpuqgwkiapgpdsxvmb`
 
@@ -70,17 +63,16 @@ These caused a multi-hour outage. Do not repeat them.
 
 ## 5. CONTACT & BUSINESS INFO
 
-- **Customer email (sender):** hello@movability.gr
-- **Public/reply email:** info@movability.gr → forwards to **info@koinis.gr** (ImprovMX catch-all)
-- **Admin notification email:** info@koinis.gr
-- **WhatsApp:** +30 697 463 3697
-- **Admin users:** vasileios@koinis.gr, kalogeropoulosbill6@gmail.com
+- Customer sender: hello@movability.gr · Public/reply: info@movability.gr → forwards to info@koinis.gr
+- Admin notification email: info@koinis.gr
+- WhatsApp: +30 697 463 3697
+- Admin users: vasileios@koinis.gr, kalogeropoulosbill6@gmail.com
 
 ---
 
 ## 6. EQUIPMENT & PRICING
 
-⚠️ **Prices are PER RENTAL PERIOD, not per day.** Never display "/day". Source of truth: `src/data/equipmentCatalog.ts`.
+⚠️ **Per RENTAL PERIOD, not per day.** Source of truth: Supabase `equipment` table.
 
 | Product | Slug | 1–3d | 4–7d | 8–14d | 15–30d |
 |---|---|---|---|---|---|
@@ -91,130 +83,113 @@ These caused a multi-hour outage. Do not repeat them.
 | Foldable Travel Scooter | foldable-travel-scooter | €150 | €250 | €350 | €450 |
 | Foldable Power Wheelchair | foldable-power-wheelchair | €150 | €250 | €350 | €450 |
 | Rollator Walker | rollator-walker | €49 | €79 | €149 | €199 |
+| **Knee Walker (Knee Scooter)** | **knee-walker** | **€49** | **€79** | **€149** | **€199** |
 
-**Delivery zones (authoritative):** Store Pickup **Free** · Athens City **€10** · Piraeus Cruise Terminal **€25** · Athens Airport **€50**.
-⚠️ Marketing must say "Free store pickup," NOT "free delivery."
+Knee Walker (added June 16): category `walking-aids`, max user 136kg, images in `equipment-images/equipment/rent-knee-rollator-strolly*.webp`. Targets injury-recovery market (foot/ankle surgery, fractures) — crutch alternative.
+
+### Delivery zones — ONLY 4 ARE ACTIVE (what customers see)
+
+| Customer sees | slug | fee | is_active |
+|---|---|---|---|
+| Store Pickup | store-pickup | €0 | ✅ |
+| **Athens City** | **athens-city** | **€20** (was €10, changed June 16) | ✅ |
+| Athens Airport | athens-airport | €50 | ✅ |
+| Piraeus Cruise Terminal | piraeus-port | €25 | ✅ |
+
+⚠️ The DB has **13 zone rows** — 9 are `is_active = false` (legacy/duplicates: city-center, extended-center, suburbs-riviera, piraeus-cruise, piraeus-ferry, airport, rafina-port, lavrio-port, attractions). Customers never see them. They could be cleaned up later but only after checking no bookings reference them (deactivate, don't delete, anything with bookings). Marketing must say "Free store pickup," never "free delivery."
+
+**Store Pickup** lets the customer choose 1 of 3 stores at checkout (Athens Center/Stadiou 31, Kallithea/Davaki 16, Chalandri/Kolokotroni 22) — built in `DeliverySection.tsx`, saved to `delivery_address`.
 
 ---
 
 ## 7. EMAIL SYSTEM
 
-### Flow
 ```
 Stripe checkout → stripe-webhook → send-booking-confirmation
-                                     ├── Customer confirmation (from hello@movability.gr)
+                                     ├── Customer confirmation (hello@movability.gr)
                                      └── Admin notification → info@koinis.gr
-
-Admin marks "Completed" (admin dashboard) → send-review-request → Customer review email (from hello@)
+Admin marks "Completed" → send-review-request → Customer review email (hello@)
 ```
 
-### Auth model (CRITICAL — see Lessons §2)
-- **stripe-webhook → send-booking-confirmation:** server-to-server, Authorization `Bearer ${INTERNAL_API_KEY}` (the Supabase secret). Both functions read/check `INTERNAL_API_KEY`.
-- **admin dashboard → send-review-request:** browser call, sends `VITE_INTERNAL_API_KEY` (Vercel). Function checks `INTERNAL_API_KEY` (Supabase). **These two values MUST be identical.**
+Auth: webhook→confirmation uses `INTERNAL_API_KEY` (Supabase secret). Admin→review uses `VITE_INTERNAL_API_KEY` (Vercel) which MUST equal the Supabase `INTERNAL_API_KEY`. send-review-request body expects `booking_id`; send-booking-confirmation body expects `booking_number`. Resend recipients must be a flat array. Review emails land in Gmail Promotions (acceptable).
 
-### Edge Functions
-
-| Function | Status | Notes |
-|---|---|---|
-| `create-checkout-session` | ✅ Live | |
-| `stripe-webhook` | ✅ Live | Sends INTERNAL_API_KEY to confirmation fn |
-| `send-booking-confirmation` | ✅ Live | Customer (hello@) + admin (info@koinis.gr); auth = INTERNAL_API_KEY; body expects `booking_number` |
-| `send-review-request` | ✅ Live | Fires on "Completed"; auth = INTERNAL_API_KEY; body expects `booking_id`; dedupe via `review_requested_at` |
-| `send-daily-digest` | ❌ Not deployed | Deferred |
-
-### Manual re-send of a confirmation (for missed bookings)
+Manual re-send a confirmation:
 ```
-curl -s -w "\n\nHTTP_STATUS: %{http_code}\n" -X POST \
-  "https://lmgpuqgwkiapgpdsxvmb.supabase.co/functions/v1/send-booking-confirmation" \
-  -H "Authorization: Bearer <INTERNAL_API_KEY>" \
-  -H "Content-Type: application/json" \
+curl -s -X POST "https://lmgpuqgwkiapgpdsxvmb.supabase.co/functions/v1/send-booking-confirmation" \
+  -H "Authorization: Bearer <INTERNAL_API_KEY>" -H "Content-Type: application/json" \
   -d '{"booking_number":"MOV-XXXXXXXXXX"}'
 ```
-200 + `{"sent":true}` = customer + admin emails sent. (Used June 16 to recover 2 missed bookings.)
 
-### Other email facts
-- Resend recipients must be a flat array: `to: ["x@y.com"]` — never comma-string, never nested array.
-- `moveability_cart` localStorage key keeps the OLD typo on purpose — renaming wipes carts. Leave it.
-- Review emails currently land in Gmail **Promotions** (acceptable). To improve: make the email more personal/less HTML-heavy. WhatsApp follow-up converts far better for reviews.
+Edge functions: create-checkout-session ✅, stripe-webhook ✅, send-booking-confirmation ✅, send-review-request ✅, send-daily-digest ❌ (not deployed).
 
 ---
 
-## 8. SECRETS (locations only — values not stored here)
+## 8. SECRETS (locations only)
 
 | Secret | Location | Must match? |
 |---|---|---|
-| `INTERNAL_API_KEY` | Supabase Edge Function Secrets | **Must equal** Vercel's `VITE_INTERNAL_API_KEY` |
-| `VITE_INTERNAL_API_KEY` | Vercel Env Vars | **Must equal** Supabase's `INTERNAL_API_KEY` |
+| `INTERNAL_API_KEY` | Supabase Edge Function Secrets | = Vercel `VITE_INTERNAL_API_KEY` |
+| `VITE_INTERNAL_API_KEY` | Vercel Env Vars | = Supabase `INTERNAL_API_KEY` |
 | `RESEND_API_KEY` | Supabase Edge Function Secrets | — |
 | `STRIPE_SECRET_KEY` | Supabase Edge Function Secrets | — |
 | `STRIPE_WEBHOOK_SECRET` | Supabase Edge Function Secrets | — |
 
-⚠️ **Rotate `INTERNAL_API_KEY` soon** — it was exposed in plaintext during the June 16 debugging session. To rotate: set the SAME new value in both Supabase secret + Vercel `VITE_INTERNAL_API_KEY`, then redeploy the 3 functions AND redeploy Vercel.
+⚠️ **Rotate `INTERNAL_API_KEY`** — exposed in plaintext during June 16 debugging. To rotate: same new value in Supabase secret + Vercel `VITE_INTERNAL_API_KEY`, then redeploy 3 functions AND Vercel.
+(The Supabase **anon key** also appeared in chat — that's fine, it's public-by-design, protected by RLS.)
 
 ---
 
-## 9. KEY FILE PATHS (all under ~/Desktop/move-athens-freely)
+## 9. KEY FILE PATHS (under ~/Desktop/move-athens-freely)
 
 | File | Purpose |
 |---|---|
-| `src/data/articles.ts` | SEO articles: `guides` array + `blogPosts` array. ⚠️ A syntax error here breaks the WHOLE Vercel build |
-| `src/data/equipmentCatalog.ts` | Authoritative price tiers |
-| `src/i18n/en.json` / `gr.json` | UI translations — fix BOTH on copy changes |
-| `src/pages/FAQ.tsx` | FAQ (pricing, fees, accessibility claims) |
-| `src/pages/admin/BookingsNew.tsx` | Admin bookings list + New Booking button + review-request trigger (sends `{booking_id: prev.id}`) |
+| `src/data/articles.ts` | SEO articles (`guides` + `blogPosts`). A syntax error breaks the WHOLE build. Has hardcoded delivery-fee tables. |
+| `src/data/equipmentCatalog.ts` | Static catalog for article CTA cards only |
+| `src/data/equipment.ts` | Mostly dead code; only types/helpers (`getPriceForDays`, `categorySlugMap`) are used |
+| `src/components/checkout/DeliverySection.tsx` | Checkout delivery UI + **hardcoded ZONES array with fees** + 3-store pickup picker |
+| `src/components/equipment/BookingPanel.tsx` | Product-page booking panel — reads zone fees from DB at runtime |
+| `src/pages/HowItWorks.tsx` | Has a hardcoded delivery-zones display table |
+| `src/pages/FAQ.tsx` | English-only hardcoded FAQ (no Greek version) |
+| `src/pages/admin/BookingsNew.tsx` | Admin bookings + New Booking button + review trigger (`{booking_id: prev.id}`) |
 | `src/components/admin/NewBookingModal.tsx` | Manual booking wizard (uses `create_booking` RPC) |
-| `src/components/admin/AdminLayout.tsx` | Admin shell (mobile hamburger, overflow-x-hidden) |
-| `vercel.json` | Contains `/review` → Google review redirect (before SPA rewrite) |
-| `supabase/functions/stripe-webhook/index.ts` | Stripe webhook (`import Stripe...`) |
-| `supabase/functions/send-booking-confirmation/index.ts` | Customer + admin email (`import { createClient }...`) |
-| `supabase/functions/send-review-request/index.ts` | Review email |
+| `vercel.json` | `/review` → Google review redirect |
+| `supabase/functions/*` | stripe-webhook, send-booking-confirmation, send-review-request |
 
 ---
 
-## 10. ADMIN DASHBOARD FEATURES
+## 10. JUNE 16 SESSION — COMPLETED
 
-- Booking management with forward-only status workflow (Confirmed → Delivered → Completed). To revert a status, edit the `status` field directly in the Supabase table editor.
-- **New Booking button** — manual bookings for phone/WhatsApp orders (uses the same `create_booking` RPC as Stripe checkout; review email fires normally; `review_requested_at` stays NULL on creation).
-- **Mobile-friendly** (June 16): below md breakpoint, bookings render as cards with on-card quick-action status buttons — no phone rotation needed. Detail panel full-screen on mobile. NewBookingModal full-height on mobile.
-- Booking timeline/history, real-time notifications + sound, print packing slip, bulk actions (Archive All, Export CSV w/ UTF-8 BOM), equipment rental status, calendar view.
-
----
-
-## 11. JUNE 2026 — WORK COMPLETED
-
-- Audit fixes: pricing consistency (per-period framing, real numbers), "free delivery" → "free store pickup" (EN+GR), email typo `moveability`→`movability` (4 files), FAQ pricing + Acropolis precision + airport fee €30→€50.
-- Electric wheelchair SEO article moved inside `guides` array (was breaking the build).
+- Full email outage fixed (INTERNAL_API_KEY auth, swapped function code, Vercel/Supabase key sync); recovered 2 missed bookings.
+- Audit: per-period pricing, free-store-pickup wording, email typo, FAQ pricing/airport fee, Greek "3 locations" fix.
 - New Booking button (manual bookings via `create_booking` RPC).
 - Mobile-friendly admin bookings.
-- **Email outage fully resolved:** (a) review-request `booking_number`→`booking_id` body fix; (b) deliverability — hello@ sender + reply_to + same-domain /review link + ImprovMX hello@ alias; (c) the big one — `SUPABASE_SERVICE_ROLE_KEY` → `INTERNAL_API_KEY` for webhook→confirmation auth; (d) corrected swapped function code; (e) synced Vercel `VITE_INTERNAL_API_KEY` to Supabase value (was the final 401 on review emails).
-- Recovered 2 real bookings (MOV-E5A97DABEF, MOV-EA79C52F4E) that came in during the outage.
-- Repo cleanup: retired duplicate clone, moved working repo to `~/Desktop/move-athens-freely`, archived assets to `~/Desktop/KOINIS-assets`.
+- Date-picker popover background/z-index fix.
+- **Knee Walker product added** (DB insert + 3 .webp images).
+- Store-pickup label clarified on product pages ("choose location at checkout").
+- **Athens City delivery €10 → €20** (DB + DeliverySection ZONES array + HowItWorks table + article table).
+- Repo cleanup: single repo at `~/Desktop/move-athens-freely`, assets in `~/Desktop/KOINIS-assets`.
 
 ---
 
-## 12. PENDING TASKS
+## 11. PENDING TASKS
 
 ### Soon
-- [ ] **Rotate `INTERNAL_API_KEY`** (exposed in chat) — same value in Supabase + Vercel, redeploy both.
-- [ ] **Delete stale `~/Desktop/KOINIS/` folder** (assets safe in KOINIS-assets; repo moved out).
-- [ ] **WhatsApp review messages** to past customers (biggest growth lever; templates below).
-- [ ] **Greek FAQ** — confirm gr.json mirrors the June FAQ fixes.
-- [ ] Store pickup clarity — name the 3 locations in the booking form.
-- [ ] Date-picker overlay z-index glitch on product pages.
+- [ ] **Rotate `INTERNAL_API_KEY`** (exposed) — same value Supabase + Vercel, redeploy both.
+- [ ] **Delete stale `~/Desktop/KOINIS/` folder.**
+- [ ] **WhatsApp review messages** to past customers (biggest growth lever; templates §12).
+- [ ] Verify checkout shows Athens City €20 for next real booking.
 
-### Deferred
-- [ ] Make review email more personal (less HTML) to escape Gmail Promotions.
-- [ ] Google Ads (€350 credit) — low season Nov–Feb. Best CVR: Italy 50%, NL 33%, AU 33%, Greece ~29%, USA 12.7%.
-- [ ] US conversion: trust signals, international FAQ, USD hint, cruise keywords.
-- [ ] New SEO articles: Accessible Hotels, 3-Day Itinerary, Power Wheelchair Rental.
-- [ ] Instagram/Facebook accounts + real footer links.
-- [ ] Deploy `send-daily-digest` + pg_cron.
-- [ ] Cancel Lovable subscription.
-- [ ] Install Node permanently on the Mac.
+### Later
+- [ ] Knee Walker SEO article ("knee walker / knee scooter rental athens" — low competition, high intent).
+- [ ] Clean up 9 inactive duplicate delivery zones (deactivate-safe; check bookings first).
+- [ ] Greek FAQ page (FAQ.tsx is English-only) — low priority, mostly tourist audience.
+- [ ] Make review email more personal (escape Gmail Promotions).
+- [ ] Google Ads (€350 credit, low season Nov–Feb).
+- [ ] US conversion (trust signals, cruise keywords). New SEO articles. Instagram/FB + footer links. Deploy send-daily-digest. Cancel Lovable. Install Node permanently.
 
 ---
 
-## 13. WHATSAPP REVIEW TEMPLATES
+## 12. WHATSAPP REVIEW TEMPLATES
 
 **EN:** Hi [name]! Vasilis from Movability here — hope the equipment made your Athens trip easier! If you have 30 seconds, a Google review would mean the world to our small family business: https://movability.gr/review 🙏
 
@@ -222,16 +197,16 @@ curl -s -w "\n\nHTTP_STATUS: %{http_code}\n" -X POST \
 
 ---
 
-## 14. BRAND
+## 13. BRAND
 
-Primary Mediterranean Blue `#2563EB` · Secondary Warm Orange `#F59E0B` · Accent Olive Green `#65A30D` · Text Charcoal `#1F2937` · Background Warm White `#FAFAF9`. Tone: warm, direct "you" language, "mobility equipment" not "medical devices." WCAG 2.1 AA. Trust anchor: Koinis Healthcare since 1982.
-
----
-
-## 15. WORKFLOW
-
-Claude (chat) writes prompt → Antigravity edits in `~/Desktop/move-athens-freely` → `npm run build` locally → push → Vercel green → hard-refresh & verify live. Edge functions: redeploy manually in Supabase after push. Fix EN+GR together. Verify in Supabase/Resend/Stripe dashboards, never trust UI success alone. Never expose secret values in code or docs.
+Primary `#2563EB` · Secondary `#F59E0B` · Accent `#65A30D` · Text `#1F2937` · Bg `#FAFAF9`. Warm "you" language, "mobility equipment" not "medical devices," WCAG 2.1 AA. Trust anchor: Koinis Healthcare since 1982.
 
 ---
 
-*Last updated: June 16, 2026*
+## 14. WORKFLOW
+
+Claude writes prompt → Antigravity edits in `~/Desktop/move-athens-freely` → `npm run build` → push → Vercel green → hard-refresh & verify. Edge functions: redeploy manually in Supabase. DB/zone/product changes: SQL or admin form, read real schema first. After any price change: sweep frontend for hardcoded copies + test real checkout. Fix EN+GR together. Verify in dashboards, never trust UI success alone.
+
+---
+
+*Last updated: June 16, 2026 (evening)*

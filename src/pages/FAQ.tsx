@@ -39,6 +39,14 @@ const sections = [
         q: "Can I cancel or modify my booking?",
         a: "Free cancellation is available up to 48 hours before your delivery date. Modifications can be made by contacting us via WhatsApp, email, or phone.",
       },
+      {
+        q: "Can I extend my rental?",
+        a: "Yes, subject to availability. Just message us on WhatsApp before your rental ends and we'll arrange the extra days and payment — no need to rebook.",
+      },
+      {
+        q: "Can I book before I arrive in Athens?",
+        a: "Absolutely — most customers book before their trip. Choose your dates and delivery location online and we'll have everything ready when you arrive, whether that's at your hotel, Airbnb, the airport, or the cruise port.",
+      },
     ],
   },
   {
@@ -64,6 +72,14 @@ const sections = [
         q: "What are your delivery hours?",
         a: "We deliver 7 days a week. You can choose your preferred delivery window (morning, afternoon, or evening) during checkout.",
       },
+      {
+        q: "Which store can I pick up from, and what does delivery cost?",
+        a: "Store pickup is free from any of our 3 Koinis Healthcare locations: Athens Center (Stadiou 31), Kallithea (Davaki 16), and Chalandri (Kolokotroni 22) — you choose which one at checkout. If you'd prefer delivery, fees are: Athens City €20, Piraeus Cruise Terminal €25, Athens Airport €50.",
+      },
+      {
+        q: "Do you deliver to the Greek islands?",
+        a: "Currently we serve mainland Athens, the airport, and the cruise and ferry ports. We don't deliver to the islands, but you're welcome to pick up from one of our stores before you travel — just message us to arrange it.",
+      },
     ],
   },
   {
@@ -84,6 +100,10 @@ const sections = [
       {
         q: "Do you offer insurance?",
         a: "Basic equipment insurance is included in all rentals. For additional coverage, please contact us.",
+      },
+      {
+        q: "Do you rent knee walkers (knee scooters)?",
+        a: "Yes! Our knee walker is a comfortable alternative to crutches for foot and ankle injury recovery. It features an adjustable padded knee rest, hand brakes with parking lock, and a removable storage basket. Rentals start from €49 for 1–3 days — see the Equipment page for details.",
       },
     ],
   },
