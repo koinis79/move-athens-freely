@@ -347,7 +347,9 @@ const BookingPanel = ({ item }: Props) => {
               {zones.map((z) => (
                 <SelectItem key={z.id} value={z.id}>
                   {z.name_en}
-                  {z.delivery_fee === 0 ? " — Free" : ` — €${z.delivery_fee}`}
+                  {z.slug === "store-pickup"
+                    ? " — Free (choose location at checkout)"
+                    : z.delivery_fee === 0 ? " — Free" : ` — €${z.delivery_fee}`}
                 </SelectItem>
               ))}
             </SelectContent>
