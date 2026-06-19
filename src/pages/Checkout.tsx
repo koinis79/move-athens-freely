@@ -12,6 +12,8 @@ import { supabase } from "@/integrations/supabase/client";
 import { getPriceForDays } from "@/data/equipment";
 import DeliverySection, {
   getDeliveryFee,
+  getDeliveryZoneFee,
+  getDeliverySurcharge,
   getDeliveryAddress,
   getDeliveryZoneSlug,
   validateDelivery,
@@ -39,7 +41,7 @@ const INITIAL_DELIVERY: DeliveryFormData = {
   pickupLocation: null,
   detectedZone: null,
   manualZone: null,
-  timeSlot: "tbc",
+  timeSlot: "daytime",
   whatsappUpdates: true,
   specialInstructions: "",
   // Legacy compat
@@ -128,11 +130,6 @@ const Checkout = () => {
   );
 
   const equipmentTotal = lineItems.reduce((s, i) => s + i.subtotal, 0);
-  const deliveryFee = getDeliveryFee(delivery);
-  const total = equipmentTotal + deliveryFee;
-  const depositAmount = Math.ceil(total * 0.30);
-  const remainingAmount = total - depositAmount;
-  const chargeAmount = paymentMethod === "full" ? total : depositAmount;
 
   const rentalStart = useMemo(
     () =>
@@ -148,6 +145,12 @@ const Checkout = () => {
         : new Date(),
     [items]
   );
+
+  const deliveryFee = getDeliveryFee(delivery, rentalStart);
+  const total = equipmentTotal + deliveryFee;
+  const depositAmount = Math.ceil(total * 0.30);
+  const remainingAmount = total - depositAmount;
+  const chargeAmount = paymentMethod === "full" ? total : depositAmount;
 
   // ── Form helpers ─────────────────────────────────────────────────────────
   const setC = (field: keyof CustomerForm, value: string | boolean) => {
@@ -263,7 +266,7 @@ const Checkout = () => {
         p_customer_phone: fullPhone,
         p_delivery_zone_id: deliveryZoneId,
         p_delivery_address: deliveryAddress,
-        p_delivery_time_slot: "tbc",
+        p_delivery_time_slot: delivery.timeSlot || "daytime",
         p_delivery_notes: deliveryNotes || null,
         p_rental_start: format(rentalStart, "yyyy-MM-dd"),
         p_rental_end: format(rentalEnd, "yyyy-MM-dd"),
@@ -432,6 +435,7 @@ const Checkout = () => {
               errors={deliveryErrors}
               onChange={handleDeliveryChange}
               clearError={clearDeliveryError}
+              deliveryDate={rentalStart}
             />
 
             {/* Terms */}
@@ -594,6 +598,11 @@ const Checkout = () => {
                       : "—"}
                   </span>
                 </div>
+                {delivery.method === "delivery" && getDeliverySurcharge(delivery.method, delivery.timeSlot, rentalStart) > 0 && (
+                  <p className="text-xs text-muted-foreground text-right -mt-1">
+                    €{getDeliveryZoneFee(delivery)} zone + €{getDeliverySurcharge(delivery.method, delivery.timeSlot, rentalStart)} surcharge
+                  </p>
+                )}
                 <div className="flex justify-between border-t pt-2">
                   <span className="font-bold text-foreground text-base">
                     Total

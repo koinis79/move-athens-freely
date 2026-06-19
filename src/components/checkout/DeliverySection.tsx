@@ -25,6 +25,13 @@ export type DeliveryMethod = "delivery" | "pickup";
 export type DeliverySubType = "hotel" | "cruise" | "airport";
 export type PickupLocation = "stadiou" | "davaki" | "kolokotroni";
 
+export type DeliveryTimeSlot = "daytime" | "evening";
+
+const TIME_SLOTS = [
+  { id: "daytime" as const, label: "Daytime (09:00–17:00)", surcharge: 0 },
+  { id: "evening" as const, label: "Evening (17:00–21:00)", surcharge: 20 },
+];
+
 export interface DeliveryFormData {
   method: DeliveryMethod | null;
   subType: DeliverySubType | null;
@@ -63,6 +70,7 @@ interface Props {
   errors: DeliveryErrors;
   onChange: (updates: Partial<DeliveryFormData>) => void;
   clearError: (field: string) => void;
+  deliveryDate?: Date;
 }
 
 /* ── Zone detection ────────────────────────────────────────────────────── */
@@ -100,10 +108,41 @@ function getZone(slug: string | null): ZoneInfo | undefined {
 
 /* ── Exported helpers (used by Checkout.tsx) ────────────────────────────── */
 
-export function getDeliveryFee(data: DeliveryFormData): number {
+/** Exported: maps slot value to display label. Handles legacy "tbc". */
+export function formatTimeSlot(slot: string | null): string {
+  if (!slot || slot === "tbc") return "To be confirmed";
+  const found = TIME_SLOTS.find(s => s.id === slot);
+  return found?.label ?? slot;
+}
+
+/** Exported: single source of truth for delivery surcharge. */
+export function getDeliverySurcharge(
+  method: DeliveryMethod | null,
+  slot: string | null,
+  deliveryDate?: Date,
+): number {
+  if (method !== "delivery" || !slot || slot === "tbc") return 0;
+  if (deliveryDate) {
+    const day = deliveryDate.getDay(); // 0=Sun, 6=Sat
+    if (day === 0) return 50; // Sunday — any slot
+    if (day === 6 && slot === "evening") return 50; // Saturday evening
+  }
+  // Weekday or Saturday daytime — slot's own surcharge
+  return TIME_SLOTS.find(s => s.id === slot)?.surcharge ?? 0;
+}
+
+/** Exported: returns zone fee portion only (for breakdown display). */
+export function getDeliveryZoneFee(data: DeliveryFormData): number {
   if (data.method === "pickup") return 0;
   const slug = data.manualZone || data.detectedZone;
   return getZone(slug)?.fee ?? 0;
+}
+
+export function getDeliveryFee(data: DeliveryFormData, deliveryDate?: Date): number {
+  if (data.method === "pickup") return 0;
+  const zoneFee = getDeliveryZoneFee(data);
+  const surcharge = getDeliverySurcharge(data.method, data.timeSlot, deliveryDate);
+  return zoneFee + surcharge;
 }
 
 export function getDeliveryAddress(data: DeliveryFormData): string {
@@ -149,7 +188,7 @@ const PICKUP_LOCATIONS = [
 
 /* ── Component ─────────────────────────────────────────────────────────── */
 
-export function DeliverySection({ data, errors, onChange, clearError }: Props) {
+export function DeliverySection({ data, errors, onChange, clearError, deliveryDate }: Props) {
   const [showZoneOverride, setShowZoneOverride] = useState(false);
 
   const set = useCallback(
@@ -162,7 +201,9 @@ export function DeliverySection({ data, errors, onChange, clearError }: Props) {
 
   const activeZoneSlug = data.manualZone || data.detectedZone;
   const activeZone = getZone(activeZoneSlug);
-  const fee = getDeliveryFee(data);
+  const fee = getDeliveryFee(data, deliveryDate);
+  const zoneFee = getDeliveryZoneFee(data);
+  const surcharge = fee - zoneFee;
 
   const handleAddressChange = (address: string) => {
     set("deliveryAddress", address);
@@ -297,10 +338,50 @@ export function DeliverySection({ data, errors, onChange, clearError }: Props) {
             </div>
           ) : null}
 
-          {/* Delivery timing note */}
-          <p className="text-sm text-muted-foreground">
-            We'll contact you to arrange the best delivery time.
-          </p>
+          {/* Time slot picker */}
+          <div className="space-y-2">
+            <Label>Preferred Delivery Time</Label>
+            <div className="grid grid-cols-2 gap-2">
+              {TIME_SLOTS.map((slot) => {
+                const isWeekendOverride =
+                  deliveryDate &&
+                  ((deliveryDate.getDay() === 0) ||
+                   (deliveryDate.getDay() === 6 && slot.id === "evening"));
+                const effectiveSurcharge = isWeekendOverride ? 50 : slot.surcharge;
+                return (
+                  <button
+                    key={slot.id}
+                    type="button"
+                    className={cn(
+                      "flex flex-col items-center gap-1 rounded-lg border-2 p-3 text-sm transition-all",
+                      data.timeSlot === slot.id
+                        ? "border-primary bg-primary/5"
+                        : "border-border hover:border-primary/40",
+                    )}
+                    onClick={() => set("timeSlot", slot.id)}
+                  >
+                    <span className="font-medium text-foreground">{slot.label}</span>
+                    <span className={cn(
+                      "text-xs font-semibold",
+                      effectiveSurcharge === 0 ? "text-green-600" : "text-amber-600",
+                    )}>
+                      {effectiveSurcharge === 0 ? "No surcharge" : `+€${effectiveSurcharge} surcharge`}
+                    </span>
+                  </button>
+                );
+              })}
+            </div>
+            {deliveryDate && deliveryDate.getDay() === 0 && (
+              <p className="text-xs text-amber-600 bg-amber-50 border border-amber-200 rounded-md px-3 py-2">
+                ⚠️ Sunday delivery — a €50 surcharge applies to all time slots.
+              </p>
+            )}
+            {deliveryDate && deliveryDate.getDay() === 6 && data.timeSlot === "evening" && (
+              <p className="text-xs text-amber-600 bg-amber-50 border border-amber-200 rounded-md px-3 py-2">
+                ⚠️ Saturday evening — a €50 surcharge applies.
+              </p>
+            )}
+          </div>
         </div>
       )}
 
@@ -366,13 +447,18 @@ export function DeliverySection({ data, errors, onChange, clearError }: Props) {
 
       {/* Summary */}
       {data.method && (
-        <div className="rounded-xl border border-primary/20 bg-primary/5 p-4 text-sm">
+        <div className="rounded-xl border border-primary/20 bg-primary/5 p-4 text-sm space-y-1">
           <div className="flex items-center justify-between">
             <span className="text-muted-foreground">Delivery fee</span>
             <span className="font-bold text-primary">
               {fee === 0 ? "Free" : `€${fee}`}
             </span>
           </div>
+          {surcharge > 0 && data.method === "delivery" && (
+            <p className="text-xs text-muted-foreground text-right">
+              €{zoneFee} zone + €{surcharge} surcharge
+            </p>
+          )}
         </div>
       )}
     </div>

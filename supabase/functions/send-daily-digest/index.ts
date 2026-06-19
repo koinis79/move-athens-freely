@@ -73,12 +73,13 @@ function whatsappLink(phone: string | null): string {
 
 function timeSlotLabel(slot: string | null): string {
   const map: Record<string, string> = {
+    daytime: "Daytime (09:00–17:00)",
+    evening: "Evening (17:00–21:00)",
     morning: "Morning",
     afternoon: "Afternoon",
-    evening: "Evening",
-    tbc: "TBC",
   };
-  return slot ? (map[slot] ?? slot) : "TBC";
+  if (!slot || slot === "tbc") return "TBC";
+  return map[slot] ?? slot;
 }
 
 function bookingsTable(rows: BookingRow[], emptyMsg: string): string {

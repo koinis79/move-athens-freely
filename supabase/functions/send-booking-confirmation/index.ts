@@ -50,11 +50,13 @@ function formatDate(dateStr: string): string {
 
 function timeSlotLabel(slot: string | null): string {
   const map: Record<string, string> = {
-    morning: "Morning (08:00 – 12:00)",
-    afternoon: "Afternoon (12:00 – 16:00)",
-    evening: "Evening (16:00 – 20:00)",
+    daytime: "Daytime (09:00–17:00)",
+    evening: "Evening (17:00–21:00)",
+    morning: "Morning",
+    afternoon: "Afternoon",
   };
-  return slot ? (map[slot] ?? slot) : "Morning";
+  if (!slot || slot === "tbc") return "To be confirmed";
+  return map[slot] ?? slot;
 }
 
 // ── Customer confirmation email ───────────────────────────────────────────

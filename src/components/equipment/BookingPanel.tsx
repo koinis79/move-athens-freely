@@ -359,6 +359,9 @@ const BookingPanel = ({ item }: Props) => {
               Please select where we should deliver
             </p>
           )}
+          <p className="text-xs text-muted-foreground mt-1">
+            Evening & weekend surcharges may apply at checkout
+          </p>
         </div>
 
         {/* Price summary */}

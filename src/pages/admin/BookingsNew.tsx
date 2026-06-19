@@ -45,6 +45,7 @@ interface Booking {
   customer_phone: string | null;
   delivery_address: string | null;
   delivery_notes: string | null;
+  delivery_time_slot: string | null;
   rental_start: string;
   rental_end: string;
   total_amount: number;
@@ -101,6 +102,17 @@ function formatDate(dateStr: string): string {
   return format(d, "dd MMM yyyy");
 }
 
+function timeSlotLabel(slot: string | null): string {
+  const map: Record<string, string> = {
+    daytime: "Daytime (09:00–17:00)",
+    evening: "Evening (17:00–21:00)",
+    morning: "Morning",
+    afternoon: "Afternoon",
+  };
+  if (!slot || slot === "tbc") return "To be confirmed";
+  return map[slot] ?? slot;
+}
+
 export default function BookingsNew() {
   const { toast } = useToast();
   const [bookings, setBookings] = useState<Booking[]>([]);
@@ -126,7 +138,7 @@ export default function BookingsNew() {
       .from("bookings")
       .select(`
         id, booking_number, customer_name, customer_email, customer_phone,
-        delivery_address, delivery_notes, rental_start, rental_end,
+        delivery_address, delivery_notes, delivery_time_slot, rental_start, rental_end,
         total_amount, payment_status, status, internal_notes, is_archived, review_requested_at, created_at,
         delivery_zones ( name_en ),
         booking_items ( quantity, num_days, subtotal, equipment ( name_en ) )
@@ -1111,6 +1123,7 @@ export default function BookingsNew() {
                 </h3>
                 <p className="text-gray-700">{selected.delivery_zones?.name_en ?? "—"}</p>
                 <p className="text-gray-600 text-xs mt-1">{selected.delivery_address ?? "—"}</p>
+                <p className="text-gray-600 text-xs mt-1">Time slot: {timeSlotLabel(selected.delivery_time_slot)}</p>
                 {selected.delivery_notes && (
                   <p className="text-amber-700 text-xs mt-2 bg-amber-50 border border-amber-200 rounded px-2 py-1.5">
                     Notes: {selected.delivery_notes}
