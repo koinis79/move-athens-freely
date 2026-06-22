@@ -98,6 +98,7 @@ const NewBookingModal = ({ open, onOpenChange, defaultDate }: Props) => {
 
   // Step 3 — Summary
   const [internalNotes, setInternalNotes] = useState("");
+  const [sendConfirmation, setSendConfirmation] = useState(true);
 
   // Load data when dialog opens
   useEffect(() => {
@@ -168,6 +169,7 @@ const NewBookingModal = ({ open, onOpenChange, defaultDate }: Props) => {
     setDeliveryTime("daytime");
     setDeliveryNotes("");
     setInternalNotes("");
+    setSendConfirmation(true);
   };
 
   const handleCreate = async () => {
@@ -252,6 +254,47 @@ const NewBookingModal = ({ open, onOpenChange, defaultDate }: Props) => {
         title: "Booking Created",
         description: `${bookingNumber ?? "New booking"} for ${customerName.trim()} — confirmed & paid.`,
       });
+
+      // 3. Fire-and-forget: send confirmation email to customer + admin notification
+      if (sendConfirmation && bookingNumber) {
+        const internalKey = import.meta.env.VITE_INTERNAL_API_KEY;
+        if (internalKey) {
+          fetch(
+            "https://lmgpuqgwkiapgpdsxvmb.supabase.co/functions/v1/send-booking-confirmation",
+            {
+              method: "POST",
+              headers: {
+                "Content-Type": "application/json",
+                "Authorization": `Bearer ${internalKey}`,
+              },
+              body: JSON.stringify({ booking_number: bookingNumber }),
+            }
+          )
+            .then(async (res) => {
+              if (res.ok) {
+                toast({ title: "Confirmation email sent ✉️" });
+              } else {
+                const err = await res.json().catch(() => ({}));
+                console.warn("Confirmation email failed:", err);
+                toast({
+                  title: "Booking created (email failed to send)",
+                  description: err?.error ?? "Check edge function logs",
+                  variant: "destructive",
+                });
+              }
+            })
+            .catch((err) => {
+              console.warn("Confirmation email fetch failed:", err);
+              toast({
+                title: "Booking created (email failed to send)",
+                description: "Network error — check edge function logs",
+                variant: "destructive",
+              });
+            });
+        } else {
+          console.warn("VITE_INTERNAL_API_KEY not set — confirmation email skipped");
+        }
+      }
 
       reset();
       onOpenChange(false);
@@ -622,6 +665,19 @@ const NewBookingModal = ({ open, onOpenChange, defaultDate }: Props) => {
                 <strong>Note:</strong> This booking will be created as <strong>Confirmed + Paid</strong> (manual/phone order).
                 It will appear in the bookings list immediately and follow the normal status workflow.
               </div>
+
+              {/* Send confirmation email checkbox */}
+              <label className="flex items-center gap-2 cursor-pointer">
+                <input
+                  type="checkbox"
+                  checked={sendConfirmation}
+                  onChange={(e) => setSendConfirmation(e.target.checked)}
+                  className="accent-primary h-4 w-4 rounded"
+                />
+                <span className="text-sm text-foreground">
+                  Send confirmation email to customer
+                </span>
+              </label>
             </div>
           )}
         </div>
