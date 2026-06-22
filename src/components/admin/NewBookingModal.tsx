@@ -1,4 +1,5 @@
 import { useState, useEffect, useMemo } from "react";
+import { getDeliverySurcharge } from "@/components/checkout/DeliverySection";
 import { format, addDays, differenceInDays } from "date-fns";
 import {
   User, Check, ChevronRight, ChevronLeft,
@@ -27,9 +28,8 @@ import { supabase } from "@/integrations/supabase/client";
 /* ── Static helpers ─────────────────────────────────────── */
 
 const TIME_SLOTS = [
-  { value: "morning", label: "Morning (08:00 – 12:00)" },
-  { value: "afternoon", label: "Afternoon (12:00 – 17:00)" },
-  { value: "evening", label: "Evening (17:00 – 21:00)" },
+  { value: "daytime", label: "Daytime (09:00–17:00)", surcharge: 0 },
+  { value: "evening", label: "Evening (17:00–21:00)", surcharge: 20 },
 ];
 
 /** Pick the correct price tier for a given number of rental days */
@@ -93,7 +93,7 @@ const NewBookingModal = ({ open, onOpenChange, defaultDate }: Props) => {
   const [endDate, setEndDate] = useState<Date>(addDays(defaultDate ?? tomorrow, 3));
   const [deliveryZoneId, setDeliveryZoneId] = useState<string>("");
   const [deliveryAddress, setDeliveryAddress] = useState("");
-  const [deliveryTime, setDeliveryTime] = useState("morning");
+  const [deliveryTime, setDeliveryTime] = useState("daytime");
   const [deliveryNotes, setDeliveryNotes] = useState("");
 
   // Step 3 — Summary
@@ -136,7 +136,10 @@ const NewBookingModal = ({ open, onOpenChange, defaultDate }: Props) => {
 
   const unitPrice = selectedEquipment ? tierPrice(selectedEquipment, duration) : 0;
   const subtotal = unitPrice * quantity;
-  const deliveryFee = selectedZone?.delivery_fee ?? 0;
+  const zoneFee = selectedZone?.delivery_fee ?? 0;
+  const isStorePickup = selectedZone?.slug === "store-pickup";
+  const surcharge = isStorePickup ? 0 : getDeliverySurcharge("delivery", deliveryTime, startDate);
+  const deliveryFee = zoneFee + surcharge;
   const total = subtotal + deliveryFee;
 
   const tierLabel = duration <= 3 ? "1–3 days" : duration <= 7 ? "4–7 days" : duration <= 14 ? "8–14 days" : "15–30 days";
@@ -162,7 +165,7 @@ const NewBookingModal = ({ open, onOpenChange, defaultDate }: Props) => {
     setEndDate(addDays(defaultDate ?? tomorrow, 3));
     setDeliveryZoneId("");
     setDeliveryAddress("");
-    setDeliveryTime("morning");
+    setDeliveryTime("daytime");
     setDeliveryNotes("");
     setInternalNotes("");
   };
@@ -497,11 +500,24 @@ const NewBookingModal = ({ open, onOpenChange, defaultDate }: Props) => {
                         <SelectValue />
                       </SelectTrigger>
                       <SelectContent>
-                        {TIME_SLOTS.map((t) => (
-                          <SelectItem key={t.value} value={t.value} className="text-xs">{t.label}</SelectItem>
-                        ))}
+                        {TIME_SLOTS.map((t) => {
+                          const effectiveSurcharge = isStorePickup ? 0 : getDeliverySurcharge("delivery", t.value, startDate);
+                          return (
+                            <SelectItem key={t.value} value={t.value} className="text-xs">
+                              {t.label}
+                              {effectiveSurcharge > 0 && (
+                                <span className="text-amber-600 ml-1">(+€{effectiveSurcharge})</span>
+                              )}
+                            </SelectItem>
+                          );
+                        })}
                       </SelectContent>
                     </Select>
+                    {surcharge > 0 && (
+                      <p className="text-xs text-amber-600">
+                        ⚠️ +€{surcharge} surcharge ({startDate.getDay() === 0 ? "Sunday" : startDate.getDay() === 6 ? "Saturday evening" : "evening"} delivery)
+                      </p>
+                    )}
                   </div>
 
                   {/* Delivery notes */}
@@ -579,6 +595,11 @@ const NewBookingModal = ({ open, onOpenChange, defaultDate }: Props) => {
                   <span className="text-muted-foreground">Delivery Fee</span>
                   <span className="text-foreground">{deliveryFee > 0 ? `€${deliveryFee}` : "Free"}</span>
                 </div>
+                {surcharge > 0 && (
+                  <p className="text-xs text-muted-foreground text-right -mt-1">
+                    €{zoneFee} zone + €{surcharge} surcharge
+                  </p>
+                )}
                 <Separator />
                 <div className="flex items-center justify-between text-base font-bold">
                   <span className="text-foreground">Total</span>
