@@ -113,6 +113,22 @@ function timeSlotLabel(slot: string | null): string {
   return map[slot] ?? slot;
 }
 
+const paymentStatusColors: Record<string, string> = {
+  paid: "bg-green-100 text-green-800",
+  pending: "bg-amber-100 text-amber-800",
+  deposit_paid: "bg-blue-100 text-blue-800",
+  refunded: "bg-gray-100 text-gray-600",
+  failed: "bg-red-100 text-red-800",
+};
+
+const paymentStatusLabels: Record<string, string> = {
+  paid: "Paid",
+  pending: "Unpaid",
+  deposit_paid: "Deposit",
+  refunded: "Refunded",
+  failed: "Failed",
+};
+
 export default function BookingsNew() {
   const { toast } = useToast();
   const [bookings, setBookings] = useState<Booking[]>([]);
@@ -234,6 +250,17 @@ export default function BookingsNew() {
     await fetchBookings();
     setSelected((p) => (p && p.id === id ? { ...p, status } : p));
     setOpenMenuId(null);
+  }
+
+  async function updatePaymentStatus(id: string, newPaymentStatus: string) {
+    const { error } = await supabase.from("bookings").update({ payment_status: newPaymentStatus }).eq("id", id);
+    if (error) {
+      toast({ title: "Error", description: error.message, variant: "destructive" });
+      return;
+    }
+    toast({ title: `Payment: ${paymentStatusLabels[newPaymentStatus] ?? newPaymentStatus}` });
+    await fetchBookings();
+    setSelected((p) => (p && p.id === id ? { ...p, payment_status: newPaymentStatus } : p));
   }
 
   async function setArchived(id: string, archived: boolean) {
@@ -678,7 +705,16 @@ export default function BookingsNew() {
                 </div>
                 <div className="mt-2 flex items-center justify-between text-xs text-gray-600">
                   <span>{formatDate(b.rental_start)} → {formatDate(b.rental_end)}</span>
-                  <span className="font-semibold text-gray-900">€{Number(b.total_amount).toFixed(0)}</span>
+                  <div className="flex items-center gap-1.5">
+                    <span className="font-semibold text-gray-900">€{Number(b.total_amount).toFixed(0)}</span>
+                    <span
+                      className={`inline-flex px-1.5 py-0.5 rounded-full text-[10px] font-medium ${
+                        paymentStatusColors[b.payment_status] ?? "bg-gray-100 text-gray-800"
+                      }`}
+                    >
+                      {paymentStatusLabels[b.payment_status] ?? b.payment_status}
+                    </span>
+                  </div>
                 </div>
                 <p className="text-xs text-gray-500 mt-1 truncate">
                   {b.booking_items.map((i) => `${i.equipment?.name_en ?? "?"} ×${i.quantity}`).join(", ")}
@@ -809,8 +845,15 @@ export default function BookingsNew() {
                         )}
                       </div>
                     </td>
-                    <td className="px-4 py-3 text-right font-semibold">
-                      €{Number(b.total_amount).toFixed(0)}
+                    <td className="px-4 py-3 text-right">
+                      <span className="font-semibold">€{Number(b.total_amount).toFixed(0)}</span>
+                      <span
+                        className={`block mt-0.5 inline-flex px-1.5 py-0.5 rounded-full text-[10px] font-medium ${
+                          paymentStatusColors[b.payment_status] ?? "bg-gray-100 text-gray-800"
+                        }`}
+                      >
+                        {paymentStatusLabels[b.payment_status] ?? b.payment_status}
+                      </span>
                     </td>
                     <td className="px-4 py-3 text-right relative">
                       <button
@@ -1138,7 +1181,44 @@ export default function BookingsNew() {
                 <p className="text-lg font-bold text-blue-600">
                   €{Number(selected.total_amount).toFixed(0)}
                 </p>
-                <p className="text-xs text-gray-500">Status: {selected.payment_status}</p>
+                <div className="flex items-center gap-2 mt-1">
+                  <span
+                    className={`inline-flex px-2 py-0.5 rounded-full text-xs font-medium ${
+                      paymentStatusColors[selected.payment_status] ?? "bg-gray-100 text-gray-800"
+                    }`}
+                  >
+                    {paymentStatusLabels[selected.payment_status] ?? selected.payment_status}
+                  </span>
+                </div>
+                <div className="flex flex-wrap gap-1.5 mt-2">
+                  {selected.payment_status !== "paid" && (
+                    <button
+                      type="button"
+                      onClick={() => updatePaymentStatus(selected.id, "paid")}
+                      className="px-2 py-1 text-[11px] font-medium rounded-md border border-green-200 bg-green-50 text-green-700 hover:bg-green-100"
+                    >
+                      Mark Paid
+                    </button>
+                  )}
+                  {selected.payment_status !== "deposit_paid" && (
+                    <button
+                      type="button"
+                      onClick={() => updatePaymentStatus(selected.id, "deposit_paid")}
+                      className="px-2 py-1 text-[11px] font-medium rounded-md border border-blue-200 bg-blue-50 text-blue-700 hover:bg-blue-100"
+                    >
+                      Mark Deposit
+                    </button>
+                  )}
+                  {selected.payment_status !== "pending" && (
+                    <button
+                      type="button"
+                      onClick={() => updatePaymentStatus(selected.id, "pending")}
+                      className="px-2 py-1 text-[11px] font-medium rounded-md border border-amber-200 bg-amber-50 text-amber-700 hover:bg-amber-100"
+                    >
+                      Mark Unpaid
+                    </button>
+                  )}
+                </div>
               </section>
 
               <section>

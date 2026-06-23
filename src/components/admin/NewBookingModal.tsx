@@ -99,6 +99,7 @@ const NewBookingModal = ({ open, onOpenChange, defaultDate }: Props) => {
   // Step 3 — Summary
   const [internalNotes, setInternalNotes] = useState("");
   const [sendConfirmation, setSendConfirmation] = useState(true);
+  const [paymentOption, setPaymentOption] = useState<"paid_full" | "deposit" | "unpaid">("paid_full");
 
   // Load data when dialog opens
   useEffect(() => {
@@ -170,6 +171,7 @@ const NewBookingModal = ({ open, onOpenChange, defaultDate }: Props) => {
     setDeliveryNotes("");
     setInternalNotes("");
     setSendConfirmation(true);
+    setPaymentOption("paid_full");
   };
 
   const handleCreate = async () => {
@@ -230,17 +232,29 @@ const NewBookingModal = ({ open, onOpenChange, defaultDate }: Props) => {
 
       if (!bookingId) throw new Error("No booking_id returned from RPC");
 
-      // 2. Immediately mark as confirmed + paid (manual booking, no Stripe)
+      // 2. Immediately mark as confirmed + set payment status based on admin choice
       const notesText = [
         "Manual booking (admin)",
         internalNotes.trim() || null,
       ].filter(Boolean).join(" — ");
 
+      const paymentStatusMap = {
+        paid_full: "paid",
+        deposit: "deposit_paid",
+        unpaid: "pending",
+      } as const;
+      const paymentTypeMap = {
+        paid_full: "full",
+        deposit: "deposit",
+        unpaid: "full",
+      } as const;
+
       const { error: updateErr } = await supabase
         .from("bookings")
         .update({
           status: "confirmed",
-          payment_status: "paid",
+          payment_status: paymentStatusMap[paymentOption],
+          payment_type: paymentTypeMap[paymentOption],
           internal_notes: notesText,
         })
         .eq("id", bookingId);
@@ -661,9 +675,49 @@ const NewBookingModal = ({ open, onOpenChange, defaultDate }: Props) => {
                 />
               </div>
 
-              <div className="bg-blue-50 border border-blue-200 rounded-lg p-3 text-xs text-blue-700">
-                <strong>Note:</strong> This booking will be created as <strong>Confirmed + Paid</strong> (manual/phone order).
-                It will appear in the bookings list immediately and follow the normal status workflow.
+              {/* Payment state selector */}
+              <div className="space-y-2">
+                <Label className="text-xs font-semibold">Payment Status</Label>
+                <div className="grid grid-cols-1 gap-2">
+                  {[
+                    { value: "paid_full" as const, label: "💳 Paid in full", desc: "Card, cash, or transfer received", color: "border-green-300 bg-green-50" },
+                    { value: "deposit" as const, label: "💰 Deposit paid", desc: "Partial payment, rest on delivery", color: "border-blue-300 bg-blue-50" },
+                    { value: "unpaid" as const, label: "🚚 Pay on delivery", desc: "No payment yet — will pay on delivery", color: "border-amber-300 bg-amber-50" },
+                  ].map((opt) => (
+                    <label
+                      key={opt.value}
+                      className={`flex items-center gap-3 p-2.5 rounded-lg border-2 cursor-pointer transition-colors ${
+                        paymentOption === opt.value ? opt.color : "border-transparent bg-muted/30 hover:bg-muted/50"
+                      }`}
+                    >
+                      <input
+                        type="radio"
+                        name="paymentOption"
+                        value={opt.value}
+                        checked={paymentOption === opt.value}
+                        onChange={() => setPaymentOption(opt.value)}
+                        className="accent-primary h-4 w-4"
+                      />
+                      <div>
+                        <span className="text-sm font-medium text-foreground">{opt.label}</span>
+                        <p className="text-xs text-muted-foreground">{opt.desc}</p>
+                      </div>
+                    </label>
+                  ))}
+                </div>
+              </div>
+
+              <div className={`rounded-lg p-3 text-xs ${
+                paymentOption === "paid_full"
+                  ? "bg-green-50 border border-green-200 text-green-700"
+                  : paymentOption === "deposit"
+                  ? "bg-blue-50 border border-blue-200 text-blue-700"
+                  : "bg-amber-50 border border-amber-200 text-amber-700"
+              }`}>
+                <strong>Note:</strong> This booking will be created as <strong>Confirmed</strong>{" "}
+                {paymentOption === "paid_full" && "+ Paid in full."}
+                {paymentOption === "deposit" && "+ Deposit paid (remaining due on delivery)."}
+                {paymentOption === "unpaid" && "+ Unpaid (pay on delivery)."}
               </div>
 
               {/* Send confirmation email checkbox */}
