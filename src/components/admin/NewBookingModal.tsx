@@ -682,7 +682,7 @@ const NewBookingModal = ({ open, onOpenChange, defaultDate }: Props) => {
                   {[
                     { value: "paid_full" as const, label: "💳 Paid in full", desc: "Card, cash, or transfer received", color: "border-green-300 bg-green-50" },
                     { value: "deposit" as const, label: "💰 Deposit paid", desc: "Partial payment, rest on delivery", color: "border-blue-300 bg-blue-50" },
-                    { value: "unpaid" as const, label: "🚚 Pay on delivery", desc: "No payment yet — will pay on delivery", color: "border-amber-300 bg-amber-50" },
+                    { value: "unpaid" as const, label: "⏳ Unpaid / Awaiting payment", desc: "No payment yet — mark paid once received", color: "border-amber-300 bg-amber-50" },
                   ].map((opt) => (
                     <label
                       key={opt.value}
@@ -717,7 +717,7 @@ const NewBookingModal = ({ open, onOpenChange, defaultDate }: Props) => {
                 <strong>Note:</strong> This booking will be created as <strong>Confirmed</strong>{" "}
                 {paymentOption === "paid_full" && "+ Paid in full."}
                 {paymentOption === "deposit" && "+ Deposit paid (remaining due on delivery)."}
-                {paymentOption === "unpaid" && "+ Unpaid (pay on delivery)."}
+                {paymentOption === "unpaid" && "+ Unpaid (mark paid once payment is received)."}
               </div>
 
               {/* Send confirmation email checkbox */}
