@@ -2,6 +2,7 @@ import { createClient } from "npm:@supabase/supabase-js@2";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
+  "Access-Control-Allow-Methods": "POST, OPTIONS",
   "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
 };
 
@@ -191,17 +192,18 @@ function buildAdminHtml(b: Booking): string {
 }
 
 Deno.serve(async (req) => {
+  // Handle CORS preflight BEFORE auth (browser OPTIONS has no Authorization header)
+  if (req.method === "OPTIONS") {
+    return new Response(null, { headers: corsHeaders });
+  }
+
   const INTERNAL_API_KEY = Deno.env.get("INTERNAL_API_KEY")!;
   const token = (req.headers.get("Authorization") ?? "").replace(/^Bearer\s+/i, "");
   if (!token || token !== INTERNAL_API_KEY) {
     return new Response(JSON.stringify({ error: "Unauthorized" }), {
       status: 401,
-      headers: { "Content-Type": "application/json" },
+      headers: { ...corsHeaders, "Content-Type": "application/json" },
     });
-  }
-
-  if (req.method === "OPTIONS") {
-    return new Response("ok", { headers: corsHeaders });
   }
 
   try {
