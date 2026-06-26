@@ -30,6 +30,7 @@ const Header = () => {
     { label: t("nav.accessibleAthens"), to: "/accessible-athens" },
     { label: t("nav.about"), to: "/about" },
     { label: t("nav.contact"), to: "/contact" },
+    { label: "Partner With Us", to: "/partners" },
   ];
 
   const displayName =

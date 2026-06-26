@@ -15,7 +15,7 @@ const Footer = () => {
     { label: t("footer.about"), to: "/about" },
     { label: t("footer.contact"), to: "/contact" },
     { label: t("footer.faq"), to: "/faq" },
-    { label: "For Business", to: "/partners" },
+    { label: "Partner With Us", to: "/partners" },
   ];
 
   const equipmentLinks = [
