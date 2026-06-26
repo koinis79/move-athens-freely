@@ -244,19 +244,26 @@ const BookingPanel = ({ item }: Props) => {
                 <p className={`mt-1 text-xl font-bold ${isPopular ? "text-primary" : "text-foreground"}`}>
                   €{item[tier]}
                 </p>
-                {savingsPct > 0 && (
-                  <p className="mt-0.5 text-[10px] font-medium text-emerald-600">
-                    Save {savingsPct}% per day
+                <div className="mt-0.5 flex flex-col gap-0.5">
+                  <p className="text-[10px] font-medium text-muted-foreground">
+                    (~€{Math.round(avgPerDay)}/day)
                   </p>
-                )}
+                  {savingsPct > 0 && (
+                    <p className="text-[10px] font-medium text-emerald-600">
+                      Save {savingsPct}% per day
+                    </p>
+                  )}
+                </div>
               </div>
             );
           })}
         </div>
 
-        <p className="text-xs text-muted-foreground pt-1">
-          Prices are per rental period, not per day. Longer stays = better value.
-        </p>
+        <div className="rounded-md bg-muted/50 p-2 mt-1 border border-border/50">
+          <p className="text-xs text-muted-foreground text-center">
+            Prices are <strong className="font-semibold text-foreground">per rental period</strong>, not per day. Longer stays = better value.
+          </p>
+        </div>
       </div>
 
       {/* Booking form */}

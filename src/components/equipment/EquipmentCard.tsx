@@ -42,8 +42,7 @@ const EquipmentCard = ({ item }: { item: EquipmentItem }) => {
           </Badge>
           {/* Price badge — top-right corner */}
           <div className="absolute right-3 top-3 rounded-full bg-primary text-primary-foreground px-3 py-1 text-sm font-bold shadow-md">
-            €{item.priceTier1}
-
+            from €{item.priceTier1}
           </div>
         </div>
 
