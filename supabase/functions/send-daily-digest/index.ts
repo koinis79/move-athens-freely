@@ -29,6 +29,15 @@ interface BookingRow {
   booking_items: { quantity: number; equipment: { name_en: string } | null }[];
 }
 
+interface InquiryRow {
+  id: string;
+  name: string;
+  source: string;
+  subject: string | null;
+  message: string;
+  created_at: string;
+}
+
 /* ── Date helpers (Europe/Athens) ─────────────────────────────────────── */
 
 /** Returns YYYY-MM-DD for "today" in Athens timezone */
@@ -127,6 +136,27 @@ function bookingsTable(rows: BookingRow[], emptyMsg: string): string {
     </table>`;
 }
 
+function inquiriesTable(rows: InquiryRow[]): string {
+  if (rows.length === 0) return "";
+  const trs = rows.map((b) => {
+    const label = b.source === "b2b_inquiry" ? "B2B" : "Contact";
+    const bg = b.source === "b2b_inquiry" ? "#eff6ff" : "#f3f4f6";
+    const color = b.source === "b2b_inquiry" ? "#1d4ed8" : "#374151";
+    return `
+      <div style="border:1px solid #e5e7eb;border-radius:6px;padding:12px;margin-bottom:12px;">
+        <div style="display:flex;justify-content:space-between;margin-bottom:6px;">
+          <strong style="font-size:14px;color:#111827;">${b.name}</strong>
+          <span style="background:${bg};color:${color};font-size:10px;font-weight:700;padding:2px 6px;border-radius:4px;text-transform:uppercase;">${label}</span>
+        </div>
+        <p style="margin:0 0 6px;font-size:12px;font-weight:600;color:#374151;">${b.subject || "No subject"}</p>
+        <p style="margin:0;font-size:12px;color:#6b7280;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;">${b.message}</p>
+      </div>
+    `;
+  }).join("");
+
+  return `<div>${trs}</div>`;
+}
+
 /* ── Handler ──────────────────────────────────────────────────────────── */
 
 Deno.serve(async (req: Request) => {
@@ -156,6 +186,7 @@ Deno.serve(async (req: Request) => {
 
     const today    = athensDate(0);
     const tomorrow = athensDate(1);
+    const yesterdayISO = new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString();
 
     const bookingSelect = `
       id, booking_number, customer_name, customer_phone,
@@ -166,7 +197,7 @@ Deno.serve(async (req: Request) => {
     `;
 
     // Parallel queries
-    const [deliveriesToday, pickupsToday, deliveriesTomorrow, pickupsTomorrow, pending] =
+    const [deliveriesToday, pickupsToday, deliveriesTomorrow, pickupsTomorrow, pending, recentInquiries] =
       await Promise.all([
         // (a) Deliveries today
         supabase
@@ -207,6 +238,13 @@ Deno.serve(async (req: Request) => {
           .eq("status", "pending")
           .eq("is_archived", false)
           .order("created_at", { ascending: true }),
+        // (f) Unread inquiries last 24h
+        supabase
+          .from("contact_inquiries")
+          .select("id, name, source, subject, message, created_at")
+          .eq("is_read", false)
+          .gte("created_at", yesterdayISO)
+          .order("created_at", { ascending: false }),
       ]);
 
     const delivRows  = (deliveriesToday.data ?? []) as BookingRow[];
@@ -214,6 +252,7 @@ Deno.serve(async (req: Request) => {
     const tmDeliv    = (deliveriesTomorrow.data ?? []) as BookingRow[];
     const tmPick     = (pickupsTomorrow.data ?? []) as BookingRow[];
     const pendRows   = (pending.data ?? []) as BookingRow[];
+    const inqRows    = (recentInquiries.data ?? []) as InquiryRow[];
 
     const todayLabel    = formatDateLabel(today);
     const tomorrowLabel = formatShortDate(tomorrow);
@@ -300,6 +339,19 @@ Deno.serve(async (req: Request) => {
         ` : ""}
         ${bookingsTable(pendRows, "All clear — no pending bookings!")}
       </td></tr>
+
+      <!-- New Inquiries -->
+      ${inqRows.length > 0 ? `
+      <tr><td style="padding:0 24px 24px;">
+        <h2 style="margin:0 0 10px;font-size:16px;font-weight:700;color:${DARK};border-left:4px solid #047857;padding-left:10px;">
+          📩 New Inquiries (${inqRows.length})
+        </h2>
+        <p style="margin:0 0 12px;font-size:12px;color:#047857;background:#d1fae5;border:1px solid #a7f3d0;border-radius:6px;padding:8px 10px;">
+          Unread partnership or contact inquiries from the last 24 hours.
+        </p>
+        ${inquiriesTable(inqRows)}
+      </td></tr>
+      ` : ""}
 
       <!-- Footer -->
       <tr><td style="background:#f9fafb;padding:18px 24px;text-align:center;font-size:11px;color:#6b7280;border-top:1px solid #e5e7eb;">

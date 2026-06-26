@@ -58,14 +58,19 @@ const Partners = () => {
       .filter(Boolean)
       .join("\n");
 
-    const { error } = await supabase.from("contact_inquiries").insert({
-      name: form.contactPerson.trim(),
-      email: form.email.trim(),
-      phone: form.phone.trim() || null,
-      subject: `B2B: ${form.businessType} — ${form.businessName.trim()}`,
-      message: bodyText,
-      source: "b2b_inquiry",
-    });
+    const { data: insertedData, error } = await supabase
+      .from("contact_inquiries")
+      .insert({
+        name: form.contactPerson.trim(),
+        email: form.email.trim(),
+        phone: form.phone.trim() || null,
+        subject: `B2B: ${form.businessType} — ${form.businessName.trim()}`,
+        message: bodyText,
+        source: "b2b_inquiry",
+      })
+      .select("id")
+      .single();
+
     setSubmitting(false);
     if (error) {
       toast({
@@ -77,6 +82,18 @@ const Partners = () => {
     }
     setSubmitted(true);
     toast({ title: "Thanks — we'll be in touch within 1 business day" });
+
+    // Non-blocking notification email
+    if (insertedData?.id) {
+      fetch(`${import.meta.env.VITE_SUPABASE_URL ?? "https://lmgpuqgwkiapgpdsxvmb.supabase.co"}/functions/v1/send-contact-notification`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": `Bearer ${import.meta.env.VITE_INTERNAL_API_KEY}`,
+        },
+        body: JSON.stringify({ inquiry_id: insertedData.id }),
+      }).catch(console.error);
+    }
   };
 
   const set = <K extends keyof typeof form>(k: K, v: (typeof form)[K]) =>

@@ -38,7 +38,10 @@ import {
   CheckCircle2,
   ArrowRight,
   Send,
+  Loader2,
 } from "lucide-react";
+import { supabase } from "@/integrations/supabase/client";
+import { useToast } from "@/hooks/use-toast";
 
 /* ── Form schema ────────────────────────────────────────── */
 const contactSchema = z.object({
@@ -119,6 +122,8 @@ const hours = [
 
 const Contact = () => {
   const [submitted, setSubmitted] = useState(false);
+  const [submitting, setSubmitting] = useState(false);
+  const { toast } = useToast();
 
   const form = useForm<ContactFormValues>({
     resolver: zodResolver(contactSchema),
@@ -131,9 +136,46 @@ const Contact = () => {
     },
   });
 
-  const onSubmit = (_data: ContactFormValues) => {
-    // TODO: store in Supabase contact_inquiries table
+  const onSubmit = async (data: ContactFormValues) => {
+    setSubmitting(true);
+    
+    const { data: insertedData, error } = await supabase
+      .from("contact_inquiries")
+      .insert({
+        name: data.fullName.trim(),
+        email: data.email.trim(),
+        phone: data.phone?.trim() || null,
+        subject: data.subject,
+        message: data.message.trim(),
+        source: "contact_form",
+      })
+      .select("id")
+      .single();
+
+    setSubmitting(false);
+
+    if (error) {
+      toast({
+        title: "Submission failed",
+        description: error.message,
+        variant: "destructive",
+      });
+      return;
+    }
+
     setSubmitted(true);
+
+    // Non-blocking notification email
+    if (insertedData?.id) {
+      fetch(`${import.meta.env.VITE_SUPABASE_URL ?? "https://lmgpuqgwkiapgpdsxvmb.supabase.co"}/functions/v1/send-contact-notification`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": `Bearer ${import.meta.env.VITE_INTERNAL_API_KEY}`,
+        },
+        body: JSON.stringify({ inquiry_id: insertedData.id }),
+      }).catch(console.error);
+    }
   };
 
   return (
@@ -292,9 +334,9 @@ const Contact = () => {
                     )}
                   />
 
-                  <Button type="submit" size="lg" className="gap-2">
-                    <Send className="h-4 w-4" />
-                    Send Message
+                  <Button type="submit" size="lg" className="gap-2" disabled={submitting}>
+                    {submitting ? <Loader2 className="h-4 w-4 animate-spin" /> : <Send className="h-4 w-4" />}
+                    {submitting ? "Sending..." : "Send Message"}
                   </Button>
                 </form>
               </Form>
