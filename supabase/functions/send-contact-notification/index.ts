@@ -12,8 +12,18 @@ const corsHeaders = {
   "Access-Control-Allow-Headers": "Content-Type, Authorization, apikey",
 };
 
+interface InquiryData {
+  name: string;
+  email: string;
+  phone?: string | null;
+  subject?: string | null;
+  message: string;
+  source: string;
+  created_at?: string;
+}
+
 Deno.serve(async (req: Request) => {
-  // CORS Preflight
+  // CORS Preflight — must be BEFORE auth
   if (req.method === "OPTIONS") {
     return new Response(null, { headers: corsHeaders });
   }
@@ -35,30 +45,44 @@ Deno.serve(async (req: Request) => {
     });
   }
 
-  let inquiry_id: string;
+  let inquiry: InquiryData;
+
   try {
     const body = await req.json();
-    inquiry_id = body.inquiry_id;
-    if (!inquiry_id) throw new Error("Missing inquiry_id");
-  } catch {
-    return new Response(JSON.stringify({ error: "Invalid request body" }), {
+
+    if (body.inquiry_id) {
+      // Fetch from DB by ID (used when caller has the ID)
+      const supabase = createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY);
+      const { data, error: fetchErr } = await supabase
+        .from("contact_inquiries")
+        .select("name, email, phone, subject, message, source, created_at")
+        .eq("id", body.inquiry_id)
+        .single();
+
+      if (fetchErr || !data) {
+        return new Response(JSON.stringify({ error: "Inquiry not found", details: fetchErr }), {
+          status: 404,
+          headers: { ...corsHeaders, "Content-Type": "application/json" },
+        });
+      }
+      inquiry = data;
+    } else if (body.name && body.email && body.message && body.source) {
+      // Direct payload — used when RLS prevents returning the inserted ID
+      inquiry = {
+        name: body.name,
+        email: body.email,
+        phone: body.phone ?? null,
+        subject: body.subject ?? null,
+        message: body.message,
+        source: body.source,
+        created_at: new Date().toISOString(),
+      };
+    } else {
+      throw new Error("Missing required fields: provide inquiry_id OR name+email+message+source");
+    }
+  } catch (e) {
+    return new Response(JSON.stringify({ error: "Invalid request body", details: String(e) }), {
       status: 400,
-      headers: { ...corsHeaders, "Content-Type": "application/json" },
-    });
-  }
-
-  const supabase = createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY);
-
-  // Fetch the inquiry
-  const { data: inquiry, error: fetchErr } = await supabase
-    .from("contact_inquiries")
-    .select("name, email, phone, subject, message, source, created_at")
-    .eq("id", inquiry_id)
-    .single();
-
-  if (fetchErr || !inquiry) {
-    return new Response(JSON.stringify({ error: "Inquiry not found", details: fetchErr }), {
-      status: 404,
       headers: { ...corsHeaders, "Content-Type": "application/json" },
     });
   }
@@ -67,6 +91,9 @@ Deno.serve(async (req: Request) => {
   const label = inquiry.source === "b2b_inquiry" ? "B2B Partnership" : "Contact";
   const subjectStr = `📩 New [${label}] inquiry from ${inquiry.name}`;
   const phoneStr = inquiry.phone ? inquiry.phone : "Not provided";
+  const dateStr = inquiry.created_at
+    ? new Date(inquiry.created_at).toLocaleString("en-GB", { timeZone: "Europe/Athens" })
+    : new Date().toLocaleString("en-GB", { timeZone: "Europe/Athens" });
 
   const html = `
     <div style="font-family: sans-serif; max-width: 600px; margin: 0 auto; color: #111827;">
@@ -75,11 +102,9 @@ Deno.serve(async (req: Request) => {
       <p><strong>Email:</strong> <a href="mailto:${inquiry.email}">${inquiry.email}</a></p>
       <p><strong>Phone:</strong> ${phoneStr}</p>
       <p><strong>Subject:</strong> ${inquiry.subject || "No subject"}</p>
-      <p><strong>Date:</strong> ${new Date(inquiry.created_at).toLocaleString("en-GB", { timeZone: "Europe/Athens" })} (Athens time)</p>
+      <p><strong>Date:</strong> ${dateStr} (Athens time)</p>
       
-      <div style="margin-top: 20px; padding: 15px; background: #f3f4f6; border-radius: 6px; white-space: pre-wrap;">
-${inquiry.message}
-      </div>
+      <div style="margin-top: 20px; padding: 15px; background: #f3f4f6; border-radius: 6px; white-space: pre-wrap;">${inquiry.message}</div>
       
       <p style="margin-top: 30px; font-size: 12px; color: #6b7280;">
         Source: ${inquiry.source} | Movability Admin Notification
