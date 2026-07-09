@@ -63,22 +63,22 @@ const Header = () => {
           <img
             src="https://lmgpuqgwkiapgpdsxvmb.supabase.co/storage/v1/object/public/assets/movability-logo.png"
             alt="Movability - Wheelchair and mobility equipment rental in Athens"
-            className="h-11 lg:h-14 w-auto block dark:hidden"
+            className="h-11 xl:h-14 w-auto block dark:hidden"
           />
           <img
             src="https://lmgpuqgwkiapgpdsxvmb.supabase.co/storage/v1/object/public/assets/movability-logo-dark.png"
             alt="Movability - Wheelchair and mobility equipment rental in Athens"
-            className="h-11 lg:h-14 w-auto hidden dark:block"
+            className="h-11 xl:h-14 w-auto hidden dark:block"
           />
         </Link>
 
         {/* Desktop nav */}
-        <nav aria-label="Main navigation" className="hidden lg:flex items-center gap-1">
+        <nav aria-label="Main navigation" className="hidden xl:flex items-center gap-0.5">
           {navLinks.map((link) => (
             <Link
               key={link.to}
               to={link.to}
-              className={`px-3 py-2 rounded-lg text-sm font-medium transition-colors hover:bg-muted focus-visible:bg-muted ${
+              className={`whitespace-nowrap px-2.5 py-2 rounded-lg text-sm font-medium transition-colors hover:bg-muted focus-visible:bg-muted ${
                 location.pathname.startsWith(link.to) ? "text-primary font-semibold" : "text-foreground/80"
               }`}
             >
@@ -88,7 +88,7 @@ const Header = () => {
         </nav>
 
         {/* Desktop right */}
-        <div className="hidden lg:flex items-center gap-2">
+        <div className="hidden xl:flex items-center gap-2">
           <button
             onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
             className="p-2 rounded-lg border border-border hover:bg-muted transition-colors"
@@ -112,7 +112,7 @@ const Header = () => {
                 <div className="h-7 w-7 rounded-full bg-primary/10 flex items-center justify-center">
                   <User className="h-4 w-4 text-primary" />
                 </div>
-                <span className="max-w-[120px] truncate text-foreground/80">{displayName}</span>
+                <span className="max-w-[96px] truncate text-foreground/80">{displayName}</span>
                 <ChevronDown className="h-3.5 w-3.5 text-muted-foreground" />
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end" className="w-52">
@@ -168,7 +168,7 @@ const Header = () => {
         {/* Mobile cart icon */}
         <Link
           to="/cart"
-          className="lg:hidden relative p-2 rounded-lg hover:bg-muted transition-colors"
+          className="xl:hidden relative p-2 rounded-lg hover:bg-muted transition-colors"
           aria-label={`${t("nav.cart")}${itemCount > 0 ? `, ${itemCount} item${itemCount !== 1 ? "s" : ""}` : ""}`}
         >
           <ShoppingCart className="h-5 w-5" />
@@ -181,7 +181,7 @@ const Header = () => {
 
         {/* Mobile menu button */}
         <button
-          className="lg:hidden p-2 rounded-lg hover:bg-muted transition-colors"
+          className="xl:hidden p-2 rounded-lg hover:bg-muted transition-colors"
           onClick={() => setMenuOpen(!menuOpen)}
           aria-expanded={menuOpen}
           aria-controls="mobile-menu"
@@ -194,7 +194,7 @@ const Header = () => {
       {/* Mobile slide-in menu */}
       <div
         id="mobile-menu"
-        className={`fixed inset-y-0 right-0 z-50 w-72 bg-background shadow-2xl transform transition-transform duration-300 ease-in-out lg:hidden overflow-y-auto ${
+        className={`fixed inset-y-0 right-0 z-50 w-72 bg-background shadow-2xl transform transition-transform duration-300 ease-in-out xl:hidden overflow-y-auto ${
           menuOpen ? "translate-x-0" : "translate-x-full"
         }`}
         role="dialog"
@@ -302,7 +302,7 @@ const Header = () => {
 
       {menuOpen && (
         <div
-          className="fixed inset-0 z-40 bg-foreground/20 backdrop-blur-sm lg:hidden"
+          className="fixed inset-0 z-40 bg-foreground/20 backdrop-blur-sm xl:hidden"
           onClick={() => setMenuOpen(false)}
           aria-hidden="true"
         />
@@ -313,7 +313,7 @@ const Header = () => {
         <Link
           to="/admin"
           aria-label="Admin Dashboard"
-          className="lg:hidden fixed bottom-24 left-4 z-40 flex h-11 w-11 items-center justify-center rounded-full bg-primary text-primary-foreground shadow-lg hover:bg-primary/90 transition-colors"
+          className="xl:hidden fixed bottom-24 left-4 z-40 flex h-11 w-11 items-center justify-center rounded-full bg-primary text-primary-foreground shadow-lg hover:bg-primary/90 transition-colors"
         >
           <Shield className="h-5 w-5" />
         </Link>
