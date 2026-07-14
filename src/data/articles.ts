@@ -1137,6 +1137,8 @@ Don\u2019t skip it because you\u2019re worried about access. It\u2019s worth it.
 
 We deliver wheelchairs and mobility scooters directly to your Athens hotel. Free store pickup in central Athens.
 
+Recovering from a foot or ankle injury rather than using a wheelchair? A [knee walker](/accessible-athens/knee-walker-rental-athens) lets you explore the Acropolis\u2019s paved areas hands-free.
+
 [Browse Wheelchairs \u2192](/equipment/wheelchairs) | [Browse Mobility Scooters \u2192](/equipment/mobility-scooters)
 `,
   },
@@ -1457,6 +1459,93 @@ Basic equipment insurance is included. You're covered for normal use.
 **No hassle** — We deliver to your door and pick up when you're done.
 
 Ready to explore Athens with complete freedom? Browse our electric wheelchair options and book online today.
+    `,
+  },
+  {
+    slug: "knee-walker-rental-athens",
+    title: "Knee Walker Rental in Athens: The Comfortable Alternative to Crutches",
+    excerpt:
+      "Recovering from foot or ankle surgery in Athens? Rent a knee walker (knee scooter) from €49 — adjustable, foldable, with free store pickup or delivery across Athens.",
+    date: "2026-07-14",
+    image: "https://lmgpuqgwkiapgpdsxvmb.supabase.co/storage/v1/object/public/equipment-images/equipment/rent-knee-rollator-strolly.webp",
+    category: "Equipment Guides",
+    recommendedEquipment: ["knee-walker", "rollator-walker"],
+    takeaways: [
+      "Rest your leg on a padded platform and glide — hands free, far easier than crutches",
+      "From €49 per rental period; supports up to 136 kg; adjustable, foldable, sanitized",
+      "Free pickup at 3 central Athens stores, or delivery to hotel, port, or airport",
+    ],
+    body: [],
+    content: `
+If you're recovering from a foot or ankle injury — surgery, a fracture, a torn Achilles — you already know the problem with crutches: they're exhausting, hard on your hands and shoulders, and risky on uneven ground. A knee walker (also called a knee scooter) solves all of that. You rest your injured leg on a padded platform and glide, keeping your hands free and your energy for better things.
+
+## Who a knee walker is for
+
+Knee walkers are ideal if you need to keep weight completely off one foot or ankle: after foot surgery, with a fractured foot or ankle, during Achilles tendon recovery, or with a below-the-knee injury. You'll need good balance and a healthy other leg — if that's you, most people find a knee walker dramatically easier than crutches within minutes.
+
+If you can safely put *some* weight on the leg, a [rollator walker](/equipment/walking-aids/rollator-walker) may suit you better — but for strict non-weight-bearing recovery, the knee walker is the top choice.
+
+## Why it beats crutches — especially in Athens
+
+Athens is a wonderful city, but it isn't kind to crutches: marble pavements, curbs, and long distances between sights. On a knee walker you move faster, more safely, and without the underarm soreness. The basket carries your water, phone, and shopping — things you simply can't hold while on crutches.
+
+## Our knee walker
+
+Our knee walker rental includes an adjustable padded knee platform (set it to your exact height), reliable hand brakes, a storage basket, and a foldable steel frame that fits in a car boot or taxi. It supports users up to 136 kg. Every unit is fully sanitized between rentals.
+
+[See the knee walker and book online →](/equipment/walking-aids/knee-walker)
+
+## Pricing — per rental period, not per day
+
+Pricing is per rental period, not per day:
+
+- **1–3 days** — €49
+- **4–7 days** — €79
+- **8–14 days** — €149
+- **15–30 days** — €199
+
+Recovery from foot surgery typically takes weeks, so the longer periods work out to very little per day.
+
+## Delivery or free pickup
+
+Collect it free from any of our three Koinis Healthcare stores:
+
+- **Athens Center** — Stadiou 31
+- **Kallithea** — Davaki 16
+- **Chalandri** — Kolokotroni 22
+
+Or have it delivered:
+
+- **Athens City** — €20
+- **Piraeus Cruise Terminal** — €25
+- **Athens Airport** — €50
+
+Recovering locally? Store pickup makes this easy. Visiting Athens mid-recovery? We'll deliver to your hotel before you arrive.
+
+## Frequently asked questions
+
+**Is a knee walker better than crutches?**
+For most below-knee injuries, yes: less effort, more stability, hands free. You do need one healthy leg and reasonable balance.
+
+**Can I use it on Athens streets?**
+Yes — pavements, pedestrian areas, museums, and most archaeological sites with paved paths. Very rough cobblestones require a little care, as with any wheeled device. Planning a big sight? See our [Acropolis accessibility guide](/accessible-athens/acropolis-wheelchair-guide).
+
+**Do I need a prescription?**
+No. Anyone can rent one, no paperwork needed.
+
+**Can I book before I arrive in Athens?**
+Absolutely — most customers book ahead and we have everything ready on arrival.
+
+**Can I extend my rental if recovery takes longer?**
+Yes, subject to availability — just message us on WhatsApp before your rental ends.
+
+Have another question? Check our [full FAQ](/faq) or message us anytime.
+
+## Ready to book?
+
+Don't spend your recovery fighting with crutches. A knee walker keeps you mobile, comfortable, and independent — whether you're healing at home in Athens or determined not to miss your trip.
+
+[Browse equipment](/equipment) | [Contact us](/contact) | WhatsApp: +30 697 463 3697
     `,
   },
 ];
