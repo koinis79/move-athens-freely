@@ -101,7 +101,7 @@ const TestimonialsSection = () => (
         <Button asChild size="lg" className="rounded-xl px-8 text-base font-semibold">
           <Link to="/equipment">Book Your Equipment</Link>
         </Button>
-        <Button asChild variant="outline" size="lg" className="rounded-xl px-8 text-base font-semibold bg-background hover:bg-muted">
+        <Button asChild variant="outline" size="lg" className="rounded-xl px-8 text-base font-semibold bg-background hover:bg-primary/10 hover:text-primary">
           <a href="https://g.page/r/CRIC4z0HieHaEBM/review" target="_blank" rel="noopener noreferrer">
             See all our reviews on Google ⭐
           </a>
