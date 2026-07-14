@@ -1467,7 +1467,7 @@ Ready to explore Athens with complete freedom? Browse our electric wheelchair op
     excerpt:
       "Recovering from foot or ankle surgery in Athens? Rent a knee walker (knee scooter) from €49 — adjustable, foldable, with free store pickup or delivery across Athens.",
     date: "2026-07-14",
-    image: "https://lmgpuqgwkiapgpdsxvmb.supabase.co/storage/v1/object/public/equipment-images/equipment/rent-knee-rollator-strolly.webp",
+    image: "https://lmgpuqgwkiapgpdsxvmb.supabase.co/storage/v1/object/public/equipment-images/articles/knee-walker-athens-guide.webp",
     category: "Equipment Guides",
     recommendedEquipment: ["knee-walker", "rollator-walker"],
     takeaways: [
