@@ -89,6 +89,26 @@ function renderMarkdown(md: string, midBanner?: { node: React.ReactNode; afterPa
           {line.slice(4)}
         </h3>
       );
+    } else if (/^!\[[^\]]*\]\([^)]+\)$/.test(line)) {
+      // Image: ![caption](url) on its own line. Caption doubles as alt text.
+      flushList();
+      const m = line.match(/^!\[([^\]]*)\]\(([^)]+)\)$/)!;
+      const [, caption, src] = m;
+      nodes.push(
+        <figure key={key++} className="my-8">
+          <img
+            src={src}
+            alt={caption}
+            loading="lazy"
+            className="mx-auto max-h-[520px] w-auto rounded-xl border border-border"
+          />
+          {caption && (
+            <figcaption className="mt-2 text-center text-sm italic text-muted-foreground">
+              {caption}
+            </figcaption>
+          )}
+        </figure>
+      );
     } else if (/^- /.test(line)) {
       if (listType !== "ul") { flushList(); listType = "ul"; }
       listItems.push(line.slice(2));

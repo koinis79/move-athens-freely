@@ -1063,6 +1063,8 @@ Use the **accessible entrance on the northeast side**, near Dionysiou Areopagito
 
 The elevator takes you to the main plateau where the Parthenon sits.
 
+![The Acropolis wheelchair lift — photo by our customer Eliana F.](https://lmgpuqgwkiapgpdsxvmb.supabase.co/storage/v1/object/public/equipment-images/testimonials/eliana-acropolis-lift.jpg)
+
 ## What You CAN See (Accessible Areas)
 
 \u2705 **The Parthenon** \u2014 Full view, can get close on paved paths
