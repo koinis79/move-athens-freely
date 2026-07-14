@@ -3,7 +3,17 @@ import { Star, Users } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 
-const testimonials = [
+type Testimonial = {
+  quote: string;
+  translation?: string;
+  name: string;
+  location: string;
+  photo?: string;
+  photoAlt?: string;
+  photoCredit?: string;
+};
+
+const testimonials: Testimonial[] = [
   {
     quote: "This company was very polite and easy to deal with. I would recommend using them if you need mobility equipment in Athens.",
     name: "Susan K.",
@@ -19,6 +29,9 @@ const testimonials = [
     translation: "(Excellent service! We received the wheelchair right in our room before our arrival, and we were able to see Athens with ease.)",
     name: "Eliana F.",
     location: "Local Guide, Google review",
+    photo: "https://lmgpuqgwkiapgpdsxvmb.supabase.co/storage/v1/object/public/equipment-images/testimonials/eliana-hotel-room.jpg",
+    photoAlt: "A wheelchair and fresh towels set up in a hotel room, ready for a guest's arrival in Athens.",
+    photoCredit: "Foto: Eliana F.",
   },
 ];
 
@@ -30,12 +43,23 @@ const Stars = () => (
   </div>
 );
 
-type Testimonial = typeof testimonials[number];
-
-const TestimonialCard = ({ quote, translation, name, location }: Testimonial) => (
+const TestimonialCard = ({ quote, translation, name, location, photo, photoAlt, photoCredit }: Testimonial) => (
   <Card className="h-full border-none shadow-md text-left">
     <CardContent className="flex h-full flex-col justify-between p-6 md:p-8">
       <div>
+        {photo && (
+          <figure className="mb-5">
+            <img
+              src={photo}
+              alt={photoAlt ?? `Customer photo shared by ${name}`}
+              loading="lazy"
+              className="h-32 w-full rounded-xl object-cover"
+            />
+            {photoCredit && (
+              <figcaption className="mt-1.5 text-xs text-muted-foreground">{photoCredit}</figcaption>
+            )}
+          </figure>
+        )}
         <Stars />
         <blockquote className="mt-4 text-foreground leading-relaxed italic">"{quote}"</blockquote>
         {translation && (

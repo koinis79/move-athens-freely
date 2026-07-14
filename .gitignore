@@ -30,3 +30,10 @@ dist-ssr
 
 # Browser "Save Page As" dumps (e.g. Page Name_files/)
 *_files/
+
+# Raw source photos at repo root — optimize & upload to Supabase Storage, never commit
+/*.jpg
+/*.jpeg
+/*.png
+/*.heic
+/*.HEIC
