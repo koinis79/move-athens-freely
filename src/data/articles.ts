@@ -34,7 +34,7 @@ export const guides: Article[] = [
     excerpt:
       "Cruising to Athens? Get off the ship with ease and have a wheelchair, scooter, or rollator delivered right to Piraeus cruise terminal for your shore day \u2014 from \u20ac49, reserved before you sail.",
     date: "2026-07-15",
-    image: "https://lmgpuqgwkiapgpdsxvmb.supabase.co/storage/v1/object/public/assets/piraeus-cruise-port.png",
+    image: "https://lmgpuqgwkiapgpdsxvmb.supabase.co/storage/v1/object/public/equipment-images/articles/piraeus-cruise-guide.webp",
     category: "Transport",
     recommendedEquipment: ["lightweight-folding-wheelchair", "foldable-travel-scooter", "rollator-walker"],
     takeaways: [
