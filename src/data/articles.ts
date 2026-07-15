@@ -487,7 +487,7 @@ If you\u2019re planning day trips from Athens, a [mobility scooter](/equipment/e
       "Everything you need to know about renting a mobility scooter in Athens \u2014 pricing, terrain tips, and where to ride.",
     date: "2026-04-24",
     image: "https://lmgpuqgwkiapgpdsxvmb.supabase.co/storage/v1/object/public/assets/mobility-scooter-athens.jpg",
-    category: "Transport",
+    category: "Equipment Guides",
     recommendedEquipment: ["electric-mobility-scooter", "foldable-travel-scooter"],
     takeaways: [
       "Scooters work great on main streets and pedestrianized zones \u2014 stick to flat areas",
