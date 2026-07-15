@@ -112,7 +112,6 @@ const AccessibleAthens = () => (
                 article={a}
                 to={`${GUIDE_BASE}/${a.slug}`}
                 linkLabel={GUIDE_LINK}
-                className="ring-1 ring-primary/15 shadow-md"
               />
             ))}
           </div>
@@ -129,7 +128,7 @@ const AccessibleAthens = () => (
           return (
             <div key={s.title}>
               <SectionHeader icon={s.icon} title={s.title} description={s.description} />
-              <div className="grid gap-8 sm:grid-cols-2">
+              <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
                 {items.map((a) => (
                   <ArticleCard
                     key={a.slug}
@@ -150,7 +149,7 @@ const AccessibleAthens = () => (
             title="Planning & Tips"
             description="Practical advice to read before you travel."
           />
-          <div className="grid gap-8 sm:grid-cols-2">
+          <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
             {planningGuides.map((a) => (
               <ArticleCard
                 key={a.slug}
