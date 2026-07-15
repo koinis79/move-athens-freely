@@ -31,9 +31,14 @@ dist-ssr
 # Browser "Save Page As" dumps (e.g. Page Name_files/)
 *_files/
 
-# Raw source photos at repo root — optimize & upload to Supabase Storage, never commit
+# Image optimization working files (never commit).
+# Convention: do all image optimization inside /image-work/ so artifacts can
+# never be committed by accident. Optimized images belong in Supabase Storage,
+# not the repo.
+/image-work/
+/*.webp
+/*.png
 /*.jpg
 /*.jpeg
-/*.png
 /*.heic
 /*.HEIC
