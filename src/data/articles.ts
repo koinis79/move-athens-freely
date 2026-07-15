@@ -30,107 +30,125 @@ export interface Article {
 export const guides: Article[] = [
   {
     slug: "piraeus-cruise-port-wheelchair-guide",
-    title: "Cruise Port Athens: Wheelchair & Scooter Guide",
+    title: "Piraeus Cruise Port: Wheelchair & Mobility Scooter Guide for Your Athens Shore Day",
     excerpt:
-      "Arriving at Piraeus cruise port with a wheelchair or scooter? Everything you need to know about getting to Athens.",
-    date: "2026-04-25",
+      "Cruising to Athens? Get off the ship with ease and have a wheelchair, scooter, or rollator delivered right to Piraeus cruise terminal for your shore day \u2014 from \u20ac49, reserved before you sail.",
+    date: "2026-07-15",
     image: "https://lmgpuqgwkiapgpdsxvmb.supabase.co/storage/v1/object/public/assets/piraeus-cruise-port.png",
     category: "Transport",
-    recommendedEquipment: ["transit-wheelchair", "foldable-travel-scooter"],
+    recommendedEquipment: ["lightweight-folding-wheelchair", "foldable-travel-scooter", "rollator-walker"],
     takeaways: [
-      "Book accessible disembark assistance with guest services before port day",
-      "Metro Line 1 from Piraeus to Monastiraki is fully accessible \u2014 25 minutes",
-      "We deliver rental wheelchairs and scooters to Piraeus terminals for \u20ac25",
+      "We deliver rental wheelchairs, scooters, and rollators to your Piraeus terminal \u2014 \u20ac25, coordinated by WhatsApp",
+      "Reserve before you sail; we hand over at disembarkation and collect before you re-board",
+      "Metro Line 1 from Piraeus to the Acropolis area is step-free \u2014 25 minutes, \u20ac1.20",
     ],
     body: [],
     content: `
-Piraeus is the main cruise port serving Athens \u2014 one of the busiest in the Mediterranean. Thousands of passengers dock here daily, including many with mobility needs.
+Docking at Piraeus for a day in Athens? A cruise stop is short, and the last thing you want is to spend it worrying about mobility. Whether you use a wheelchair full-time or just need help covering Athens' long, uneven distances, a little planning before you sail makes your shore day effortless.
 
-If you\u2019re arriving by cruise ship and using a wheelchair or scooter, here\u2019s your complete guide.
+This guide covers both sides of it: the logistics of getting off the ship and into the city, and how to have a rental wheelchair, scooter, or rollator waiting for you right at the cruise terminal.
 
 ## The Port Layout
 
-Piraeus has multiple cruise terminals:
+Piraeus is the main cruise port serving Athens — one of the busiest in the Mediterranean — with several cruise terminals:
 
-- **Terminal A (Miaoulis)** \u2014 Largest, handles biggest ships
-- **Terminal B (Themistocles)** \u2014 Medium ships
-- **Terminal C (Alkimos)** \u2014 Smaller vessels
+- **Terminal A (Miaoulis)** — the largest, for the biggest ships
+- **Terminal B (Themistocles)** — medium ships
+- **Terminal C (Alkimos)** — smaller vessels
 
-All terminals are accessible, with ramps and elevators where needed.
+All are step-free accessible, with ramps and elevators where needed.
 
 ## Getting Off the Ship
 
-Cruise ships provide accessible gangways. If you need wheelchair assistance:
+Cruise ships provide accessible gangways. If you need disembarkation assistance:
 
 1. Register with guest services before your port day
 2. Accessible passengers usually disembark first or last
-3. Ship crew will assist with gangways and ramps
-4. Port staff can provide wheelchairs at the terminal
+3. Ship crew assist with gangways and ramps
 
-**Scooters:** You can take your mobility scooter ashore. Ships have elevators to the gangway level.
+You can take your own mobility scooter ashore — ships have elevators to the gangway level. But many passengers prefer to travel light and rent on arrival, which is where we come in.
 
-## Your Options Once Ashore
+## How Cruise-Terminal Equipment Delivery Works
 
-### Option 1: Ship-Organized Accessible Tour
+This is the part that makes a shore day easy: we bring the equipment to you.
 
-Easiest but most expensive. Major cruise lines offer accessible shore excursions to the Acropolis and city highlights. Expect \u20ac100-200 per person.
+1. **Reserve before you sail** — book online and tell us your ship, terminal, and arrival date.
+2. **We meet you at the terminal** — our team hand-delivers your wheelchair, scooter, or rollator to the Piraeus cruise terminal (a €25 delivery zone).
+3. **We coordinate by WhatsApp** — on port morning we message you to confirm the exact handover spot and time, so there's no hunting around a busy terminal.
+4. **Explore, then hand it back** — we collect the equipment from the terminal before you re-board. No return trips, no storage.
 
-### Option 2: Rent Equipment + Explore Independently
+Because timing is confirmed live over WhatsApp (+30 697 463 3697), a slightly early or late docking is no problem — we adjust to your ship.
 
-More flexible, often cheaper:
+## Why Rent Instead of Bringing Your Own
 
-1. [Rent a wheelchair or scooter](/equipment) \u2014 We deliver to Piraeus port (\u20ac25 delivery fee)
-2. Take the metro to Athens \u2014 Line 1 from Piraeus station is accessible
-3. Explore at your pace
-4. Return by ship\u2019s departure time
+Bringing your own equipment on a cruise sounds simplest, but for a single port day it rarely is:
 
-### Option 3: Accessible Private Tour
+- **No lugging it through the ship** — gangways, elevators, and tight cabins make maneuvering a personal scooter a hassle.
+- **No wear on your own device** — salt air, ramps, and cobblestones are hard on the equipment you rely on at home.
+- **The right tool for the terrain** — rent exactly what suits an Athens shore day, even if it differs from what you use day to day.
+- **Nothing to charge or store** — we hand it over ready to go and take it back at the end.
 
-Book a private accessible van with driver/guide. [Contact us](/contact) for recommendations.
+If you'd rather travel hands-free and keep your own chair pristine, renting for the day is usually the easier call.
 
-## Metro from Piraeus to Athens
+## What to Rent for a Shore Day
 
-**Accessibility:** Piraeus and Monastiraki stations have elevators. Trains have wheelchair spaces.
+For a Piraeus shore day, three options cover almost everyone:
 
-**Journey:** 25 minutes to Monastiraki (Acropolis area)
+- **[Lightweight folding wheelchair](/equipment/wheelchairs/lightweight-folding-wheelchair)** — easy to push and folds for the metro and taxis. Ideal if a companion is pushing.
+- **[Foldable travel scooter](/equipment/mobility-scooters/foldable-travel-scooter)** — independent mobility over Athens' long distances, and it folds to fit a taxi boot or the metro.
+- **[Rollator walker](/equipment/walking-aids/rollator-walker)** — if you can walk but need support and a place to rest, a rollator with a seat lets you pace yourself.
 
-**Tickets:** \u20ac1.20 per ride
+All rentals start from €49 and are fully sanitized before every handover. Not sure which fits? [Message us](/contact) and we'll advise for your mobility and your plans.
 
-## Our Piraeus Delivery Service
+## Getting to Athens: Metro Line 1
 
-For cruise passengers, we offer:
+The easiest way into the city is the metro:
 
-- Delivery to Piraeus port terminals (\u20ac25 fee)
-- Equipment waiting when you disembark
-- Pickup before you re-board
-- Flexible timing matched to your schedule
+- **Accessibility:** Piraeus and Monastiraki stations have elevators; trains have wheelchair spaces.
+- **Journey:** about 25 minutes to Monastiraki, right by the Acropolis area.
+- **Tickets:** €1.20 per ride.
 
-[Book at least 48 hours before arrival.](/equipment)
+A folding wheelchair or travel scooter makes boarding straightforward. Prefer door to door? A private accessible van is an option — [contact us](/contact) and we'll point you to trusted operators.
 
 ## What You Can See in a Day
 
-**Short Visit (4-5 hours):**
+You have time for the highlights. Two realistic plans:
+
+**Short visit (4–5 hours):**
 - Metro to Monastiraki (25 min)
-- Acropolis Museum (2 hours)
-- Lunch in Plaka (1 hour)
-- Metro back (25 min)
+- Acropolis Museum (fully accessible, ~2 hours)
+- Lunch in Plaka
+- Metro back
 
-**Full Day (7-8 hours):**
-- Morning: Acropolis + Museum
+**Full day (7–8 hours):**
+- Morning: the Acropolis and its museum
 - Lunch: Plaka or Monastiraki
-- Afternoon: National Garden or Syntagma Square
+- Afternoon: the National Garden or Syntagma Square
 
-## Tips for Cruise Day
+The Acropolis itself is more accessible than most people expect — there's a free wheelchair lift to the top. Read our [complete Acropolis wheelchair guide](/accessible-athens/acropolis-wheelchair-guide), which includes a real photo of the accessibility lift shared by one of our customers, before you go.
 
-1. **Disembark early** \u2014 Beat the crowds
-2. **Know your departure time** \u2014 Ships don\u2019t wait
-3. **Carry ship ID** \u2014 Needed to re-board
-4. **Have euros** \u2014 Some places don\u2019t take cards
-5. **Book Acropolis tickets online** \u2014 Skip the line
+## Timing & Reliability: Cruise-Day FAQ
+
+**How far ahead should I book?**
+Reserve as soon as your itinerary is set — ideally a week or more, and at least 48 hours before arrival. Cruise days are busy and equipment is limited.
+
+**What if my ship docks late or leaves early?**
+No problem. We confirm the live handover time by WhatsApp on port morning and adjust to your ship, with buffer built in so a schedule change doesn't cost you your equipment.
+
+**Can I pay in dollars or by card?**
+Booking is by card, online, in euros. For anything you buy ashore, carry some euros — many small cafes and kiosks don't take cards.
+
+**Is the equipment cleaned between customers?**
+Yes. Every wheelchair, scooter, and rollator is fully sanitized before each handover.
+
+**We're stopping at Piraeus on a multi-port cruise — can you still help?**
+Absolutely. A single shore-day rental is exactly what we do. Give us your Piraeus date and terminal and we'll have it ready.
+
+**More questions?** See our [full FAQ](/faq) or message us any time.
 
 ## Ready to Book?
 
-Don\u2019t stay on the ship while others explore. With the right equipment, Piraeus is your gateway to Athens.
+Don't spend your one day in Athens stuck on the ship. Reserve before you sail, and we'll have the right equipment waiting at the terminal.
 
 [Browse equipment](/equipment) | [Contact us](/contact) | WhatsApp: +30 697 463 3697
 `,
