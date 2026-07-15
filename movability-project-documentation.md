@@ -1,56 +1,59 @@
 # MOVABILITY.GR — Project Documentation
 
-> **Single source of truth** for the Movability project. Updated: June 25, 2026.
-> Drop this file in the repo root and have any AI tool (Antigravity, Claude Code, Claude) read it FIRST for full project context.
+> **Single source of truth** for the Movability project. Updated: July 15, 2026.
+> Drop this file in the repo root and have any AI tool (Claude Code, Claude, etc.) read it FIRST for full project context.
 
 ---
 
 ## 1. PROJECT OVERVIEW
 
-**What:** Movability (movability.gr) — Athens-based mobility equipment rental for tourists and locals. Wheelchairs, power wheelchairs, mobility scooters, rollators, knee walkers — delivered to hotels or picked up in-store.
+**What:** Movability (movability.gr) — Athens-based mobility equipment rental for tourists and locals. Wheelchairs, power wheelchairs, mobility scooters, rollators, knee walkers — delivered to hotels/ports/airport or picked up in-store.
 
 **Owner:** Vasilis (vasileios@koinis.gr) — part of **Koinis Healthcare Group** (founded 1982, Corinth; verified). Stores: Athens Center (Stadiou 31), Kallithea (Davaki 16), Chalandri (Kolokotroni 22).
 
-**Status:** LIVE, taking real bookings (~1 every 2 days, ~15/month). Customer base is mostly international tourists (US, UK, EU).
+**Status:** LIVE. **True volume: ~32 bookings / €4,208 per 90 days (~€1,400/mo)** — roughly HALF via WhatsApp/manual admin bookings (invisible to GA4; the bookings table is the source of truth, not analytics). **5 five-star Google reviews** (from zero, via WhatsApp outreach). Google impressions at all-time high; #4 for "wheelchair rental athens". US = premium segment (~€139/booking avg); Greek local market bigger than analytics suggests (WhatsApp bookings are mostly Greek).
 
 ---
 
 ## 2. ⚠️ READ THIS FIRST — HARD-WON LESSONS
 
-1. **A PRICE/VALUE LIVES IN MORE THAN ONE PLACE.** Changing a value in the DB is NOT enough — it's often hardcoded in the frontend too, AND may be guarded by a DB CHECK constraint. After ANY such change, sweep ALL places and test end to end. Cases: equipment prices (DB + `equipmentCatalog.ts`); delivery fees (DB `delivery_zones` + hardcoded `ZONES` in `DeliverySection.tsx` + `HowItWorks.tsx` + article tables); time-slot values (code/UI + DB CHECK constraint).
+1. **A PRICE LIVES IN THREE LAYERS: frontend, edge functions, AND the create_booking RPC.** The RPC (migration `009_validate_booking_price.sql`, since replaced via SQL) recomputes equipment tier + zone fee + surcharge and REJECTS mismatches ("Price mismatch" / Greek "Ασυμφωνία τιμής"). July outage: surcharges added frontend-only → every surcharged booking silently rejected ~11 days in peak season. **Follow-up bug:** the first RPC fix applied the Sunday +€50 only when a time slot was selected — customers with slot "tbc"/null were still rejected. Fixed: **Sunday surcharge is slot-INDEPENDENT in all three layers** (evening/Sat-evening still require a slot). Any price-logic change → check all three layers.
 
-2. **DB CHECK CONSTRAINTS silently block new values → live payment outage.** When the surcharge feature saved `delivery_time_slot = 'daytime'`, the constraint only allowed old values → bookings REJECTED at payment. Before saving any new value to a column, check its constraints:
-   `SELECT conname, pg_get_constraintdef(oid) FROM pg_constraint WHERE conrelid = 'bookings'::regclass;`
-   Known constraints on `bookings`: status, payment_type (full/deposit), payment_status (pending/paid/deposit_paid/refunded/failed), delivery_time_slot (daytime/evening/morning/afternoon/tbc/null).
+2. **TEST A MATRIX, NOT A TEST CASE.** After any pricing/booking change: one complete booking per branch — daytime weekday / evening / Sunday / Sunday-with-no-slot / store pickup. The outage survived because every test happened to be a no-surcharge combo.
 
-3. **TEST A COMPLETE BOOKING END TO END, not just the price display.** Display correct ≠ saves to DB. Complete a real booking (admin New Booking, or tiny real checkout) — that's the only test that catches DB-level rejections.
+3. **GREP FOR THE ERROR STRING BEFORE FIXING.** The first outage fix patched create-checkout-session — which contains NO validation. Locate the code that raises the error, then fix that layer. RPC fixes = SQL in the SQL Editor (live instantly); edge functions = manual redeploy + verify the deployed code.
 
-4. **Browser-called edge functions need CORS + OPTIONS handled BEFORE auth.** When the admin browser started calling `send-booking-confirmation` (historically webhook-only), it failed with an opaque "network error." Cause: the browser sends an `OPTIONS` preflight with NO auth header; the function ran the auth check first → 401 (without CORS headers) → browser blocked everything. Fix (matches `send-review-request`): handle `OPTIONS` FIRST, include `corsHeaders` on the 401 response, add `Access-Control-Allow-Methods`. **Any function called from the admin browser must follow this order.**
+4. **REJECTED PAYMENTS ARE INVISIBLE.** create_booking rejections aren't logged/alerted; customers leave silently. Discovered only via one customer email. → Top pending build: alert on rejected bookings.
 
-5. **`INTERNAL_API_KEY` must be IDENTICAL everywhere — ~5 places:** Supabase Edge Function Secrets (`INTERNAL_API_KEY`), Vercel env (`VITE_INTERNAL_API_KEY`), the pg_cron job SQL, and any curl/test scripts. Drift → 401. Rotation = update ALL + redeploy functions + redeploy Vercel + recreate cron.
+5. **Supabase Storage dashboard does NOT overwrite same-named uploads** — it silently keeps the old object. To replace a file: DELETE it, VERIFY it's gone from the list, then upload. (Scripts can use `upsert: true`.) This silently ate an hour during the Piraeus hero swap.
 
-6. **When scheduling pg_cron jobs, REPLACE the key placeholder.** The digest cron silently 401'd for 2 days because the SQL kept the literal `YOUR_INTERNAL_API_KEY_HERE`. Cron `status: succeeded` only means the HTTP request was *sent*, not accepted. Verify with `SELECT jobname, command FROM cron.job;` and a manual fire.
+6. **AI-generated images MUST be actually optimized before upload.** Renaming .png→.webp does nothing. Pipeline: generate → Claude Code converts (real WebP, ~1600px, q80, target <300 KB; raw Gemini PNGs are ~9 MB) → **crop the Gemini "sparkle" watermark (bottom-right)** → upload → **Copy URL from the stored file** (never reconstruct URLs from memory) → swap. Delete raw PNGs from Desktop after (wrong-file uploads happened twice).
 
-7. **NEVER use `SUPABASE_`-prefixed secrets for function/cron auth** — runtime rewrites the Authorization header → 401. Use `INTERNAL_API_KEY`.
+7. **DB CHECK CONSTRAINTS silently block new values.** Before saving new values: `SELECT conname, pg_get_constraintdef(oid) FROM pg_constraint WHERE conrelid = 'bookings'::regclass;`
 
-8. **Edge functions do NOT deploy from git.** After pushing, manually redeploy in Supabase Dashboard (GitHub → Raw → copy → paste → Deploy). Right code in the right slot.
+8. **New dashboard-created edge functions have "Enforce JWT verification" ON by default** — rejects INTERNAL_API_KEY at the gateway (`UNAUTHORIZED_INVALID_JWT_FORMAT`, ≠ your function's 401). Turn it OFF for INTERNAL_API_KEY functions.
 
-9. **ONE repo only:** `~/Desktop/move-athens-freely`. (Old `~/Desktop/KOINIS/` retired; assets in `~/Desktop/KOINIS-assets/`.)
+9. **RLS: anonymous forms can INSERT but not SELECT back** (id readback returns null). Pass payloads forward instead of reading back after insert.
 
-10. **Always `npm run build` before pushing; confirm Vercel "Ready" after.**
+10. **Browser-called edge functions: CORS/OPTIONS handled BEFORE auth**, corsHeaders on the 401 (else opaque "network error"). Copy the send-review-request pattern.
 
-11. **Products & delivery zones live in the Supabase DB**, not code. Edit via SQL/admin; read the real schema first, don't guess columns. (e.g. date columns are `rental_start`/`rental_end`, not `start_date`/`end_date`.)
+11. **`INTERNAL_API_KEY` identical everywhere (~5 places):** Supabase Edge Secrets, Vercel `VITE_INTERNAL_API_KEY`, the pg_cron job SQL, scripts. Never `SUPABASE_`-prefixed secrets for function/cron auth. pg_cron: verify the key placeholder was replaced; "succeeded" only means the HTTP request was sent.
 
-12. **Equipment images:** bucket `equipment-images`, folder `equipment/`, `.webp`. Store filenames with REAL spaces in the DB; the browser encodes `%20`.
+12. **Edge functions do NOT deploy from git** — manual redeploy, then VERIFY the deployed code contains your change.
 
-13. **curl runs in the TERMINAL; SQL in the Supabase SQL Editor.** Don't paste one into the other ("syntax error at or near..." usually means JSON/curl got pasted into the SQL editor).
+13. **ONE repo:** `~/Desktop/move-athens-freely`. `npm run build` before push; Vercel green after. Products/zones live in the DB (columns: `rental_start`/`rental_end`). Equipment images: `equipment-images/equipment/`, article heroes: `equipment-images/articles/`, testimonial photos: `equipment-images/testimonials/`. curl in Terminal, SQL in SQL Editor. **articles.ts: a syntax error breaks the WHOLE build.**
+
+14. **SPA meta-tag caveat:** article URLs serve the generic homepage meta tags to non-JS crawlers (react-helmet sets them client-side). Google is fine (executes JS — impressions prove it), but social/WhatsApp link previews of articles show the generic card. Future SEO polish item.
+
+15. **Bulk find-and-replace can miss instances with different indentation.** Jul 15 card-grid unification: replace_all matched the themed-section grids but silently missed Planning & Tips (different whitespace). After any multi-instance edit, grep to confirm ALL intended occurrences changed.
 
 ---
 
-## 3. TECH STACK
+## 3. TECH STACK & TOOLS
 
-React + Vite + Tailwind · Supabase (Postgres + Auth + Edge Functions + Storage + pg_cron/pg_net) · Stripe (LIVE) · Resend (sender `hello@movability.gr`) · Vercel (auto-deploy from GitHub `main`) · GA4 (G-8RD4VHF74X) + Search Console · Papaki DNS + ImprovMX forwarding (catch-all active) · EN/GR i18n.
-Local repo: `~/Desktop/move-athens-freely`. Tool: **Antigravity** (Google AI IDE). Node v20 reinstalled to /tmp each session. GitHub CLI authed as koinis79.
+React + Vite + Tailwind · Supabase (Postgres + Edge Functions + Storage + pg_cron/pg_net) · Stripe (LIVE) · Resend (`hello@movability.gr`) · Vercel (auto from GitHub `main`) · GA4 (G-8RD4VHF74X) + Search Console · Papaki DNS + ImprovMX · EN/GR i18n.
+
+**Coding tool: Claude Code** (`cd ~/Desktop/move-athens-freely && claude`; resume with `claude --continue`). Reads this doc first; edits, builds, commits, pushes. Node gets reinstalled to /tmp per session when needed. Image optimization happens through it (see lesson 6). Claude-in-Chrome browser automation has been unreliable — human eyeballs the live site instead.
 
 ---
 
@@ -58,195 +61,159 @@ Local repo: `~/Desktop/move-athens-freely`. Tool: **Antigravity** (Google AI IDE
 
 | Resource | URL |
 |---|---|
-| Live site | https://movability.gr |
-| Admin | https://movability.gr/admin |
+| Live site / Admin | https://movability.gr · /admin |
 | GitHub | https://github.com/koinis79/move-athens-freely |
 | Supabase | https://supabase.com/dashboard/project/lmgpuqgwkiapgpdsxvmb |
-| Stripe | https://dashboard.stripe.com |
-| Resend | https://resend.com/emails |
-| Google Review | https://g.page/r/CRIC4z0HieHaEBM/review (also https://movability.gr/review) |
+| Stripe / Resend | dashboard.stripe.com · resend.com/emails |
+| Google Review | https://g.page/r/CRIC4z0HieHaEBM/review (= movability.gr/review) |
 
-**Supabase Project ID:** `lmgpuqgwkiapgpdsxvmb`
-
----
-
-## 5. CONTACT & BUSINESS INFO
-
-- Customer sender: hello@movability.gr · Public/reply: info@movability.gr → forwards to info@koinis.gr
-- Admin notification + daily digest recipient: info@koinis.gr
-- WhatsApp: +30 697 463 3697
-- Admin users: vasileios@koinis.gr, kalogeropoulosbill6@gmail.com (Bill / Vasilis Giannakopoulos)
+Contacts: hello@movability.gr (sender) · info@movability.gr → info@koinis.gr (admin/digest/notifications) · WhatsApp +30 697 463 3697 · Admins: vasileios@koinis.gr, kalogeropoulosbill6@gmail.com (Bill).
 
 ---
 
-## 6. EQUIPMENT & PRICING
+## 5. EQUIPMENT & PRICING
 
-⚠️ **Per RENTAL PERIOD, not per day.** Source of truth: Supabase `equipment` table.
+⚠️ **Per RENTAL PERIOD, not per day.** Source of truth: `equipment` table.
 
-| Product | Slug | 1–3d | 4–7d | 8–14d | 15–30d |
-|---|---|---|---|---|---|
-| Manual Wheelchair | manual-wheelchair | €49 | €79 | €149 | €199 |
-| Transit Wheelchair | transit-wheelchair | €49 | €79 | €149 | €199 |
-| Lightweight Folding Wheelchair | lightweight-folding-wheelchair | €79 | €99 | €179 | €249 |
-| Electric Mobility Scooter | electric-mobility-scooter | €120 | €220 | €300 | €400 |
-| Foldable Travel Scooter | foldable-travel-scooter | €150 | €250 | €350 | €450 |
-| Foldable Power Wheelchair | foldable-power-wheelchair | €150 | €250 | €350 | €450 |
-| Rollator Walker | rollator-walker | €49 | €79 | €149 | €199 |
-| Knee Walker (Knee Scooter) | knee-walker | €49 | €79 | €149 | €199 |
+| Product | 1–3d | 4–7d | 8–14d | 15–30d |
+|---|---|---|---|---|
+| Manual / Transit Wheelchair, Rollator, Knee Walker | €49 | €79 | €149 | €199 |
+| Lightweight Folding Wheelchair | €79 | €99 | €179 | €249 |
+| Electric Mobility Scooter | €120 | €220 | €300 | €400 |
+| Foldable Travel Scooter / Foldable Power Wheelchair | €150 | €250 | €350 | €450 |
 
-Knee Walker: category `walking-aids`, max 136kg, crutch alternative. Foldable Travel Scooter: 5-image gallery. Images in `equipment-images/equipment/*.webp`.
+Product pages show per-day equivalents ("~€16/day") + "from €49" badges. "Most Popular" badge on 4–7d (intentional).
 
-### Delivery zones — ONLY 4 ACTIVE
+### Delivery zones (4 active)
+Store Pickup €0 (choose 1 of 3 stores) · Athens City €20 · Athens Airport €50 · Piraeus Cruise Terminal €25. (9 inactive legacy rows — deactivate, never delete.) "Free store pickup," never "free delivery."
 
-| Customer sees | slug | zone fee |
-|---|---|---|
-| Store Pickup | store-pickup | €0 |
-| Athens City | athens-city | €20 |
-| Athens Airport | athens-airport | €50 |
-| Piraeus Cruise Terminal | piraeus-port | €25 |
-
-13 rows total; 9 inactive (legacy/dupes). Deactivate (never delete) anything with bookings. Say "Free store pickup," never "free delivery." Store Pickup → customer picks 1 of 3 stores at checkout (saved to `delivery_address`).
-
-### ⭐ DELIVERY SURCHARGES (time + day, on top of zone fee, DELIVERY ONLY)
-
-Slots (only two): `daytime` Daytime 09:00–17:00 → +€0 · `evening` Evening 17:00–21:00 → +€20.
-Weekend (REPLACES time surcharge): any Sunday → +€50; Saturday evening → +€50; Saturday daytime → +€0.
-Logic order in shared `getDeliverySurcharge()` (DeliverySection.tsx): pickup→€0; Sunday→€50; Sat evening→€50; else slot value. Computed from `rentalStart` day-of-week. Frontend is the authoritative price calc (create_booking RPC is a pass-through, no server validation). Admin New Booking modal uses the same shared function.
+### Surcharges (delivery only, on top of zone fee)
+`daytime` 09–17 +€0 · `evening` 17–21 +€20. Weekend REPLACES: **Sunday any slot (or NO slot) → +€50** · Saturday evening → +€50 · Saturday daytime normal. Implemented in THREE agreeing layers: frontend `getDeliverySurcharge()` (DeliverySection.tsx) · create_booking RPC (SQL) · admin NewBookingModal. Day-of-week: `EXTRACT(DOW FROM p_rental_start)`, Sunday=0, timezone-safe.
 
 ---
 
-## 7. EMAIL & AUTOMATION
+## 6. EMAIL & AUTOMATION
 
 ```
-Stripe checkout → stripe-webhook → send-booking-confirmation
-                                     ├── Customer confirmation (hello@movability.gr)
-                                     └── Admin notification → info@koinis.gr
-Admin New Booking (WhatsApp/phone) → send-booking-confirmation (checkbox, default ON)
-Admin marks "Completed" → send-review-request → Customer review email (hello@)
-pg_cron daily 08:30 Athens → send-daily-digest → info@koinis.gr
+Stripe checkout → stripe-webhook → send-booking-confirmation (customer + admin)
+Admin New Booking → send-booking-confirmation (checkbox, default ON)
+Admin "Completed" → send-review-request
+/contact + /partners → contact_inquiries + send-contact-notification → info@koinis.gr
+pg_cron 08:30 Athens → send-daily-digest (deliveries/pickups/tomorrow/pending + unread inquiries)
 ```
-
-Auth: ALL functions use `INTERNAL_API_KEY`. Browser-triggered calls (admin review, admin confirmation) use `VITE_INTERNAL_API_KEY` (must equal Supabase secret) — and the function MUST handle CORS/OPTIONS before auth (see lesson 4). Bodies: send-review-request = `{booking_id}`; send-booking-confirmation = `{booking_number}`; send-daily-digest = `{}`. Resend recipients must be a flat array. Emails land in Gmail Promotions (acceptable). The confirmation email says "Booking Confirmed" (not "Payment received"), so it's safe for unpaid bookings.
-
-`timeSlotLabel()` (in send-booking-confirmation, send-daily-digest, admin BookingsNew): daytime→"Daytime (09:00–17:00)", evening→"Evening (17:00–21:00)", legacy morning/afternoon handled, tbc/null→"To be confirmed".
-
-### Edge functions (all deployed, all INTERNAL_API_KEY auth)
-create-checkout-session · stripe-webhook · send-booking-confirmation (now CORS-safe for browser) · send-review-request · send-daily-digest
-
-### Daily digest cron (LIVE)
-Job `daily-digest-email`, `30 5 * * *` (05:30 UTC = 08:30 Athens summer), active.
-⚠️ **Winter (late Oct):** `SELECT cron.unschedule('daily-digest-email');` then recreate with `30 6 * * *`.
-Health: `SELECT jobid,jobname,schedule,active FROM cron.job;` / `SELECT * FROM cron.job_run_details WHERE jobid=<N> ORDER BY start_time DESC;`
-
-### Manual test/resend (run in TERMINAL)
-```
-curl -s -X POST ".../functions/v1/send-booking-confirmation" -H "Authorization: Bearer <KEY>" -H "Content-Type: application/json" -d '{"booking_number":"MOV-XXXX"}'
-curl -s -X POST ".../functions/v1/send-daily-digest" -H "Authorization: Bearer <KEY>" -H "Content-Type: application/json" -d '{}'
-```
+All INTERNAL_API_KEY auth. Browser-called functions: CORS-before-auth + JWT-verification OFF. Bodies: review `{booking_id}` · confirmation `{booking_number}` · contact-notification direct payload · digest `{}`.
+6 functions deployed: create-checkout-session · stripe-webhook · send-booking-confirmation · send-review-request · send-daily-digest · send-contact-notification.
+Digest cron `30 5 * * *` (=08:30 Athens summer), jobid 3. **Late Oct → `30 6 * * *`.**
 
 ---
 
-## 8. PAYMENT STATUS (admin)
+## 7. BOOKING & PAYMENT INTERNALS
 
-Admin New Booking offers 3 payment states (mapped to existing constraint values):
-- **Paid in full** → payment_status `paid`, payment_type `full` (default)
-- **Deposit paid** → `deposit_paid` / `deposit`
-- **Unpaid / Awaiting payment** → `pending` / `full` (we do NOT offer "pay on delivery" as a service — this is just an internal "not paid yet" state)
-
-Admin bookings list/cards/slide-over show a color-coded payment badge (green Paid, blue Deposit, amber Unpaid, grey Refunded, red Failed). The slide-over has buttons to UPDATE payment status after creation (mark Paid when money arrives). ⚠️ `payment_status` (money truth, set by Stripe webhook for website bookings) is independent of `status` (operational label you click). To verify a real payment, check Stripe (a `cs_live_` session + Succeeded charge) — not the manual status.
-
----
-
-## 9. SECRETS
-
-| Secret | Location |
-|---|---|
-| `INTERNAL_API_KEY` | Supabase Edge Function Secrets (must equal Vercel key + cron SQL) |
-| `VITE_INTERNAL_API_KEY` | Vercel Env (browser→function auth) |
-| `RESEND_API_KEY` / `STRIPE_SECRET_KEY` / `STRIPE_WEBHOOK_SECRET` | Supabase Edge Function Secrets |
-
-⚠️ **Rotate `INTERNAL_API_KEY`** — exposed in plaintext during debugging. Touches ~5 places: Supabase secret, Vercel env, pg_cron job (unschedule + recreate), redeploy all functions + Vercel.
+- **create_booking RPC** = insert + PRICE VALIDATION (tier + zone + surcharge; Sunday slot-independent). Rejections say "Price mismatch: expected X, got Y". Current version replaced via SQL Jul 5–7 (fix_create_booking.sql pattern; latest includes the tbc-slot Sunday fix). **Source-controlled copy: `sql/create_booking_rpc.sql`** — any SQL Editor change to the RPC must update this file in the same commit.
+- **create-checkout-session** = Stripe line items from the saved row; NO validation here.
+- `payment_status` (webhook truth) ≠ `status` (manual label). Admin states: Paid in full / Deposit / **Unpaid–Awaiting payment** + badges + update buttons. Verify real payments in Stripe (cs_live_ + Succeeded).
+- Admin New Booking = fallback path when checkout misbehaves (bypasses Stripe flow).
+- **~Half of all bookings are WhatsApp/manual** — GA4 sees none of them; conversion analytics describe only the website slice. Mobile "drop-offs" partly convert via WhatsApp. True volume: query the bookings table.
 
 ---
 
-## 10. KEY FILE PATHS (under ~/Desktop/move-athens-freely)
+## 8. CONTENT & SEO
+
+### Articles (in `src/data/articles.ts` — syntax error breaks the build)
+~17 guides + blog posts, organized on the Accessible Athens page (Jul 15) into: **⭐ Featured/Start Here** (Acropolis guide first · Honest Truth · Airport arrival) + themed sections (Sights/Food & Beaches · Equipment Guides · Getting Around · Planning/Tips), driven by each article's `category` field. Slugs/URLs unchanged (SEO history preserved). **All sections render identical 3-up ArticleCard grids** (Jul 15) — Start Here distinguished by its tinted band + ⭐ header only, not by card styling.
+
+Key pieces:
+- **Acropolis wheelchair guide** (`/accessible-athens/acropolis-wheelchair-guide`) — flagship; refreshed Jul 14 with verified facts + **Eliana's REAL customer photo of the lift** (unique online; `testimonials/eliana-acropolis-lift.jpg`, credited). Verified facts: lift on the north slope (Dec 2020 panoramic elevator, 2 wheelchairs+companions), call ahead +30 210 321 4172, green-gate taxi drop-off, free admission for disabled visitors, Akropoli metro Line 2 accessible.
+- **Knee walker article** (`knee-walker-rental-athens`) — new Jul 14; targets "knee walker/knee scooter rental athens" + local Greek recovery market.
+- **Piraeus cruise guide** (`piraeus-cruise-port-wheelchair-guide`) — MERGED Jul 15 (old thin logistics piece + new rental-focused content) into one ~1,000-word definitive guide on the original slug. Landing page for the Nov US ads.
+
+### Article images
+- The article renderer (renderMarkdown in ArticleDetail.tsx) supports inline images: a `![caption](url)` line alone → centered figure + caption (added Jul 14).
+- Hero pipeline: generate (Gemini/Ideogram) → optimize via Claude Code (lesson 6) → upload to `equipment-images/articles/` → Copy URL → swap the article's `image` field. Heroes live: knee-walker-athens-guide.webp · acropolis-wheelchair-guide.webp · piraeus-cruise-guide.webp.
+- Generated images are for atmosphere/heroes only — product detail photos stay real. Real customer photos (permission required — Eliana granted, credited "Foto: Eliana F.") beat generated ones.
+- **Image work convention:** all optimization sessions happen inside `/image-work/` (gitignored, along with root-level .webp/.png/.jpg) so artifacts can never be committed by accident.
+
+### Homepage
+Real testimonials (Susan K. · Berk G. · Eliana F. with Italian + translation + her real hotel-room photo) + "See all on Google" link (hover fixed). Header: one-line nav (collapses to hamburger below 1280px), "Partner With Us" link. Pricing display: per-day equivalents.
+
+### Review engine (proven playbook — §13 of previous docs)
+WhatsApp ask AFTER rental ends, name+equipment personalized, "family business" wording → 5 reviews from ~14 asks. Always reply publicly in the reviewer's language. Recipients query: bookings where rental_end < today, phone present, status delivered/completed. Photos need explicit permission; review text on-site OK with first-name + initial.
+
+---
+
+## 9. ANALYTICS TRUTHS (as of Jul 2026)
+
+- GA4 sees only website bookings (half the business). GSC is the SEO truth: impressions ~90–105/day (all-time high), #4 "wheelchair rental athens". The 16 "page with redirect" GSC items = old stable noise.
+- Channels (website slice): Organic = the booking engine · Direct inflated by self-testing · **AI Assistant** (ChatGPT/Copilot) = small but high-converting emerging channel — structured data/FAQ-friendliness feeds it · Referral ≈ Stripe bounce-backs, ignore.
+- Devices: mobile majority (recent) and growing; desktop converts ~2× on-site BUT mobile users partly convert via WhatsApp instead. Mobile flow human-tested = smooth.
+- Countries (website): US = premium (~€139/booking) · Greece bigger than it looks (WhatsApp) · long EU tail. Nov–Feb Google Ads (€350 credit): target US first.
+
+---
+
+## 10. KEY FILE PATHS
 
 | File | Purpose |
 |---|---|
-| `src/data/articles.ts` | SEO articles; syntax error breaks WHOLE build; hardcoded delivery-fee tables |
-| `src/data/equipmentCatalog.ts` | Static catalog for article CTA cards only |
-| `src/components/checkout/DeliverySection.tsx` | Checkout delivery UI + ZONES array + getDeliverySurcharge/getDeliveryFee + 3-store picker + slot picker |
-| `src/components/equipment/BookingPanel.tsx` | Product-page booking panel (reads zone fees from DB); surcharge note; date-picker |
-| `src/pages/Checkout.tsx` | Threads rentalStart into fee calc; saves slot to p_delivery_time_slot |
-| `src/pages/FAQ.tsx` | English-only FAQ (22 entries); FAQPage JSON-LD auto via sections.flatMap() |
-| `src/pages/HowItWorks.tsx` | Hardcoded delivery-zones table |
-| `src/pages/admin/BookingsNew.tsx` | Admin bookings + New Booking + review trigger + payment badges + updatePaymentStatus + timeSlotLabel |
-| `src/components/admin/NewBookingModal.tsx` | Manual booking wizard (create_booking RPC) + surcharge + payment selector + auto confirmation email (checkbox) |
-| `vercel.json` | /review redirect |
-| `supabase/functions/*` | the 5 edge functions |
-| `.gitignore` | includes `*_files/` |
+| `src/data/articles.ts` | All articles; categories drive the organized listing; ⚠️ fragile |
+| `src/pages/ArticleDetail.tsx` | renderMarkdown incl. `![caption](url)` image support |
+| Accessible Athens listing page | Shared `ArticleCard` component + unified 3-up grid (`grid gap-6 sm:grid-cols-2 lg:grid-cols-3`) across all sections — card styling lives in ONE place |
+| `src/components/checkout/DeliverySection.tsx` | ZONES + getDeliverySurcharge/getDeliveryFee + store picker + slot picker |
+| `src/components/equipment/BookingPanel.tsx` | Product booking panel (per-day display) |
+| `src/pages/Checkout.tsx` | Fee calc + create_booking call |
+| `src/pages/Contact.tsx` / `Partners.tsx` | Forms → contact_inquiries + notification |
+| `src/pages/admin/BookingsNew.tsx` / `NewBookingModal.tsx` | Admin bookings; payment states; surcharge; confirmation email |
+| `src/components/.../TestimonialsSection.tsx` | Real reviews + Eliana's photo |
+| `Header.tsx` / `Footer.tsx` | One-line nav (xl breakpoint), Partner With Us |
+| `sql/create_booking_rpc.sql` | Source-controlled copy of the live create_booking RPC — update in the SAME commit as any SQL Editor change to the RPC |
+| `supabase/migrations/009_validate_booking_price.sql` | Where price validation originated (RPC since replaced via SQL) |
+| `supabase/functions/*` | 6 edge functions |
+| `scripts/upload-testimonial-images.ts` | Service-role storage upload pattern (upsert) |
 
 ---
 
-## 11. RECENT WORK LOG
+## 11. RECENT WORK LOG (July)
 
-### June 25
-- **Admin payment-status clarity** (commit 8015e04, reworded 221c197): 3 payment states + color badges in list/cards/slide-over + update-after-creation. "Unpaid / Awaiting payment" wording (not "pay on delivery").
-- **CORS bug fixed** in send-booking-confirmation (commit f4fb760): OPTIONS preflight moved before auth + corsHeaders on 401, so the admin "send confirmation email" works from the browser. Redeployed.
-- Verified payment of MOV-DD12F82562 (William Pappas, €69 — cs_live_ session, webhook-set paid).
-- **WhatsApp review push:** sent personalized (name + equipment) review-request messages to 13 customers whose rentals had ENDED. Skipped customers still renting. (First real review-collection effort.)
-
-### Earlier June (16–22)
-- Delivery surcharge feature + live constraint outage fix. Daily digest built, scheduled, cron placeholder-key fixed. Admin New Booking auto-confirmation email. Knee Walker product. Athens City €10→€20. Foldable scooter gallery. 5 new FAQs. Email outage fixed. Date-picker fix. Repo consolidated + cleaned.
+- **Jul 15 (later session):** Accessible Athens card layout unified — Start Here, all three themed sections, and Planning & Tips now render the identical compact 3-up grid through one shared ArticleCard component (featured per-card ring/shadow removed; Start Here distinguished by tinted band only). Layout-only change, articles.ts untouched, build green. Mid-task catch: replace_all missed the Planning & Tips grid (different indentation) → fixed explicitly, all grids verified identical (→ lesson 15). Repo housekeeping DONE (commit 83aa3b9): image artifacts deleted (verified gone), fix_create_booking.sql → `sql/create_booking_rpc.sql` with sync-note header (158-line RPC body intact), .gitignore consolidated into one documented image block (`/image-work/` + root .webp/.png/.jpg/.jpeg/.heic). Workflow rule added: every session ends with this doc updated (work log, pending tasks, new lessons) and re-uploaded to Claude project knowledge.
+- **Jul 15:** Piraeus cruise guide merged+expanded (1,011 words, original slug) + optimized watermark-cropped hero. Accessible Athens page reorganized (featured band + themed sections, blog posts pulled in). Storage overwrite lesson learned.
+- **Jul 14:** Knee walker article live. Acropolis guide: Eliana's lift photo inserted (renderer taught image syntax) + generated cover. Knee walker hero (8.8MB→179KB optimization saga → pipeline established). Header nav wrapping fixed (xl breakpoint). Reviews-button hover fixed. **5th review (Thomas B.)**.
+- **Jul 7:** Sunday-surcharge tbc-slot follow-up bug fixed in RPC (slot-independent). Christos booked manually (MOV-C96C1CF52B).
+- **Jul 5:** THE PRICE-VALIDATION OUTAGE fixed (RPC, after wrong-layer first attempt). Claude Code adopted. Traffic investigation: no SEO problem; impressions record-high; "drop" = comparison artifact + reduced self-testing.
+- **Late June:** contact/partner forms fixed + notification system (JWT + RLS lessons). Payment-status feature. Review engine launched → 4 reviews. Eliana's photos approved + testimonial photo live. Pricing display clarified. Partner With Us surfaced.
 
 ---
 
 ## 12. PENDING TASKS
 
-### Soon
-- [ ] **Rotate `INTERNAL_API_KEY`** (exposed) — ~5 places (§9).
-- [ ] **Delete stale `~/Desktop/KOINIS/` folder.**
-- [ ] **Mark ended rentals "Completed"** (most sit on "delivered") so the automated review email fires. Many past bookings never triggered it.
-- [ ] **Make review outreach a routine** — every week or two, WhatsApp the batch whose rental just ended. (Idea: one-tap "Send review request" WhatsApp button in admin.)
-- [ ] **Late October:** digest cron → `30 6 * * *` for winter.
+### Queue (priority order)
+- [ ] **Alert on rejected bookings** (create_booking "Price mismatch" etc. → email info@koinis.gr). Would have caught the 11-day outage on day one. HIGHEST VALUE.
+- [ ] **Verify `sql/create_booking_rpc.sql` matches the live RPC**: `SELECT pg_get_functiondef('create_booking'::regproc);` in SQL Editor — if it differs (esp. Sunday slot-independent logic), paste the live definition into the file in a follow-up commit.
+- [ ] **Visual check** movability.gr/accessible-athens after deploy — 3-up grids on desktop, clean 1-column collapse on mobile (hard refresh).
+- [ ] **Abandoned-cart recovery email** — targets the mobile-browse-book-later pattern the device data revealed.
+- [ ] **booking_source field** on admin bookings (WhatsApp/Phone/Walk-in dropdown) → true channel mix forever.
+- [ ] **Rotate INTERNAL_API_KEY** (~5 places).
+- [ ] Mark ended rentals "Completed" (fires auto review email); keep WhatsApp review routine.
+- [ ] Sameh Adly (3 pending bookings, scooter Jul 14–19) — was dropped; check if resolved/expired.
+- [ ] **Late October:** digest cron → `30 6 * * *`.
 
-### Later / ideas
-- Knee Walker SEO article. Abandoned-cart email. Checkout upsells. Cruise/Piraeus landing page. Hotel/Airbnb flyer. WhatsApp booking confirmations. Double-booking/inventory check. Clean 9 inactive zones. Greek FAQ page. Less-promotional review email. Google Ads (€350 credit, low season). US conversion. Instagram/FB + footer links. Cancel Lovable. Install Node permanently.
-
----
-
-## 13. WHATSAPP REVIEW TEMPLATES
-
-Personalize name + equipment; send only AFTER the rental has ENDED (not while customer still has the item). Send to most-recent first.
-
-**EN:** Hi [name]! Vasilis from Movability here — hope the [equipment] made your Athens trip easier! If you have 30 seconds, a Google review would mean the world to our family business: https://movability.gr/review 🙏
-
-**GR:** Γεια σας [όνομα]! Ο Βασίλης από τη Movability — ελπίζω ο εξοπλισμός να έκανε την επίσκεψή σας στην Αθήνα πιο εύκολη! Αν έχετε 30 δευτερόλεπτα, μια κριτική στο Google θα σήμαινε πολλά για την οικογενειακή μας επιχείρηση: https://movability.gr/review 🙏
-
-Find recipients (rental ended, has phone):
-```sql
-SELECT b.booking_number, b.customer_name, b.customer_phone, e.name_en AS equipment, b.rental_end
-FROM bookings b
-LEFT JOIN booking_items bi ON bi.booking_id = b.id
-LEFT JOIN equipment e ON e.id = bi.equipment_id
-WHERE b.customer_phone IS NOT NULL AND b.customer_phone != ''
-  AND b.rental_end < CURRENT_DATE
-  AND b.status IN ('completed','picked_up','delivered','in_use')
-ORDER BY b.rental_end DESC LIMIT 30;
-```
+### Content / marketing
+- Nov–Feb Google Ads (€350, US-first) — landing page: the Piraeus cruise guide.
+- Next articles: accessible beaches (seasonal) · metro/transport deep-dive · cobblestones guide (from customer feedback).
+- Add 4th/5th reviews to homepage testimonials rotation someday. Article social-preview meta tags (lesson 14). Instagram/FB. Greek FAQ.
 
 ---
 
-## 14. BRAND
+## 13. BRAND
 
 Primary `#2563EB` · Secondary `#F59E0B` · Accent `#65A30D` · Text `#1F2937` · Bg `#FAFAF9`. Warm "you" language, "mobility equipment" not "medical devices," WCAG 2.1 AA. Trust anchor: Koinis Healthcare since 1982.
 
 ---
 
-## 15. WORKFLOW
+## 14. WORKFLOW
 
-Claude writes prompt → Antigravity edits in `~/Desktop/move-athens-freely` → `npm run build` → push → Vercel green → hard-refresh & verify. Edge functions: redeploy manually in Supabase, then curl-test. DB/zone/product changes: SQL or admin, read real schema first. **After any price/value change: sweep frontend for hardcoded copies, check DB CHECK constraints, complete one real end-to-end booking through payment.** Browser-called functions need CORS/OPTIONS before auth. Fix EN+GR together. curl in Terminal, SQL in SQL editor. Verify in dashboards, never trust UI success alone.
+Claude (chat) writes prompts → **Claude Code** executes in the repo (reads this doc first) → build → push → Vercel green → **human eyeballs the live site**. Edge functions: manual redeploy + verify deployed code. RPC: SQL in SQL Editor + sync `sql/create_booking_rpc.sql` in the same commit. **Price/booking changes: test the full matrix through to Stripe (incl. Sunday-no-slot).** Images: the §8 pipeline, inside `/image-work/`. Storage replacements: delete → verify gone → upload. Grep error strings before fixing; after multi-instance edits, grep to confirm ALL occurrences changed (lesson 15). Copy URLs from stored files. curl in Terminal, SQL in SQL Editor. Verify in dashboards; never trust UI success alone.
+
+**End of every session:** update this doc — Recent Work Log, Pending Tasks (check off done / add new), and any new hard-won lesson — commit it to the repo AND re-upload it to Claude project knowledge so the next chat session starts current.
 
 ---
 
-*Last updated: June 25, 2026*
+*Last updated: July 15, 2026*
