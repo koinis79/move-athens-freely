@@ -1654,7 +1654,7 @@ Ready to make it easy? [See our mobility equipment and book delivery to your hot
     image: packingImg,
     category: "Tips",
     takeaways: [
-      "Bring your disability card — it means free admission at the Acropolis",
+      "Free Acropolis admission for a documented 67%+ disability + one companion — bring your certificate (checked on-site, issued at the ticket desk, not online)",
       "Greece uses Type C/F plugs (230V) — pack adapters for your chargers",
       "Skip bulky equipment — renting on arrival with hotel delivery is easier than transporting your own",
     ],
@@ -1666,7 +1666,7 @@ Packing for an accessible trip to Athens is mostly the same as any trip — with
 
 Keep the essentials together and easy to reach:
 
-- **Proof of disability.** Bring your disability card or medical documentation. At the Acropolis, disabled visitors and one companion are admitted **free** — having your documentation on hand keeps it simple.
+- **Proof of disability.** If you have a documented disability of **67% or more**, you and one companion enter the Acropolis **free** — whatever your nationality. Bring your official disability certificate or ID, as ticket staff do check it carefully, and pick up these free tickets at the **on-site ticket desk** rather than booking online.
 - **Travel insurance details**, including anything that covers mobility equipment or medical needs.
 - **A list of your medications** (generic names help) with enough supply for the whole trip, plus a little extra.
 - **Your hotel address saved in Greek** on your phone — a real help for taxi drivers.
