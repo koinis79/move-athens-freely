@@ -1574,48 +1574,206 @@ export const blogPosts: Article[] = [
     slug: "5-tips-wheelchair-travel-greece",
     title: "5 Tips for Traveling with a Wheelchair in Greece",
     excerpt:
-      "Practical advice from our team on making your Greek holiday smoother, more comfortable, and more enjoyable.",
-    date: "2026-02-05",
+      "Five honest, practical tips from our Athens team — rent locally instead of flying with your own chair, plan for the stone and the summer heat, use the metro and taxis, and keep local help one message away.",
+    date: "2026-07-15",
     author: "Movability Team",
     image: wheelchairTravelImg,
     category: "Tips",
-    body: [
-      "Traveling to Greece with a wheelchair doesn't have to be daunting. With a bit of planning and the right local knowledge, you can enjoy everything this incredible country has to offer. Here are our top five tips.",
-      "First, book your mobility equipment in advance. Peak season (April–October) means high demand. Reserving your wheelchair, scooter, or rollator at least 48 hours ahead guarantees availability and gives us time to deliver to your accommodation.",
-      "Second, choose your accommodation wisely. Many newer Athens hotels are fully accessible, but it's worth confirming specifics like roll-in showers and elevator access before booking. We maintain a list of verified accessible hotels — just ask.",
-      "Third, embrace public transport. Athens' metro is excellent for wheelchair users — fully step-free with elevators at every station. The tram to the coast is equally accessible. These are often faster and more reliable than taxis for getting around.",
-    ],
+    body: [],
+    content: `
+Traveling to Greece with a wheelchair, scooter, or rollator takes a little planning — but it's absolutely doable, and the reward is one of the most memorable destinations in the world. After years of helping visitors explore Athens, here are the five tips we share most often.
+
+## 1. Rent your equipment locally instead of flying with your own
+
+Bringing a powered wheelchair or scooter on a plane is one of the biggest sources of stress for travelers who use mobility equipment. Airlines don't always handle powered devices gently, batteries come with extra paperwork and restrictions, and a chair that's damaged in the hold can derail an entire trip.
+
+Renting locally sidesteps all of that. We deliver a wheelchair, scooter, or rollator straight to your Athens hotel, ready to use the moment you arrive — and collect it when you leave. Your own equipment stays safe at home, and you travel light.
+
+If you'd prefer to bring your own, that's completely fine too. But for many people — especially those with heavier powered chairs — renting on arrival is simply less to worry about. [See what we deliver →](/equipment)
+
+## 2. Plan for the surfaces — marble and old stone
+
+Athens is an ancient city, and it shows underfoot. Historic districts like Plaka have marble paving and cobblestones that can be uneven and, when polished smooth by centuries of footsteps, slippery. Around the archaeological sites you'll find paved paths alongside stretches of old stone.
+
+None of this puts the city off-limits — it just rewards a little foresight:
+
+- **Sturdy tyres** handle the terrain far better than a lightweight indoor chair.
+- **A companion** to help over the bumpiest stretches makes a real difference.
+- **Take the smoother route** when there's a choice; it's usually worth the small detour.
+
+The Acropolis is the perfect example of "more accessible than you'd expect, with a few honest limits." For exactly what to expect — the elevator, the paved routes, and the parts that stay hard to reach — read our [complete Acropolis wheelchair guide](/accessible-athens/acropolis-wheelchair-guide).
+
+## 3. Respect the summer heat
+
+From late spring through early autumn, Athens gets genuinely hot, and much of the city — including the top of the Acropolis — offers little shade. Heat is tiring for everyone, and more so if you're self-propelling a manual chair.
+
+A few simple habits go a long way:
+
+- **Start early.** Mornings are cooler and quieter; the middle of the day is the hardest.
+- **Carry water** and refill whenever you can.
+- **Bring a hat and sunscreen**, and plan shaded breaks in cafes or air-conditioned museums.
+- **Don't over-schedule** — two comfortable stops beat four rushed ones.
+
+## 4. Getting around the city
+
+Athens has a modern metro, and the **Akropoli station on Line 2 is step-free and accessible** — handy, since it drops you right by the Acropolis and its museum. For longer distances across the city, the metro is often the easiest option.
+
+Taxis are the other workhorse. For the Acropolis specifically, ask your driver for the accessible **"green gate" drop-off** near the site — it saves you the steepest part of the approach. A folding wheelchair or foldable scooter makes both taxis and the metro much simpler, since they tuck into a boot or sit beside you with ease.
+
+Wherever you're headed, build in a little extra time. Unhurried is the whole point of a good trip.
+
+## 5. Keep local support one message away
+
+The single biggest difference between a stressful trip and an easy one is knowing there's someone local you can reach. If a delivery time needs to shift, if you're unsure which entrance to use, or if something just isn't working, a quick message usually solves it.
+
+We stay reachable on **WhatsApp at +30 697 463 3697** throughout your rental — before you arrive and while you're here. Ask us anything, from the best accessible route to a last-minute change of plans.
+
+## Bonus: the coast is closer than you think
+
+Athens isn't only ancient sites — the sea is a short ride away, and it's one of the nicest ways to cool off after a morning of sightseeing. Several beaches near the city have **Seatrac** installations: a system that lets you move from the shore into the sea independently, without needing to be lifted. If a beach day sounds good, see our guide to [accessible beaches near Athens](/accessible-athens/accessible-beaches-athens) for where to find them and what to expect.
+
+## The bottom line
+
+Greece is more welcoming than its ancient reputation suggests. Rent locally so you travel light, plan around the stone and the sun, use the metro and taxis to your advantage, and keep us on speed dial. Do that, and Athens opens right up.
+
+Ready to make it easy? [See our mobility equipment and book delivery to your hotel →](/equipment)
+`,
   },
   {
     slug: "what-to-pack-accessible-trip-athens",
     title: "What to Pack for an Accessible Trip to Athens",
     excerpt:
-      "A packing checklist tailored for travelers who use wheelchairs, scooters, or other mobility equipment.",
-    date: "2026-02-18",
+      "A genuine, accurate packing checklist for Athens — documents for free Acropolis admission, the right Type C/F power adapters, sun and comfort essentials, and the bulky mobility equipment you can skip entirely.",
+    date: "2026-07-15",
     author: "Movability Team",
     image: packingImg,
     category: "Tips",
-    body: [
-      "Packing for an accessible trip to Athens requires a few extra considerations beyond the usual sunscreen and camera. Here's what our team recommends based on years of helping travelers navigate the city.",
-      "Sun protection is essential — Athens gets very hot in summer. Pack a wide-brimmed hat, high-SPF sunscreen, and a reusable water bottle. If you're using a wheelchair or scooter, consider a clip-on umbrella for shade during long outdoor explorations.",
-      "Comfortable, supportive footwear matters even if you primarily use a wheelchair. You may need to transfer or walk short distances, and Athens' stone surfaces can be slippery. Bring anti-fatigue gloves if you self-propel a manual wheelchair — the terrain can be demanding.",
-      "Don't worry about bringing bulky mobility equipment from home. We deliver everything you need — wheelchairs, scooters, rollators — directly to your hotel. This saves luggage space and the hassle of airline equipment handling.",
-    ],
+    body: [],
+    content: `
+Packing for an accessible trip to Athens is mostly the same as any trip — with a few additions that make the difference between a smooth visit and a frustrating one. Here's what our team recommends, and just as importantly, what you can leave at home.
+
+## Start with your documents
+
+Keep the essentials together and easy to reach:
+
+- **Proof of disability.** Bring your disability card or medical documentation. At the Acropolis, disabled visitors and one companion are admitted **free** — having your documentation on hand keeps it simple.
+- **Travel insurance details**, including anything that covers mobility equipment or medical needs.
+- **A list of your medications** (generic names help) with enough supply for the whole trip, plus a little extra.
+- **Your hotel address saved in Greek** on your phone — a real help for taxi drivers.
+
+If you're renting equipment from us, there's no paperwork to pack for it — just your booking confirmation.
+
+## Power and charging
+
+Greece uses the standard European setup: **Type C and Type F plugs, 230V**. Coming from the UK, US, or anywhere with different sockets? Pack the right **travel adapters** — and bring more than one if you charge several devices overnight.
+
+If you use a **powered wheelchair or scooter**, check that its charger is rated for 230V before you fly (most modern chargers handle a range automatically, but confirm). Renting locally sidesteps the question entirely — our equipment comes ready for Greek power. A small **power bank** is worth packing too, to keep your phone going through a long day of sightseeing.
+
+## Comfort items for long days
+
+Sightseeing is more tiring than it sounds, and small comforts pay off:
+
+- **A cushion or seat pad** for long stretches of sitting.
+- **Anti-fatigue gloves** if you self-propel a manual wheelchair — Athens' surfaces can be demanding.
+- **A light layer** for cooler evenings and strongly air-conditioned interiors.
+- **A day bag that clips to your chair or scooter**, so your hands stay free.
+- **Wet wipes and hand sanitiser** for when facilities are further apart than you'd like.
+
+## Sun protection
+
+From late spring to early autumn, Athens is hot and often shadeless — the top of the Acropolis especially. Don't underestimate it:
+
+- **A wide-brimmed hat** and **high-SPF sunscreen**.
+- **Sunglasses.**
+- **A refillable water bottle** — staying hydrated is the best defense against a wilting afternoon.
+- **A clip-on umbrella or parasol** for your chair if you want shade you can take with you.
+
+## Footwear and short transfers
+
+Even if you use a wheelchair or scooter most of the time, bring **comfortable, supportive shoes with good grip**. You may transfer in and out of taxis, step over a threshold, or cover a short distance on foot — and Athens' polished marble and old stone can be slippery, especially in the historic centre. Sensible footwear is a small thing that saves a lot of wobble.
+
+## Staying connected
+
+Reliable data makes an accessible trip easier: live maps for step-free routes, quick translation, and a simple way to reach us. A **local SIM or eSIM** is usually cheap and easy to set up on arrival, and it means you can message us on **WhatsApp (+30 697 463 3697)** any time during your rental — to adjust a delivery, check a route, or ask a question. Save that number before you travel.
+
+## What you can leave at home
+
+Here's the part that lightens your luggage most: **you don't need to bring bulky mobility equipment.**
+
+Flying with a wheelchair or scooter means wrestling it through airports, worrying about damage in the hold, and handling battery paperwork for powered devices. Instead, we **[deliver a wheelchair, scooter, or rollator](/equipment) straight to your Athens hotel** — ready when you arrive, collected when you leave. That frees up luggage space and removes one of the biggest travel headaches.
+
+So unless you have a specific reason to bring your own, you can skip:
+
+- The wheelchair or scooter itself
+- Its charger and spare batteries
+- Repair kits and spare parts
+
+Let us handle the equipment; you handle the holiday.
+
+## Your quick Athens packing checklist
+
+- Disability documentation (free Acropolis admission for you and a companion)
+- Medications and a copy of your prescriptions
+- Type C/F travel adapters and a power bank
+- Hat, high-SPF sunscreen, sunglasses, water bottle
+- Cushion, light layer, chair-friendly day bag
+- Comfortable footwear for short transfers
+
+For more on getting around once you've landed, see our [five tips for wheelchair travel in Greece](/blog/5-tips-wheelchair-travel-greece); and for the country's most famous site, our [Acropolis wheelchair guide](/accessible-athens/acropolis-wheelchair-guide) covers exactly what to expect — including that free admission.
+
+## Ready to travel light?
+
+Pack for the fun parts and let the equipment be waiting for you. [Browse our mobility equipment and book delivery to your Athens hotel →](/equipment)
+`,
   },
   {
     slug: "athens-becoming-more-accessible",
     title: "Why Athens Is Becoming More Accessible Every Year",
     excerpt:
-      "From the Acropolis elevator to metro upgrades — how Athens is investing in accessibility for all visitors.",
-    date: "2026-03-02",
+      "An honest look at how Athens keeps getting more accessible — the Acropolis panoramic elevator, a step-free metro stop, Seatrac beaches — alongside a clear-eyed view of what still needs work.",
+    date: "2026-07-15",
     author: "Movability Team",
     image: athensAccessibleImg,
     category: "Athens",
-    body: [
-      "Athens has historically been a challenging city for visitors with mobility needs. Steep hills, ancient cobblestone streets, and older infrastructure created real barriers. But over the past decade, the city has made remarkable progress.",
-      "The installation of an elevator at the Acropolis was a landmark moment — literally and figuratively. For the first time, wheelchair users could independently access one of the world's most important archaeological sites. The adjacent Acropolis Museum was built from the ground up with universal design principles.",
-      "The Athens metro, completed for the 2004 Olympics, set a new standard. Every station has elevators, tactile guidance, and audio announcements. The coastal tram is similarly modern and accessible. Newer bus fleets feature low floors and boarding ramps.",
-      "Looking ahead, the city continues to invest. Pedestrian zones are being expanded and repaved with smooth surfaces. New hotels are required to meet accessibility standards. And organizations like ours are filling the gaps by providing equipment, local guides, and honest accessibility information.",
-    ],
+    body: [],
+    content: `
+Athens has a reputation as a hard city for visitors with mobility needs — ancient streets, steep hills, and infrastructure built long before anyone thought about ramps. Some of that is fair. But the fuller story is that Athens has been steadily getting better, and the direction of travel is genuinely encouraging. Here's an honest look at the progress — and at what still needs work. Both halves matter: the progress is what makes a great trip possible, and the honesty is what makes it go smoothly.
+
+## The Acropolis got a proper elevator
+
+The clearest symbol of change sits on the **north slope of the Acropolis** itself. In **December 2020**, a new **panoramic accessibility elevator** opened, carrying **two wheelchair users plus their companions** to the top. The most iconic site in the country is now genuinely reachable for people who could never manage the ancient ramp and steps.
+
+Admission is **free for disabled visitors and one companion**, and it's worth **calling ahead (+30 210 321 4172)** to confirm the lift is running before you set out. Taxis can use the accessible **"green gate" drop-off** near the site to save you the steepest part of the approach. It isn't flawless — some corners of the archaeological area remain hard to reach over old stone — but being able to stand beside the Parthenon is a real shift. Our [complete Acropolis wheelchair guide](/accessible-athens/acropolis-wheelchair-guide) walks through exactly what to expect.
+
+## A step-free way to get there
+
+Getting to the sites has improved too. The **Akropoli station on Metro Line 2 is step-free and accessible**, putting the Acropolis, its museum, and the surrounding neighbourhoods within reach without a single stair. For visitors who once had to rely entirely on taxis, a step-free metro stop right by the main attraction is a meaningful upgrade — and often the fastest way across town.
+
+## The beaches opened up
+
+Progress hasn't stopped at the monuments. Several beaches near Athens now have **Seatrac** installations — a system that lets a wheelchair user move from the shore into the sea and back **independently**. For anyone who assumed a Greek beach day was off the table, it's a small piece of engineering that quietly changes what a trip can include. Our guide to [accessible beaches near Athens](/accessible-athens/accessible-beaches-athens) covers where to find them.
+
+## Honest about what's left
+
+None of this means Athens is "solved." The historic centre still has marble and cobblestones that are uneven and, polished smooth over centuries, slippery. Not every site, street, or venue is accessible, and information can be patchy — you often only learn what's truly step-free by asking, or by turning up. Older buildings, narrow pavements, and the occasional out-of-service lift are still part of the picture.
+
+We think honesty serves visitors better than hype. If you want the unvarnished version — what works, what doesn't, and how to plan around the gaps — read our [honest guide to wheelchair accessibility in Athens](/accessible-athens/athens-accessibility-honest-guide). The point isn't that Athens is perfect; it's that it keeps improving, and that with a little planning you can have a wonderful trip today.
+
+## What this means for planning a trip
+
+Put together, these changes add up to something simple: a well-planned accessible trip to Athens is far more realistic than it was even a decade ago. In a single visit you can reach the top of the Acropolis by lift, get there step-free on the metro, and spend an afternoon at a Seatrac beach — a combination that would have been hard to imagine not long ago.
+
+The key word is still **planned**. Because accessibility varies from one place to the next, the visitors who have the smoothest time are the ones who sort the essentials in advance: how they'll move around the city, where they'll stay, and how they'll get the mobility equipment they need without hauling it across a continent. Get those right, and the city rewards the effort.
+
+## Where we fit in
+
+Some of the accessibility gap is closed by public investment. The rest gets closed by people on the ground — and that's where we come in. We're part of **Koinis Healthcare Group, a family business serving Greece since 1982**. We deliver mobility equipment to hotels and cruise terminals, share honest local knowledge, and stay reachable while you're here, so the practical side of an accessible trip is simply handled. Whether you're staying in the city centre, docking at Piraeus, or landing at the airport, we can have the right equipment waiting for you.
+
+Every year, a little more of Athens opens up. Our job is to help you enjoy the parts that already have — and there are more of them than you might think.
+
+## Plan your accessible Athens trip
+
+Ready to explore the city on your own terms? [Browse our mobility equipment and book delivery to your hotel →](/equipment)
+`,
   },
 ];
