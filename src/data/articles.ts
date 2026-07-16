@@ -1579,6 +1579,11 @@ export const blogPosts: Article[] = [
     author: "Movability Team",
     image: wheelchairTravelImg,
     category: "Tips",
+    takeaways: [
+      "Rent locally instead of flying with powered equipment — delivered to your hotel, no airline battery hassle",
+      "Athens mixes smooth pedestrian zones with marble and cobblestones — plan your surfaces (see our Acropolis guide)",
+      "Metro Line 2 to Akropoli is step-free, and WhatsApp support keeps local help one message away",
+    ],
     body: [],
     content: `
 Traveling to Greece with a wheelchair, scooter, or rollator takes a little planning — but it's absolutely doable, and the reward is one of the most memorable destinations in the world. After years of helping visitors explore Athens, here are the five tips we share most often.
@@ -1648,6 +1653,11 @@ Ready to make it easy? [See our mobility equipment and book delivery to your hot
     author: "Movability Team",
     image: packingImg,
     category: "Tips",
+    takeaways: [
+      "Bring your disability card — it means free admission at the Acropolis",
+      "Greece uses Type C/F plugs (230V) — pack adapters for your chargers",
+      "Skip bulky equipment — renting on arrival with hotel delivery is easier than transporting your own",
+    ],
     body: [],
     content: `
 Packing for an accessible trip to Athens is mostly the same as any trip — with a few additions that make the difference between a smooth visit and a frustrating one. Here's what our team recommends, and just as importantly, what you can leave at home.
@@ -1735,6 +1745,11 @@ Pack for the fun parts and let the equipment be waiting for you. [Browse our mob
     author: "Movability Team",
     image: athensAccessibleImg,
     category: "Athens",
+    takeaways: [
+      "Acropolis panoramic elevator since Dec 2020 — free admission for disabled visitors",
+      "Accessible metro plus Seatrac beach installations show real, ongoing progress",
+      "Challenges remain — see our Honest Truth guide for the full picture",
+    ],
     body: [],
     content: `
 Athens has a reputation as a hard city for visitors with mobility needs — ancient streets, steep hills, and infrastructure built long before anyone thought about ramps. Some of that is fair. But the fuller story is that Athens has been steadily getting better, and the direction of travel is genuinely encouraging. Here's an honest look at the progress — and at what still needs work. Both halves matter: the progress is what makes a great trip possible, and the honesty is what makes it go smoothly.
