@@ -1,6 +1,6 @@
 # MOVABILITY.GR — Project Documentation
 
-> **Single source of truth** for the Movability project. Updated: July 15, 2026.
+> **Single source of truth** for the Movability project. Updated: August 6, 2026.
 > Drop this file in the repo root and have any AI tool (Claude Code, Claude, etc.) read it FIRST for full project context.
 
 ---
@@ -100,10 +100,12 @@ Admin New Booking → send-booking-confirmation (checkbox, default ON)
 Admin "Completed" → send-review-request
 /contact + /partners → contact_inquiries + send-contact-notification → info@koinis.gr
 pg_cron 08:30 Athens → send-daily-digest (deliveries/pickups/tomorrow/pending + unread inquiries)
+pg_cron hourly → send-abandoned-cart-email (pending + real Stripe session, 2h–7d old, not yet emailed)
 ```
-All INTERNAL_API_KEY auth. Browser-called functions: CORS-before-auth + JWT-verification OFF. Bodies: review `{booking_id}` · confirmation `{booking_number}` · contact-notification direct payload · digest `{}`.
-6 functions deployed: create-checkout-session · stripe-webhook · send-booking-confirmation · send-review-request · send-daily-digest · send-contact-notification.
+All INTERNAL_API_KEY auth. Browser-called functions: CORS-before-auth + JWT-verification OFF. Bodies: review `{booking_id}` · confirmation `{booking_number}` · contact-notification direct payload · digest `{}` · abandoned-cart `{booking_id}`.
+7 functions deployed: create-checkout-session · stripe-webhook · send-booking-confirmation · send-review-request · send-daily-digest · send-contact-notification · **send-abandoned-cart-email**.
 Digest cron `30 5 * * *` (=08:30 Athens summer), jobid 3. **Late Oct → `30 6 * * *`.**
+**Abandoned-cart cron** `0 * * * *` (hourly), `send-abandoned-cart-email`. Warm, low-pressure recovery email from `hello@movability.gr`: booking summary (equipment/dates/total) + a **fresh** Stripe payment link (mints a new checkout session — the original session URL expires ~24h, so old carts need a new one) + reply/WhatsApp option. Dedup via `bookings.abandoned_email_sent_at`. Only touches rows with `stripe_session_id IS NOT NULL` (real checkout attempts) — never manual/store/WhatsApp/partner entries. Cron SQL: `sql/abandoned_cart_cron.sql` (placeholder key — replace with real INTERNAL_API_KEY when scheduling; JWT-verification OFF like the other functions).
 
 ---
 
@@ -112,6 +114,8 @@ Digest cron `30 5 * * *` (=08:30 Athens summer), jobid 3. **Late Oct → `30 6 *
 - **create_booking RPC** = insert + PRICE VALIDATION (tier + zone + surcharge; Sunday slot-independent). Rejections say "Price mismatch: expected X, got Y". Current version replaced via SQL Jul 5–7 (fix_create_booking.sql pattern; latest includes the tbc-slot Sunday fix). **Source-controlled copy: `sql/create_booking_rpc.sql`** — any SQL Editor change to the RPC must update this file in the same commit.
 - **create-checkout-session** = Stripe line items from the saved row; NO validation here.
 - `payment_status` (webhook truth) ≠ `status` (manual label). Admin states: Paid in full / Deposit / **Unpaid–Awaiting payment** + badges + update buttons. Verify real payments in Stripe (cs_live_ + Succeeded).
+- **`stripe_session_id`** distinguishes channel: NOT NULL = a real website checkout attempt; NULL = manual/store/WhatsApp/partner entry. This is the key filter for abandoned-cart recovery (never chase NULL rows).
+- **`abandoned_email_sent_at`** (timestamptz, added Aug 6) = dedup guard for the abandoned-cart email, same pattern as `review_requested_at`. Set once, only after a successful send. Migration: `supabase/migrations/20260806000000_add_abandoned_email_sent_at.sql`.
 - Admin New Booking = fallback path when checkout misbehaves (bypasses Stripe flow).
 - **~Half of all bookings are WhatsApp/manual** — GA4 sees none of them; conversion analytics describe only the website slice. Mobile "drop-offs" partly convert via WhatsApp. True volume: query the bookings table.
 
@@ -171,8 +175,9 @@ WhatsApp ask AFTER rental ends, name+equipment personalized, "family business" w
 
 ---
 
-## 11. RECENT WORK LOG (July)
+## 11. RECENT WORK LOG
 
+- **Aug 6 (abandoned-cart recovery):** SQL investigation into pending/abandoned checkouts surfaced this as the new top priority. **Findings:** paid revenue climbing fast — Apr €98 → May €708 → Jun €1,459 → Jul €2,223 (Aug €468 to date); **abandoned-cart value (pending + real Stripe session) growing alongside it** — Jun €655 → Jul €1,651 (11 carts). **Channel split (paid):** 32 website checkout vs 9 manual/WhatsApp/partner (~78/22). Every abandoned cart = a real customer who started Stripe checkout but never paid; manual/partner rows (`stripe_session_id IS NULL`) are correctly excluded. **Built:** `abandoned_email_sent_at` column (dedup, mirrors `review_requested_at`; applied live + migration file); new `send-abandoned-cart-email` edge function (INTERNAL_API_KEY auth, CORS-before-auth per lesson, `{booking_id}` body, warm low-pressure Resend email with a **freshly-minted** Stripe payment link since old session URLs expire ~24h, + WhatsApp/reply option, sets the dedup column on success); hourly cron SQL (`sql/abandoned_cart_cron.sql`, placeholder key). **Pending live activation** (can't deploy from here): manual function deploy + JWT-verification OFF + run cron SQL with real key + controlled test — the cron's first run currently matches just **2 carts (€298)**, so activation is low-risk. This bumped the rejected-bookings alert to #2.
 - **Jul 15 (content pass):** Refurbished the three launch-era blog posts (`5-tips-wheelchair-travel-greece`, `what-to-pack-accessible-trip-athens`, `athens-becoming-more-accessible`) — thin `body[]` paragraphs → scannable markdown `content` (~800 words each: 807/808/811), date→Jul 15. Slugs/URLs/titles/categories/hero images unchanged. **Accuracy-first:** used only verified facts (Dec 2020 Acropolis panoramic elevator on north slope, 2 chairs + companions, call-ahead +30 210 321 4172, green-gate taxi drop-off, free admission for disabled visitors, Akropoli Line 2 step-free, Seatrac beaches, Type C/F 230V) and **removed prior unverified claims** (elevators at every metro station, "verified accessible hotel list", coastal tram accessible). Each links `/equipment` + 1–3 relevant guides and ends with a rental CTA. Edited one article at a time via a guarded splice script, `npm run build` green after each. **Follow-up (Quick Takeaways):** the three posts had been rendering the ArticleDetail placeholder ("Key points from this guide will appear here.") because they lacked a `takeaways` field — added real 3-bullet takeaways to each (facts drawn from the article bodies). A full scan confirmed **all 19 articles now define `takeaways`** — none left on the placeholder. **Refinement:** tightened the what-to-pack free-Acropolis-admission point (bullet + matching takeaway) to the precise conditions — documented **67%+ disability + one companion**, any nationality; official certificate/ID checked on-site; free tickets issued at the **on-site ticket desk, not online**.
 - **Jul 15 (later session):** Accessible Athens card layout unified — Start Here, all three themed sections, and Planning & Tips now render the identical compact 3-up grid through one shared ArticleCard component (featured per-card ring/shadow removed; Start Here distinguished by tinted band only). Layout-only change, articles.ts untouched, build green. Mid-task catch: replace_all missed the Planning & Tips grid (different indentation) → fixed explicitly, all grids verified identical (→ lesson 15). Repo housekeeping DONE (commit 83aa3b9): image artifacts deleted (verified gone), fix_create_booking.sql → `sql/create_booking_rpc.sql` with sync-note header (158-line RPC body intact), .gitignore consolidated into one documented image block (`/image-work/` + root .webp/.png/.jpg/.jpeg/.heic). Workflow rule added: every session ends with this doc updated (work log, pending tasks, new lessons) and re-uploaded to Claude project knowledge.
 - **Jul 15:** Piraeus cruise guide merged+expanded (1,011 words, original slug) + optimized watermark-cropped hero. Accessible Athens page reorganized (featured band + themed sections, blog posts pulled in). Storage overwrite lesson learned.
@@ -186,11 +191,11 @@ WhatsApp ask AFTER rental ends, name+equipment personalized, "family business" w
 ## 12. PENDING TASKS
 
 ### Queue (priority order)
+- [ ] **Activate abandoned-cart recovery** (code done Aug 6): manually deploy `send-abandoned-cart-email`, turn **JWT-verification OFF** (lesson 8), run `sql/abandoned_cart_cron.sql` with the real INTERNAL_API_KEY (verify the placeholder was actually replaced — "succeeded" ≠ accepted, lessons 6 & 11), then a controlled live test. First cron run currently matches just 2 carts (€298), so low-risk.
 - [ ] **Alert on rejected bookings** (create_booking "Price mismatch" etc. → email info@koinis.gr). Would have caught the 11-day outage on day one. HIGHEST VALUE.
+- [ ] **booking_source field** on admin bookings (WhatsApp/Phone/Walk-in dropdown) → true channel mix forever.
 - [ ] **Verify `sql/create_booking_rpc.sql` matches the live RPC**: `SELECT pg_get_functiondef('create_booking'::regproc);` in SQL Editor — if it differs (esp. Sunday slot-independent logic), paste the live definition into the file in a follow-up commit.
 - [ ] **Visual check** movability.gr/accessible-athens after deploy — 3-up grids on desktop, clean 1-column collapse on mobile (hard refresh).
-- [ ] **Abandoned-cart recovery email** — targets the mobile-browse-book-later pattern the device data revealed.
-- [ ] **booking_source field** on admin bookings (WhatsApp/Phone/Walk-in dropdown) → true channel mix forever.
 - [ ] **Rotate INTERNAL_API_KEY** (~5 places).
 - [ ] Mark ended rentals "Completed" (fires auto review email); keep WhatsApp review routine.
 - [ ] Sameh Adly (3 pending bookings, scooter Jul 14–19) — was dropped; check if resolved/expired.
@@ -218,4 +223,4 @@ Claude (chat) writes prompts → **Claude Code** executes in the repo (reads thi
 
 ---
 
-*Last updated: July 15, 2026*
+*Last updated: August 6, 2026*
