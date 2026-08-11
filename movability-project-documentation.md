@@ -1,6 +1,6 @@
 # MOVABILITY.GR — Project Documentation
 
-> **Single source of truth** for the Movability project. Updated: August 6, 2026.
+> **Single source of truth** for the Movability project. Updated: August 7, 2026.
 > Drop this file in the repo root and have any AI tool (Claude Code, Claude, etc.) read it FIRST for full project context.
 
 ---
@@ -48,6 +48,8 @@
 15. **Bulk find-and-replace can miss instances with different indentation.** Jul 15 card-grid unification: replace_all matched the themed-section grids but silently missed Planning & Tips (different whitespace). After any multi-instance edit, grep to confirm ALL intended occurrences changed.
 
 16. **Supabase Vault beats plaintext keys in cron commands.** Typing an API key directly into a scheduled `cron.schedule()` command is error-prone (a placeholder can silently survive a copy-paste — verify with `command LIKE '%PLACEHOLDER%'` after every cron edit, don't trust that pasting worked) and leaves the key exposed in `cron.job` forever. Better: `SELECT vault.create_secret(key, name, description)` once, then reference it in the cron body via `(SELECT decrypted_secret FROM vault.decrypted_secrets WHERE name = '...')` — no plaintext key in the command at all. Migrate older crons (e.g. the digest job, jobid 3) to this pattern when convenient.
+
+17. **Lovable-era mock/placeholder data can survive into production.** The March Lovable specs seeded components with hardcoded mock data (e.g. "Show 2 mock bookings" in the user dashboard). `MyBookings.tsx` was never wired to the backend at all — it rendered `const bookings = mockBookings` unconditionally, so every logged-in customer saw two fake bookings (found Aug 7 via a customer report). Old mock uses the `MOV-YYYYMMDD-NNN` booking format; **real** bookings use random hex (e.g. `MOV-AB8D8BE48D`). When auditing: grep for the old `MOV-[0-9]{8}-[0-9]{3}` format and known mock strings, and confirm each data-driven component **actually calls the backend** — a component can look finished but never fetch. Dead `src/data/admin*MockData.ts` files also linger (not imported by live code; safe to delete when convenient).
 
 ---
 
@@ -179,6 +181,7 @@ WhatsApp ask AFTER rental ends, name+equipment personalized, "family business" w
 
 ## 11. RECENT WORK LOG
 
+- **Aug 7 (customer dashboard bug):** Customer reported two fake bookings on "My Bookings" — MOV-20260401-001 (Lightweight Folding Wheelchair, €60, "Confirmed") and MOV-20260315-003 (Portable Mobility Scooter, €125, "Completed"), both confirmed absent from the DB. **Root cause:** `src/components/dashboard/MyBookings.tsx` was never wired to Supabase — it rendered a hardcoded `mockBookings` array (leftover from the March Lovable spec's "Show 2 mock bookings") unconditionally, so *every* logged-in customer saw the same two fakes. **Fix:** replaced with a real user-scoped Supabase fetch — `.or(user_id.eq…,customer_email.eq…)`, matching the RLS SELECT policy (`auth.uid()=user_id OR jwt email=customer_email OR is_admin()`); the explicit filter also stops an admin from seeing *all* bookings on their own customer dashboard — plus proper loading (spinner), empty ("No bookings yet"), and error states, so no fake cards render under any condition. Also dropped the fabricated "Visa ending in 4242" card field (the DB never stored card data) in favour of the real payment status. Verified the fetch returns real joined bookings and the fake numbers don't exist. **Thoroughness** (grepped `MOV-20260401`/`MOV-20260315` across `src/`): MyBookings was the only *live* offender; the admin `admin*MockData.ts` chain is dead code (referenced only within `src/data/`, never imported by a live page/component — flagged for cleanup, not shipping fake data). → lesson 17.
 - **Aug 6 (SQL investigation + abandoned-cart build):** Full revenue audit via direct SQL against the bookings table (not analytics) — confirmed true 90-day figures: **37 paid bookings, €4,619 revenue, €124.84 avg.** Channel split via `stripe_session_id` presence: website 76% of bookings/62% of revenue (€102.61 avg), manual/WhatsApp 24%/38% (€194.00 avg — worth ~2x per booking). Month-over-month: Apr €98 → May €708 → Jun €1,459 → Jul €2,223 (record month DESPITE the price-validation outage) → Aug pacing similarly. Product breakdown: Foldable Travel Scooter is the clear leader (8 bookings/€1,500); Electric Mobility Scooter was the clear laggard (1 booking/€120) — investigated and found its description competed head-on with the Foldable Travel Scooter's "travel" framing instead of differentiating; rewrote `description_en` to position it as the roomier, more comfortable option for longer/local stays, explicitly deferring the portability angle to the Foldable model by name (DB-only change, no deploy needed). `is_popular` flag spot-checked against real 90-day bookings — holds up reasonably well, no action needed. Delivery zones: Athens City dominates (28 bookings/€3,386); Piraeus Cruise Terminal has only 1 booking despite being the intended Nov–Feb ad landing page — flagged to re-check before committing ad budget. Review automation confirmed healthy: 96.2% of completed bookings got a review request (25/26). Pending-bookings deep dive: of 24 "pending" records (€3,107 total), 22 were already cancelled (€2,901, historical — proof of a pattern, not live risk), 1 was a Motion4Rent referral booking (cash-on-delivery by design, not abandoned), 1 was genuinely live (Andrew O'Kola, €99, pickup scheduled same day — emailed him directly). True abandoned-cart trend (noise excluded) confirmed real and growing: Apr €49 → May €249 → Jun €488 → Jul €918 → Aug (6d) €405, tracking ~20–36% of paid volume monthly. This reprioritized abandoned-cart recovery ahead of the rejected-bookings alert.
   Built same day — full abandoned-cart recovery system:
   - **DB:** added `bookings.abandoned_email_sent_at` (mirrors `review_requested_at` pattern).
@@ -237,4 +240,4 @@ Claude (chat) writes prompts → **Claude Code** executes in the repo (reads thi
 
 ---
 
-*Last updated: August 6, 2026*
+*Last updated: August 7, 2026*
