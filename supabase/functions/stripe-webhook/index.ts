@@ -37,10 +37,24 @@ Deno.serve(async (req) => {
         const bookingNumber = session.metadata?.booking_number;
         if (!bookingNumber) break;
 
+        // What Stripe actually charged (authoritative), in euros.
+        const amountPaid = (session.amount_total ?? 0) / 100;
+        // Full booking total carried through from create-checkout-session.
+        const fullTotal = Number(session.metadata?.full_total ?? amountPaid);
+        const isDeposit = session.metadata?.payment_type === "deposit";
+
+        // Deposit → partial payment: payment_status 'deposit_paid', balance due.
+        // Full → 'paid', nothing due. status is 'confirmed' either way.
+        const paymentStatus = isDeposit ? "deposit_paid" : "paid";
+        const amountDue = isDeposit ? Math.max(0, fullTotal - amountPaid) : 0;
+
         await supabase
           .from("bookings")
           .update({
-            payment_status: "paid",
+            payment_status: paymentStatus,
+            payment_type: isDeposit ? "deposit" : "full",
+            amount_paid: amountPaid,
+            amount_due: amountDue,
             status: "confirmed",
             stripe_payment_intent_id: typeof session.payment_intent === "string"
               ? session.payment_intent
@@ -48,7 +62,7 @@ Deno.serve(async (req) => {
           })
           .eq("booking_number", bookingNumber);
 
-        console.log(`Booking ${bookingNumber} marked as paid + confirmed`);
+        console.log(`Booking ${bookingNumber} → ${paymentStatus} (paid €${amountPaid}, due €${amountDue})`);
 
         // Send confirmation email — fire-and-forget, don't fail the webhook on email errors
         try {

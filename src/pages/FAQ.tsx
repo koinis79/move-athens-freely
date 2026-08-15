@@ -29,7 +29,7 @@ const sections = [
       },
       {
         q: "Do I need to pay a deposit?",
-        a: "A small security deposit may apply for power wheelchairs and mobility scooters. This is fully refundable when the equipment is returned in good condition.",
+        a: "Some items — such as power wheelchairs and mobility scooters — have a refundable security deposit, and the exact amount is shown on each product page. It is collected in person at delivery (never charged online) and returned in full when the equipment is picked up in good condition.",
       },
       {
         q: "What payment methods do you accept?",

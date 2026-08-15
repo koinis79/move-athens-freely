@@ -1,4 +1,5 @@
 import { useState, useEffect, useMemo, useRef } from "react";
+import { useTranslation } from "react-i18next";
 import { useNavigate, Link } from "react-router-dom";
 import { cn } from "@/lib/utils";
 import { format, differenceInDays } from "date-fns";
@@ -70,6 +71,7 @@ const COUNTRY_CODES = [
 
 
 const Checkout = () => {
+  const { t } = useTranslation();
   const { items, clearCart } = useCart();
   const { user } = useAuth();
   const { zones, loading: zonesLoading } = useDeliveryZones();
@@ -167,6 +169,12 @@ const Checkout = () => {
 
   const deliveryFee = getDeliveryFee(delivery, zones, rentalStart);
   const total = equipmentTotal + deliveryFee;
+  // Refundable security deposits are collected in person at delivery — shown for
+  // information only, never added to the online total or charged via Stripe.
+  const securityDeposit = lineItems.reduce(
+    (s, i) => s + (i.equipment.depositAmount ?? 0) * i.quantity,
+    0
+  );
   const depositAmount = Math.ceil(total * 0.30);
   const remainingAmount = total - depositAmount;
   const chargeAmount = paymentMethod === "full" ? total : depositAmount;
@@ -643,6 +651,11 @@ const Checkout = () => {
                       <span>€{remainingAmount}</span>
                     </div>
                   </>
+                )}
+                {securityDeposit > 0 && (
+                  <p className="border-t pt-2 text-xs text-muted-foreground">
+                    {t("product.securityDepositShort", { amount: securityDeposit })}
+                  </p>
                 )}
               </div>
 

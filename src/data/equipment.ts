@@ -32,6 +32,8 @@ export interface EquipmentItem {
   availability: Availability;
   popular?: boolean;
   image: string;
+  /** Refundable security deposit (€), collected in person at delivery. 0 = none. */
+  depositAmount: number;
 }
 
 /** Return the correct tier price for a given number of rental days */

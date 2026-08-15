@@ -18,6 +18,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { useTranslation } from "react-i18next";
 import { supabase } from "@/integrations/supabase/client";
 import { getPriceForDays, type EquipmentItem } from "@/data/equipment";
 import { useCart } from "@/context/CartContext";
@@ -43,6 +44,7 @@ const TIER_LABELS = [
 ];
 
 const BookingPanel = ({ item }: Props) => {
+  const { t } = useTranslation();
   const { addItem, items: cartItems } = useCart();
   const { toast } = useToast();
   const navigate = useNavigate();
@@ -407,6 +409,15 @@ const BookingPanel = ({ item }: Props) => {
                 {!zoneId && <span className="text-sm font-normal text-muted-foreground"> + delivery</span>}
               </span>
             </div>
+          </div>
+        )}
+
+        {/* Refundable security deposit — informational, collected in person at
+            delivery, never charged online and NOT part of the total above. */}
+        {item.depositAmount > 0 && (
+          <div className="flex items-start gap-2 rounded-lg border border-border bg-muted/40 px-3 py-2.5 text-xs text-muted-foreground">
+            <ShieldCheck className="mt-0.5 h-4 w-4 shrink-0 text-accent" />
+            <span>{t("product.securityDepositNote", { amount: item.depositAmount })}</span>
           </div>
         )}
 

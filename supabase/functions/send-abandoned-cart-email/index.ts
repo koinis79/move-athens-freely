@@ -79,6 +79,7 @@ Deno.serve(async (req: Request) => {
       delivery_fee,
       total_amount,
       payment_status,
+      payment_type,
       stripe_session_id,
       abandoned_email_sent_at,
       rental_start,
@@ -129,6 +130,13 @@ Deno.serve(async (req: Request) => {
   const endStr = formatDate(booking.rental_end);
   const items = (booking.booking_items ?? []) as BookingItem[];
 
+  // Preserve the original payment choice: a deposit booking must re-mint at 30%,
+  // not full (same logic + metadata as create-checkout-session, so the webhook
+  // records paid/due correctly). Declared here so the email body can use them too.
+  const isDeposit = booking.payment_type === "deposit";
+  const fullTotal = Number(booking.total_amount);
+  const depositAmount = Math.ceil(fullTotal * 0.30);
+
   // ── Fresh Stripe payment link ──
   // The original checkout session URL expires ~24h after creation, so carts up
   // to 7 days old need a new session. Mirrors create-checkout-session's line
@@ -137,26 +145,42 @@ Deno.serve(async (req: Request) => {
   try {
     const stripe = new Stripe(STRIPE_SECRET_KEY, { apiVersion: "2024-06-20" });
 
-    const lineItems: Stripe.Checkout.SessionCreateParams.LineItem[] = items.map((item) => ({
-      price_data: {
-        currency: "eur",
-        product_data: {
-          name: `${item.equipment?.name_en ?? "Equipment"} — ${item.num_days} day${item.num_days !== 1 ? "s" : ""}`,
-        },
-        unit_amount: Math.round((item.subtotal / item.quantity) * 100),
-      },
-      quantity: item.quantity,
-    }));
-
-    if (Number(booking.delivery_fee) > 0) {
-      lineItems.push({
+    let lineItems: Stripe.Checkout.SessionCreateParams.LineItem[];
+    if (isDeposit) {
+      const balance = fullTotal - depositAmount;
+      lineItems = [{
         price_data: {
           currency: "eur",
-          product_data: { name: "Delivery fee" },
-          unit_amount: Math.round(Number(booking.delivery_fee) * 100),
+          product_data: {
+            name: `30% Deposit — booking ${booking.booking_number}`,
+            description: `€${balance} balance due in person on delivery (booking total €${fullTotal}).`,
+          },
+          unit_amount: depositAmount * 100,
         },
         quantity: 1,
-      });
+      }];
+    } else {
+      lineItems = items.map((item) => ({
+        price_data: {
+          currency: "eur",
+          product_data: {
+            name: `${item.equipment?.name_en ?? "Equipment"} — ${item.num_days} day${item.num_days !== 1 ? "s" : ""}`,
+          },
+          unit_amount: Math.round((item.subtotal / item.quantity) * 100),
+        },
+        quantity: item.quantity,
+      }));
+
+      if (Number(booking.delivery_fee) > 0) {
+        lineItems.push({
+          price_data: {
+            currency: "eur",
+            product_data: { name: "Delivery fee" },
+            unit_amount: Math.round(Number(booking.delivery_fee) * 100),
+          },
+          quantity: 1,
+        });
+      }
     }
 
     const session = await stripe.checkout.sessions.create({
@@ -167,6 +191,8 @@ Deno.serve(async (req: Request) => {
       metadata: {
         booking_number: booking.booking_number,
         booking_id: booking.id,
+        payment_type: isDeposit ? "deposit" : "full",
+        full_total: String(fullTotal),
       },
       success_url: `${SITE_ORIGIN}/booking/confirmation/${booking.booking_number}?paid=1`,
       cancel_url: `${SITE_ORIGIN}/cart`,
@@ -233,6 +259,9 @@ Deno.serve(async (req: Request) => {
         <td style="font-size: 16px; font-weight: bold; color: #1a1a1a; text-align: right;">&euro;${Number(booking.total_amount).toFixed(0)}</td>
       </tr>
     </table>
+    ${isDeposit
+      ? `<p style="font-size: 14px; color: #00838F; margin: 12px 0 0;"><strong>You'll pay a 30% deposit of &euro;${depositAmount} now</strong> — the remaining &euro;${fullTotal - depositAmount} is paid in person on delivery.</p>`
+      : ""}
     <p style="font-size: 14px; color: #666; margin: 14px 0 0;">
       Rental dates: <strong>${startStr}</strong> to <strong>${endStr}</strong>
     </p>

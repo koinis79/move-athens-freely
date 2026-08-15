@@ -137,12 +137,16 @@
     "4to7days": "4–7 Days",
     "8to14days": "8–14 Days",
     "faq1q": "Do I need to leave a deposit?",
-    "faq1a": "Yes — a small refundable deposit is required at the time of booking. It is returned in full once the equipment is picked up in good condition.",
+    "faq1a": "Some items — such as power wheelchairs and mobility scooters — have a refundable security deposit, shown on each product page. It is collected in person at delivery (never charged online) and returned in full once the equipment is picked up in good condition.",
     "faq2q": "Can I extend my rental period?",
     "faq2a": "Absolutely. Contact us at least 24 hours before your rental ends and we'll extend it — subject to availability.",
     "faq3q": "Is the equipment sanitized?",
     "faq3a": "Every item is professionally sanitized and safety-checked between rentals. We follow strict hygiene protocols.",
     "faq4q": "What if the equipment breaks during my rental?",
     "faq4a": "All equipment is covered by our rental insurance. Contact us immediately and we'll arrange a replacement at no extra cost."
+  },
+  "product": {
+    "securityDepositNote": "€{{amount}} refundable security deposit — collected at delivery, returned when the equipment is picked up.",
+    "securityDepositShort": "€{{amount}} refundable security deposit (collected at delivery, not included above)"
   }
 }

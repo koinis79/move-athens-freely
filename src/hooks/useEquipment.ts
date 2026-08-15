@@ -12,6 +12,7 @@ interface EquipmentRow {
   price_tier2: number;
   price_tier3: number;
   price_tier4: number;
+  deposit_amount: number | null;
   availability: string;
   is_popular: boolean;
   thumbnail_url: string | null;
@@ -36,6 +37,7 @@ function mapRow(row: EquipmentRow): EquipmentItem {
     priceTier2: Number(row.price_tier2),
     priceTier3: Number(row.price_tier3),
     priceTier4: Number(row.price_tier4),
+    depositAmount: Number(row.deposit_amount ?? 0),
     pricePerDay: Number(row.price_tier1),
     pricePerWeek: Number(row.price_tier2),
     availability:
