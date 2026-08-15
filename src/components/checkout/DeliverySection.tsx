@@ -5,7 +5,9 @@ import {
   MapPin,
   ChevronDown,
   MessageCircle,
+  Loader2,
 } from "lucide-react";
+import type { DeliveryZone } from "@/hooks/useDeliveryZones";
 import { cn } from "@/lib/utils";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -71,39 +73,43 @@ interface Props {
   onChange: (updates: Partial<DeliveryFormData>) => void;
   clearError: (field: string) => void;
   deliveryDate?: Date;
+  zones: DeliveryZone[];
+  zonesLoading: boolean;
 }
 
 /* ── Zone detection ────────────────────────────────────────────────────── */
 
-interface ZoneInfo {
-  slug: string;
-  label: string;
-  fee: number;
-}
-
-const ZONES: ZoneInfo[] = [
-  { slug: "store-pickup", label: "Store Pickup", fee: 0 },
-  { slug: "athens-city", label: "Athens City", fee: 20 },
-  { slug: "athens-airport", label: "Athens Airport", fee: 50 },
-  { slug: "piraeus-port", label: "Piraeus Cruise Terminal", fee: 25 },
-];
-
+/**
+ * Best-effort mapping of a free-text address to a zone slug. Detection is only
+ * a convenience — the user-visible "Change zone" dropdown is the source of
+ * truth, so we keep this simple rather than mirroring every DB zone. IMPORTANT:
+ * "Rafina" must be tested BEFORE the generic "port" match, or Rafina addresses
+ * would fall through to piraeus-port (the old silent-undercharge bug).
+ */
 function detectZoneFromAddress(address: string): string {
   const l = address.toLowerCase();
 
   // Airport
   if (l.includes("airport") || l.includes("venizelos") || l.includes("eleftherios") || l.includes("aerodrom") || l.includes("αεροδρόμ")) return "athens-airport";
 
+  // Rafina — MUST come before the generic Piraeus/port match below.
+  if (l.includes("rafina") || l.includes("ραφήν") || l.includes("ραφην")) return "rafina-port";
+
   // Piraeus / Cruise / Port
   if (l.includes("piraeus") || l.includes("πειραι") || l.includes("cruise") || l.includes("ferry") || l.includes("port") || l.includes("λιμάνι")) return "piraeus-port";
 
-  // Default — all Athens addresses
-  if (l.length > 3) return "athens-city";
+  // Southern suburbs & Athens Riviera
+  if (l.includes("glyfada") || l.includes("γλυφάδ") || l.includes("γλυφαδ") ||
+      l.includes("kifisia") || l.includes("kifissia") || l.includes("κηφισ") ||
+      l.includes("vouliagmeni") || l.includes("βουλιαγμ") ||
+      l.includes("voula") || l.includes("βούλα") || l.includes("βουλα")) return "suburbs-riviera";
+
+  // Default — all other Athens addresses
   return "athens-city";
 }
 
-function getZone(slug: string | null): ZoneInfo | undefined {
-  return ZONES.find(z => z.slug === slug);
+function getZone(slug: string | null, zones: DeliveryZone[]): DeliveryZone | undefined {
+  return zones.find(z => z.slug === slug);
 }
 
 /* ── Exported helpers (used by Checkout.tsx) ────────────────────────────── */
@@ -132,15 +138,15 @@ export function getDeliverySurcharge(
 }
 
 /** Exported: returns zone fee portion only (for breakdown display). */
-export function getDeliveryZoneFee(data: DeliveryFormData): number {
+export function getDeliveryZoneFee(data: DeliveryFormData, zones: DeliveryZone[]): number {
   if (data.method === "pickup") return 0;
   const slug = data.manualZone || data.detectedZone;
-  return getZone(slug)?.fee ?? 0;
+  return Number(getZone(slug, zones)?.delivery_fee ?? 0);
 }
 
-export function getDeliveryFee(data: DeliveryFormData, deliveryDate?: Date): number {
+export function getDeliveryFee(data: DeliveryFormData, zones: DeliveryZone[], deliveryDate?: Date): number {
   if (data.method === "pickup") return 0;
-  const zoneFee = getDeliveryZoneFee(data);
+  const zoneFee = getDeliveryZoneFee(data, zones);
   const surcharge = getDeliverySurcharge(data.method, data.timeSlot, deliveryDate);
   return zoneFee + surcharge;
 }
@@ -188,7 +194,7 @@ const PICKUP_LOCATIONS = [
 
 /* ── Component ─────────────────────────────────────────────────────────── */
 
-export function DeliverySection({ data, errors, onChange, clearError, deliveryDate }: Props) {
+export function DeliverySection({ data, errors, onChange, clearError, deliveryDate, zones, zonesLoading }: Props) {
   const [showZoneOverride, setShowZoneOverride] = useState(false);
 
   const set = useCallback(
@@ -200,9 +206,9 @@ export function DeliverySection({ data, errors, onChange, clearError, deliveryDa
   );
 
   const activeZoneSlug = data.manualZone || data.detectedZone;
-  const activeZone = getZone(activeZoneSlug);
-  const fee = getDeliveryFee(data, deliveryDate);
-  const zoneFee = getDeliveryZoneFee(data);
+  const activeZone = getZone(activeZoneSlug, zones);
+  const fee = getDeliveryFee(data, zones, deliveryDate);
+  const zoneFee = getDeliveryZoneFee(data, zones);
   const surcharge = fee - zoneFee;
 
   const handleAddressChange = (address: string) => {
@@ -266,15 +272,23 @@ export function DeliverySection({ data, errors, onChange, clearError, deliveryDa
             {errors.deliveryAddress && <p className="text-sm text-destructive">{errors.deliveryAddress}</p>}
           </div>
 
+          {/* Zone still loading — don't render a broken/empty picker */}
+          {zonesLoading && data.deliveryAddress.trim().length > 3 && (
+            <div className="flex items-center gap-2 rounded-lg bg-muted/50 border border-border px-4 py-2.5 text-sm text-muted-foreground">
+              <Loader2 className="h-4 w-4 animate-spin shrink-0" />
+              Detecting delivery zone…
+            </div>
+          )}
+
           {/* Auto-detected zone badge */}
-          {activeZone && data.deliveryAddress.trim().length > 3 && (
+          {!zonesLoading && activeZone && data.deliveryAddress.trim().length > 3 && (
             <div className="flex items-center gap-2 rounded-lg bg-primary/5 border border-primary/20 px-4 py-2.5">
               <MapPin className="h-4 w-4 text-primary shrink-0" />
               <span className="text-sm font-medium text-foreground">
-                {activeZone.label}
+                {activeZone.name_en}
                 {" — "}
                 <span className="text-primary font-bold">
-                  {activeZone.fee === 0 ? "Free delivery" : `€${activeZone.fee} delivery`}
+                  {Number(activeZone.delivery_fee) === 0 ? "Free delivery" : `€${Number(activeZone.delivery_fee)} delivery`}
                 </span>
               </span>
               <button
@@ -288,7 +302,7 @@ export function DeliverySection({ data, errors, onChange, clearError, deliveryDa
           )}
 
           {/* Manual zone override */}
-          {showZoneOverride && (
+          {showZoneOverride && !zonesLoading && (
             <div className="space-y-1.5">
               <Label>Override delivery zone</Label>
               <Select
@@ -302,9 +316,9 @@ export function DeliverySection({ data, errors, onChange, clearError, deliveryDa
                   <SelectValue placeholder="Select zone manually" />
                 </SelectTrigger>
                 <SelectContent>
-                  {ZONES.filter(z => z.slug !== "store-pickup").map((z) => (
+                  {zones.filter(z => z.slug !== "store-pickup").map((z) => (
                     <SelectItem key={z.slug} value={z.slug}>
-                      {z.label} — {z.fee === 0 ? "Free" : `€${z.fee}`}
+                      {z.name_en} — {Number(z.delivery_fee) === 0 ? "Free" : `€${Number(z.delivery_fee)}`}
                     </SelectItem>
                   ))}
                 </SelectContent>

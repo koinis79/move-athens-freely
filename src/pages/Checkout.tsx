@@ -1,4 +1,4 @@
-import { useState, useEffect, useMemo } from "react";
+import { useState, useEffect, useMemo, useRef } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import { cn } from "@/lib/utils";
 import { format, differenceInDays } from "date-fns";
@@ -8,6 +8,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useCart } from "@/context/CartContext";
 import { useAuth } from "@/context/AuthContext";
+import { useDeliveryZones } from "@/hooks/useDeliveryZones";
 import { supabase } from "@/integrations/supabase/client";
 import { getPriceForDays } from "@/data/equipment";
 import DeliverySection, {
@@ -71,6 +72,7 @@ const COUNTRY_CODES = [
 const Checkout = () => {
   const { items, clearCart } = useCart();
   const { user } = useAuth();
+  const { zones, loading: zonesLoading } = useDeliveryZones();
   const navigate = useNavigate();
 
   const [submitting, setSubmitting] = useState(false);
@@ -118,6 +120,23 @@ const Checkout = () => {
     if (items.length === 0 && !submitting) navigate("/equipment");
   }, [items, navigate, submitting]);
 
+  // Seed the delivery form from the zone the customer picked on the product
+  // page (BookingPanel). Their explicit choice becomes the manual override, so
+  // it wins over address auto-detection instead of being silently re-priced.
+  // Runs once, and only if the user hasn't already touched the delivery method.
+  const seededZoneRef = useRef(false);
+  useEffect(() => {
+    if (seededZoneRef.current || delivery.method) return;
+    const cartSlug = items.find((i) => i.deliveryZoneSlug)?.deliveryZoneSlug;
+    if (!cartSlug) return;
+    seededZoneRef.current = true;
+    if (cartSlug === "store-pickup") {
+      setDelivery((d) => ({ ...d, method: "pickup" }));
+    } else {
+      setDelivery((d) => ({ ...d, method: "delivery", manualZone: cartSlug }));
+    }
+  }, [items, delivery.method]);
+
   // ── Pricing ──────────────────────────────────────────────────────────────
   const lineItems = useMemo(
     () =>
@@ -146,7 +165,7 @@ const Checkout = () => {
     [items]
   );
 
-  const deliveryFee = getDeliveryFee(delivery, rentalStart);
+  const deliveryFee = getDeliveryFee(delivery, zones, rentalStart);
   const total = equipmentTotal + deliveryFee;
   const depositAmount = Math.ceil(total * 0.30);
   const remainingAmount = total - depositAmount;
@@ -436,6 +455,8 @@ const Checkout = () => {
               onChange={handleDeliveryChange}
               clearError={clearDeliveryError}
               deliveryDate={rentalStart}
+              zones={zones}
+              zonesLoading={zonesLoading}
             />
 
             {/* Terms */}
@@ -600,7 +621,7 @@ const Checkout = () => {
                 </div>
                 {delivery.method === "delivery" && getDeliverySurcharge(delivery.method, delivery.timeSlot, rentalStart) > 0 && (
                   <p className="text-xs text-muted-foreground text-right -mt-1">
-                    €{getDeliveryZoneFee(delivery)} zone + €{getDeliverySurcharge(delivery.method, delivery.timeSlot, rentalStart)} surcharge
+                    €{getDeliveryZoneFee(delivery, zones)} zone + €{getDeliverySurcharge(delivery.method, delivery.timeSlot, rentalStart)} surcharge
                   </p>
                 )}
                 <div className="flex justify-between border-t pt-2">

@@ -25,7 +25,9 @@ import {
   CalendarPlus,
   XCircle,
   Phone,
+  Loader2,
 } from "lucide-react";
+import { useDeliveryZones } from "@/hooks/useDeliveryZones";
 
 /* ------------------------------------------------------------------ */
 /*  Scroll-reveal hook                                                 */
@@ -94,36 +96,21 @@ const steps = [
   },
 ];
 
-const zones = [
-  {
-    Icon: Store,
-    name: "Store Pickup",
-    areas: "Stadiou 31 · Kallithea · Chalandri",
-    fee: "FREE",
-    color: "bg-green-100 text-green-800 dark:bg-green-900/40 dark:text-green-300",
-  },
-  {
-    Icon: MapPin,
-    name: "Athens City",
-    areas: "Syntagma, Plaka, Monastiraki, greater metro area",
-    fee: "€20",
-    color: "bg-blue-100 text-blue-800 dark:bg-blue-900/40 dark:text-blue-300",
-  },
-  {
-    Icon: Ship,
-    name: "Piraeus Cruise Terminal",
-    areas: "Cruise terminal & ferry port",
-    fee: "€25",
-    color: "bg-blue-100 text-blue-800 dark:bg-blue-900/40 dark:text-blue-300",
-  },
-  {
-    Icon: Plane,
-    name: "Athens Airport",
-    areas: "Eleftherios Venizelos (ATH)",
-    fee: "€50",
-    color: "bg-blue-100 text-blue-800 dark:bg-blue-900/40 dark:text-blue-300",
-  },
-];
+/* Presentation only — icon/areas/color per zone slug. The list of zones and
+   their fees come from the delivery_zones table (useDeliveryZones), so new
+   zones appear here automatically; this map just keeps the card styling. */
+const BLUE = "bg-blue-100 text-blue-800 dark:bg-blue-900/40 dark:text-blue-300";
+const GREEN = "bg-green-100 text-green-800 dark:bg-green-900/40 dark:text-green-300";
+
+const ZONE_PRESENTATION: Record<string, { Icon: typeof MapPin; areas: string; color: string }> = {
+  "store-pickup": { Icon: Store, areas: "Stadiou 31 · Kallithea · Chalandri", color: GREEN },
+  "athens-city": { Icon: MapPin, areas: "Syntagma, Plaka, Monastiraki, greater metro area", color: BLUE },
+  "suburbs-riviera": { Icon: MapPin, areas: "Glyfada, Kifisia, Vouliagmeni, Voula", color: BLUE },
+  "athens-airport": { Icon: Plane, areas: "Eleftherios Venizelos (ATH)", color: BLUE },
+  "piraeus-port": { Icon: Ship, areas: "Cruise terminal & ferry port", color: BLUE },
+  "rafina-port": { Icon: Ship, areas: "Rafina ferry port · pre-arranged", color: BLUE },
+};
+const DEFAULT_PRESENTATION = { Icon: MapPin, areas: "", color: BLUE };
 
 const faqs = [
   { q: "How far in advance should I book?", a: "We recommend 48 hours, but same-day delivery is often available." },
@@ -136,7 +123,9 @@ const faqs = [
 /* ------------------------------------------------------------------ */
 /*  Component                                                          */
 /* ------------------------------------------------------------------ */
-const HowItWorks = () => (
+const HowItWorks = () => {
+  const { zones, loading: zonesLoading } = useDeliveryZones();
+  return (
   <>
     <SEOHead
       title="How It Works – Rent Mobility Equipment in Athens | Movability"
@@ -230,22 +219,35 @@ const HowItWorks = () => (
           </p>
         </Reveal>
 
-        <div className="mx-auto mt-12 grid max-w-4xl gap-6 sm:grid-cols-2 lg:grid-cols-4">
-          {zones.map((z) => (
-            <Reveal key={z.name}>
-              <Card className="h-full border border-border bg-card text-center shadow-sm transition-all duration-200 hover:-translate-y-1 hover:shadow-md">
-                <CardContent className="flex flex-col items-center p-6">
-                  <z.Icon className="h-8 w-8 text-primary" />
-                  <h3 className="mt-3 text-base font-heading font-semibold text-foreground">{z.name}</h3>
-                  <p className="mt-1 text-xs text-muted-foreground">{z.areas}</p>
-                  <span className={`mt-4 inline-block rounded-full px-4 py-1 text-sm font-bold ${z.color}`}>
-                    {z.fee}
-                  </span>
-                </CardContent>
-              </Card>
-            </Reveal>
-          ))}
-        </div>
+        {zonesLoading ? (
+          <div className="mt-12 flex justify-center">
+            <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
+          </div>
+        ) : (
+          <div className="mx-auto mt-12 grid max-w-4xl gap-6 sm:grid-cols-2 lg:grid-cols-3">
+            {zones.map((z) => {
+              const pres = ZONE_PRESENTATION[z.slug] ?? DEFAULT_PRESENTATION;
+              const title = z.name_en.replace(/\s*\([^)]*\)/, "").trim();
+              const parenMatch = z.name_en.match(/\(([^)]*)\)/);
+              const areas = pres.areas || parenMatch?.[1] || "";
+              const fee = Number(z.delivery_fee) === 0 ? "FREE" : `€${Number(z.delivery_fee)}`;
+              return (
+                <Reveal key={z.id}>
+                  <Card className="h-full border border-border bg-card text-center shadow-sm transition-all duration-200 hover:-translate-y-1 hover:shadow-md">
+                    <CardContent className="flex flex-col items-center p-6">
+                      <pres.Icon className="h-8 w-8 text-primary" />
+                      <h3 className="mt-3 text-base font-heading font-semibold text-foreground">{title}</h3>
+                      <p className="mt-1 text-xs text-muted-foreground">{areas}</p>
+                      <span className={`mt-4 inline-block rounded-full px-4 py-1 text-sm font-bold ${pres.color}`}>
+                        {fee}
+                      </span>
+                    </CardContent>
+                  </Card>
+                </Reveal>
+              );
+            })}
+          </div>
+        )}
 
         <Reveal>
           <p className="mx-auto mt-8 flex max-w-md items-center justify-center gap-2 text-center text-sm text-muted-foreground">
@@ -374,6 +376,7 @@ const HowItWorks = () => (
       </div>
     </section>
   </>
-);
+  );
+};
 
 export default HowItWorks;

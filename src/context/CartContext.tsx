@@ -7,6 +7,7 @@ export interface CartItem {
   endDate: Date;
   quantity: number;
   deliveryZone?: string;
+  deliveryZoneSlug?: string;
   deliveryFee: number;
   deliveryNotes?: string;
 }

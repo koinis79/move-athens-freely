@@ -117,6 +117,7 @@ const BookingPanel = ({ item }: Props) => {
       endDate,
       quantity: qty,
       deliveryZone: selectedZone?.name_en,
+      deliveryZoneSlug: selectedZone?.slug,
       deliveryFee,
     });
 
@@ -175,6 +176,7 @@ const BookingPanel = ({ item }: Props) => {
       endDate,
       quantity: qty,
       deliveryZone: selectedZone?.name_en,
+      deliveryZoneSlug: selectedZone?.slug,
       deliveryFee,
     });
 
