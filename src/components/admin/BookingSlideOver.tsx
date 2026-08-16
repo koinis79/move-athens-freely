@@ -1,8 +1,9 @@
 import { format } from "date-fns";
 import {
   Phone, Mail, MapPin, Clock, CreditCard, Euro,
-  CheckCircle2, Truck, PackageCheck, XCircle, MessageSquare, Send,
+  CheckCircle2, Truck, PackageCheck, XCircle, MessageSquare, Send, AlertTriangle,
 } from "lucide-react";
+import { detectZoneFromAddress } from "@/lib/deliveryZoneDetect";
 import { useState } from "react";
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sheet";
 import { Badge } from "@/components/ui/badge";
@@ -50,6 +51,13 @@ const BookingSlideOver = ({ booking, onClose }: Props) => {
   const b = booking;
   const sc = statusConfig[b.status] ?? statusConfig.pending;
   const equipmentName = b.booking_items?.[0]?.equipment?.name_en ?? "Unknown Equipment";
+
+  // Advisory: does the address keyword-match a different zone than the one
+  // booked? Catches zone mistakes at review rather than at delivery. Only warns
+  // when both a keyword and the booked zone slug are known and they disagree.
+  const detectedSlug = detectZoneFromAddress(b.delivery_address);
+  const bookedSlug = b.delivery_zones?.slug ?? null;
+  const zoneMismatch = !!detectedSlug && !!bookedSlug && detectedSlug !== bookedSlug;
 
   const handleStatusUpdate = async (newStatus: string) => {
     const { error } = await supabase
@@ -146,6 +154,11 @@ const BookingSlideOver = ({ booking, onClose }: Props) => {
           <Section title="Delivery Details">
             <div className="space-y-2">
               {b.delivery_address && <InfoRow icon={MapPin} label={b.delivery_address} />}
+              {zoneMismatch && (
+                <span className="inline-flex items-center gap-1 rounded-md border border-amber-300 bg-amber-50 px-2 py-0.5 text-xs font-medium text-amber-800">
+                  <AlertTriangle className="h-3 w-3 shrink-0" /> address may not match zone
+                </span>
+              )}
               {b.delivery_time_slot && <InfoRow icon={Clock} label={`Preferred time: ${b.delivery_time_slot}`} />}
               {b.special_requirements && (
                 <div className="bg-amber-50 rounded-lg p-3 text-sm text-amber-900 mt-2">

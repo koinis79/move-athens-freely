@@ -20,8 +20,10 @@ import {
   Printer,
   Search,
   Truck,
+  AlertTriangle,
   X as XIcon,
 } from "lucide-react";
+import { detectZoneFromAddress } from "@/lib/deliveryZoneDetect";
 
 interface BookingItem {
   quantity: number;
@@ -55,7 +57,7 @@ interface Booking {
   is_archived: boolean;
   review_requested_at: string | null;
   created_at: string;
-  delivery_zones: { name_en: string } | null;
+  delivery_zones: { name_en: string; slug: string } | null;
   booking_items: BookingItem[];
 }
 
@@ -156,7 +158,7 @@ export default function BookingsNew() {
         id, booking_number, customer_name, customer_email, customer_phone,
         delivery_address, delivery_notes, delivery_time_slot, rental_start, rental_end,
         total_amount, payment_status, status, internal_notes, is_archived, review_requested_at, created_at,
-        delivery_zones ( name_en ),
+        delivery_zones ( name_en, slug ),
         booking_items ( quantity, num_days, subtotal, equipment ( name_en ) )
       `)
       .order("created_at", { ascending: false });
@@ -1165,6 +1167,16 @@ export default function BookingsNew() {
                   Delivery
                 </h3>
                 <p className="text-gray-700">{selected.delivery_zones?.name_en ?? "—"}</p>
+                {(() => {
+                  // Advisory only: address keywords suggest a different zone than booked.
+                  const detected = detectZoneFromAddress(selected.delivery_address);
+                  const booked = selected.delivery_zones?.slug ?? null;
+                  return detected && booked && detected !== booked ? (
+                    <span className="inline-flex items-center gap-1 mt-1 rounded-md border border-amber-300 bg-amber-50 px-2 py-0.5 text-xs font-medium text-amber-800">
+                      <AlertTriangle className="h-3 w-3 shrink-0" /> address may not match zone
+                    </span>
+                  ) : null;
+                })()}
                 <p className="text-gray-600 text-xs mt-1">{selected.delivery_address ?? "—"}</p>
                 <p className="text-gray-600 text-xs mt-1">Time slot: {timeSlotLabel(selected.delivery_time_slot)}</p>
                 {selected.delivery_notes && (

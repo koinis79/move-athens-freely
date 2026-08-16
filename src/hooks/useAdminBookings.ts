@@ -23,6 +23,7 @@ export interface AdminBooking {
   internal_notes: string | null;
   created_at: string;
   updated_at: string;
+  delivery_zones: { slug: string } | null;
   booking_items: {
     id: string;
     quantity: number;
@@ -57,6 +58,7 @@ export function useAdminBookings(filters?: Filters) {
       .from("bookings")
       .select(`
         *,
+        delivery_zones(slug),
         booking_items(*, equipment(id, name_en, slug, images, category_id))
       `)
       .order("created_at", { ascending: false });

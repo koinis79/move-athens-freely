@@ -8,6 +8,7 @@ import {
   Loader2,
 } from "lucide-react";
 import type { DeliveryZone } from "@/hooks/useDeliveryZones";
+import { detectZoneFromAddress } from "@/lib/deliveryZoneDetect";
 import { cn } from "@/lib/utils";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -79,34 +80,9 @@ interface Props {
 
 /* ── Zone detection ────────────────────────────────────────────────────── */
 
-/**
- * Best-effort mapping of a free-text address to a zone slug. Detection is only
- * a convenience — the user-visible "Change zone" dropdown is the source of
- * truth, so we keep this simple rather than mirroring every DB zone. IMPORTANT:
- * "Rafina" must be tested BEFORE the generic "port" match, or Rafina addresses
- * would fall through to piraeus-port (the old silent-undercharge bug).
- */
-function detectZoneFromAddress(address: string): string {
-  const l = address.toLowerCase();
-
-  // Airport
-  if (l.includes("airport") || l.includes("venizelos") || l.includes("eleftherios") || l.includes("aerodrom") || l.includes("αεροδρόμ")) return "athens-airport";
-
-  // Rafina — MUST come before the generic Piraeus/port match below.
-  if (l.includes("rafina") || l.includes("ραφήν") || l.includes("ραφην")) return "rafina-port";
-
-  // Piraeus / Cruise / Port
-  if (l.includes("piraeus") || l.includes("πειραι") || l.includes("cruise") || l.includes("ferry") || l.includes("port") || l.includes("λιμάνι")) return "piraeus-port";
-
-  // Southern suburbs & Athens Riviera
-  if (l.includes("glyfada") || l.includes("γλυφάδ") || l.includes("γλυφαδ") ||
-      l.includes("kifisia") || l.includes("kifissia") || l.includes("κηφισ") ||
-      l.includes("vouliagmeni") || l.includes("βουλιαγμ") ||
-      l.includes("voula") || l.includes("βούλα") || l.includes("βουλα")) return "suburbs-riviera";
-
-  // Default — all other Athens addresses
-  return "athens-city";
-}
+// Keyword address→slug matching (Latin + Greek, accent-insensitive) lives in a
+// shared util so admin review can reuse the exact same logic. It returns null
+// when nothing matches; checkout keeps athens-city as the fallback zone.
 
 function getZone(slug: string | null, zones: DeliveryZone[]): DeliveryZone | undefined {
   return zones.find(z => z.slug === slug);
@@ -214,10 +190,22 @@ export function DeliverySection({ data, errors, onChange, clearError, deliveryDa
   const handleAddressChange = (address: string) => {
     set("deliveryAddress", address);
     if (address.trim().length > 3) {
-      const detected = detectZoneFromAddress(address);
+      // Keyword match falls back to athens-city when nothing matches, preserving
+      // the prior default behavior for the auto-detected zone.
+      const detected = detectZoneFromAddress(address) ?? "athens-city";
       onChange({ detectedZone: detected });
     }
   };
+
+  // Advisory mismatch: does the typed address keyword-match a DIFFERENT zone
+  // than the one currently active? Only meaningful when the user (or the seeded
+  // cart choice) has fixed a zone that disagrees with the address. null = no
+  // keyword matched → no hint. Never auto-switches or blocks.
+  const keywordSlug = detectZoneFromAddress(data.deliveryAddress);
+  const mismatchZone =
+    keywordSlug && keywordSlug !== activeZoneSlug
+      ? getZone(keywordSlug, zones)
+      : undefined;
 
   return (
     <div className="space-y-6">
@@ -299,6 +287,15 @@ export function DeliverySection({ data, errors, onChange, clearError, deliveryDa
                 {showZoneOverride ? "Close" : "Change zone"}
               </button>
             </div>
+          )}
+
+          {/* Advisory mismatch hint — address keywords suggest a different zone
+              than the one selected. Never auto-switches; just nudges. */}
+          {!zonesLoading && mismatchZone && (
+            <p className="text-xs text-amber-600 bg-amber-50 border border-amber-200 rounded-md px-3 py-2">
+              Your address looks like it may be in <strong>{mismatchZone.name_en}</strong>{" "}
+              ({Number(mismatchZone.delivery_fee) === 0 ? "Free" : `€${Number(mismatchZone.delivery_fee)}`}) — tap “Change zone” if so.
+            </p>
           )}
 
           {/* Manual zone override */}
