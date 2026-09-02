@@ -7,7 +7,9 @@ import NewBookingModal from "@/components/admin/NewBookingModal";
 import {
   Archive,
   ArchiveRestore,
+  ArrowDown,
   ArrowRight,
+  ArrowUp,
   CalendarDays,
   Check,
   CheckCircle2,
@@ -51,6 +53,10 @@ interface Booking {
   rental_start: string;
   rental_end: string;
   total_amount: number;
+  amount_paid: number | null;
+  amount_due: number | null;
+  payment_type: string | null;
+  stripe_payment_intent_id: string | null;
   payment_status: string;
   status: string;
   internal_notes: string | null;
@@ -149,6 +155,12 @@ export default function BookingsNew() {
   const [archiveConfirm, setArchiveConfirm] = useState<Booking | null>(null);
   const [cancelConfirm, setCancelConfirm] = useState<Booking | null>(null);
   const [newBookingOpen, setNewBookingOpen] = useState(false);
+  const [sortField, setSortField] = useState<"created_at" | "rental_start">("created_at");
+  const [sortDir, setSortDir] = useState<"asc" | "desc">("desc");
+  // Accounting export — defaults to the current month (YYYY-MM)
+  const [accountingMonth, setAccountingMonth] = useState<string>(() =>
+    new Date().toISOString().slice(0, 7),
+  );
 
   async function fetchBookings() {
     setLoading(true);
@@ -157,7 +169,8 @@ export default function BookingsNew() {
       .select(`
         id, booking_number, customer_name, customer_email, customer_phone,
         delivery_address, delivery_notes, delivery_time_slot, rental_start, rental_end,
-        total_amount, payment_status, status, internal_notes, is_archived, review_requested_at, created_at,
+        total_amount, amount_paid, amount_due, payment_type, stripe_payment_intent_id,
+        payment_status, status, internal_notes, is_archived, review_requested_at, created_at,
         delivery_zones ( name_en, slug ),
         booking_items ( quantity, num_days, subtotal, equipment ( name_en ) )
       `)
@@ -360,6 +373,86 @@ export default function BookingsNew() {
     toast({ title: `Exported ${rows.length} booking${rows.length !== 1 ? "s" : ""} as CSV` });
   }
 
+  // Monthly accounting export (Λογιστήριο). Produces a single CSV with two
+  // sections: settled bookings (paid + deposit_paid) and outstanding ones
+  // (everything else), both filtered to bookings CREATED in the selected month.
+  // Archived (test) bookings are excluded. Exact columns are fixed for the
+  // accountant so the paid section reconciles against the owner's manual SQL.
+  function exportAccountingCSV() {
+    const monthStart = `${accountingMonth}-01`;
+    // First day of the following month, computed from the YYYY-MM string.
+    const [y, m] = accountingMonth.split("-").map(Number);
+    const nextMonth = m === 12 ? `${y + 1}-01-01` : `${y}-${String(m + 1).padStart(2, "0")}-01`;
+
+    const inMonth = bookings.filter((b) => {
+      if (b.is_archived) return false;
+      const created = b.created_at.slice(0, 10);
+      return created >= monthStart && created < nextMonth;
+    });
+
+    const settled = inMonth.filter(
+      (b) => b.payment_status === "paid" || b.payment_status === "deposit_paid",
+    );
+    const outstanding = inMonth.filter(
+      (b) => b.payment_status !== "paid" && b.payment_status !== "deposit_paid",
+    );
+
+    const esc = (v: unknown) => {
+      const s = String(v ?? "");
+      if (/[",\n\r]/.test(s)) return `"${s.replace(/"/g, '""')}"`;
+      return s;
+    };
+
+    const HEADERS = [
+      "booking_number", "customer_name", "rental_start", "rental_end",
+      "total_amount", "amount_paid", "amount_due", "payment_type",
+      "payment_channel", "payment_status", "status", "created_at",
+    ];
+
+    const rowFor = (b: Booking) => [
+      b.booking_number,
+      b.customer_name,
+      b.rental_start,
+      b.rental_end,
+      Number(b.total_amount).toFixed(2),
+      b.amount_paid != null ? Number(b.amount_paid).toFixed(2) : "",
+      b.amount_due != null ? Number(b.amount_due).toFixed(2) : "",
+      b.payment_type ?? "",
+      b.stripe_payment_intent_id ? "Stripe" : "Cash/Manual",
+      b.payment_status,
+      b.status,
+      b.created_at,
+    ].map(esc).join(",");
+
+    const sumTotal = (rows: Booking[]) =>
+      rows.reduce((s, b) => s + Number(b.total_amount || 0), 0).toFixed(2);
+    const sumDue = (rows: Booking[]) =>
+      rows.reduce((s, b) => s + Number(b.amount_due || 0), 0).toFixed(2);
+
+    const lines: string[] = [];
+    lines.push(esc(`PAID & DEPOSITS — ${accountingMonth}`));
+    lines.push(HEADERS.join(","));
+    settled.forEach((b) => lines.push(rowFor(b)));
+    lines.push([esc("TOTAL"), "", "", "", esc(sumTotal(settled))].join(","));
+    lines.push("");
+    lines.push(esc(`PENDING / UNPAID (outstanding) — ${accountingMonth}`));
+    lines.push(HEADERS.join(","));
+    outstanding.forEach((b) => lines.push(rowFor(b)));
+    lines.push([esc("TOTAL OUTSTANDING"), "", "", "", "", "", esc(sumDue(outstanding))].join(","));
+
+    const csv = lines.join("\n");
+    const blob = new Blob(["﻿" + csv], { type: "text/csv;charset=utf-8;" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = `accounting-${accountingMonth}.csv`;
+    a.click();
+    URL.revokeObjectURL(url);
+    toast({
+      title: `Λογιστήριο ${accountingMonth}: ${settled.length} settled, ${outstanding.length} outstanding`,
+    });
+  }
+
   function printPackingSlip(b: Booking) {
     const logoUrl = "https://lmgpuqgwkiapgpdsxvmb.supabase.co/storage/v1/object/public/assets/movability-logo.png";
     const itemsHtml = b.booking_items
@@ -521,21 +614,28 @@ export default function BookingsNew() {
     w.document.close();
   }
 
-  const filtered = bookings.filter((b) => {
-    if (tab === "active" && b.is_archived) return false;
-    if (tab === "archived" && !b.is_archived) return false;
-    if (statusFilter !== "all" && b.status !== statusFilter) return false;
-    if (calendarDateFilter && b.rental_start !== calendarDateFilter) return false;
-    if (search) {
-      const q = search.toLowerCase();
-      return (
-        b.booking_number.toLowerCase().includes(q) ||
-        b.customer_name.toLowerCase().includes(q) ||
-        b.customer_email.toLowerCase().includes(q)
-      );
-    }
-    return true;
-  });
+  const filtered = bookings
+    .filter((b) => {
+      if (tab === "active" && b.is_archived) return false;
+      if (tab === "archived" && !b.is_archived) return false;
+      if (statusFilter !== "all" && b.status !== statusFilter) return false;
+      if (calendarDateFilter && b.rental_start !== calendarDateFilter) return false;
+      if (search) {
+        const q = search.toLowerCase();
+        return (
+          b.booking_number.toLowerCase().includes(q) ||
+          b.customer_name.toLowerCase().includes(q) ||
+          b.customer_email.toLowerCase().includes(q)
+        );
+      }
+      return true;
+    })
+    .sort((a, b) => {
+      const av = a[sortField] ?? "";
+      const bv = b[sortField] ?? "";
+      const cmp = av < bv ? -1 : av > bv ? 1 : 0;
+      return sortDir === "asc" ? cmp : -cmp;
+    });
 
   const activeCount = bookings.filter((b) => !b.is_archived).length;
   const archivedCount = bookings.filter((b) => b.is_archived).length;
@@ -668,6 +768,49 @@ export default function BookingsNew() {
             </option>
           ))}
         </select>
+      </div>
+
+      {/* Sort + accounting toolbar */}
+      <div className="flex flex-col sm:flex-row sm:items-center gap-3 sm:justify-between">
+        {/* Sort controls */}
+        <div className="flex items-center gap-2 text-sm">
+          <span className="text-gray-500">Sort by</span>
+          <select
+            value={sortField}
+            onChange={(e) => setSortField(e.target.value as "created_at" | "rental_start")}
+            className="h-10 px-2.5 rounded-md border border-gray-300 bg-white text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+          >
+            <option value="created_at">Booked (created)</option>
+            <option value="rental_start">Rental start</option>
+          </select>
+          <button
+            type="button"
+            onClick={() => setSortDir((d) => (d === "asc" ? "desc" : "asc"))}
+            title={sortDir === "desc" ? "Newest first" : "Oldest first"}
+            className="inline-flex items-center gap-1 h-10 px-2.5 rounded-md border border-gray-300 bg-white text-sm text-gray-700 hover:bg-gray-50"
+          >
+            {sortDir === "desc" ? <ArrowDown className="h-3.5 w-3.5" /> : <ArrowUp className="h-3.5 w-3.5" />}
+            {sortDir === "desc" ? "Newest" : "Oldest"}
+          </button>
+        </div>
+
+        {/* Λογιστήριο (accounting) monthly export */}
+        <div className="flex items-center gap-2 text-sm">
+          <span className="text-gray-500 hidden sm:inline">Λογιστήριο</span>
+          <input
+            type="month"
+            value={accountingMonth}
+            onChange={(e) => setAccountingMonth(e.target.value)}
+            className="h-10 px-2.5 rounded-md border border-gray-300 bg-white text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+          />
+          <button
+            type="button"
+            onClick={exportAccountingCSV}
+            className="inline-flex items-center gap-1.5 h-10 px-3 rounded-md bg-emerald-600 text-white text-sm font-medium hover:bg-emerald-700 transition-colors"
+          >
+            <Download className="h-3.5 w-3.5" /> Export
+          </button>
+        </div>
       </div>
 
       {/* ─── Mobile Card View (< md) ─── */}
