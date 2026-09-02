@@ -376,8 +376,22 @@ export default function BookingsNew() {
   // Monthly accounting export (Λογιστήριο). Produces a single CSV with two
   // sections: settled bookings (paid + deposit_paid) and outstanding ones
   // (everything else), both filtered to bookings CREATED in the selected month.
-  // Archived (test) bookings are excluded. Exact columns are fixed for the
-  // accountant so the paid section reconciles against the owner's manual SQL.
+  // ARCHIVED bookings ARE INCLUDED — archive status is operational cleanup, not
+  // financial; excluding it silently drops real (completed) revenue. Test rows
+  // are removed by KNOWN test email only (the owner's own test account). Note
+  // pending@moveability.gr is NOT a test email — it is the placeholder for real
+  // manual bookings whose customer email wasn't captured, so it stays IN.
+  const TEST_EMAILS = new Set(["kalogeropoulosbill6@gmail.com"]);
+
+  // Effective amount actually received. Handles the pre-Aug-16 webhook artifact
+  // where fully-paid Stripe rows have amount_paid=0: a settled full payment is
+  // worth its total, a deposit is worth what was actually put down.
+  function effectiveReceived(b: Booking): number {
+    if (b.payment_status === "deposit_paid") return Number(b.amount_paid || 0);
+    if (b.payment_status === "paid") return Number(b.total_amount || 0);
+    return Number(b.amount_paid || 0); // outstanding rows: whatever (if anything) came in
+  }
+
   function exportAccountingCSV() {
     const monthStart = `${accountingMonth}-01`;
     // First day of the following month, computed from the YYYY-MM string.
@@ -385,7 +399,7 @@ export default function BookingsNew() {
     const nextMonth = m === 12 ? `${y + 1}-01-01` : `${y}-${String(m + 1).padStart(2, "0")}-01`;
 
     const inMonth = bookings.filter((b) => {
-      if (b.is_archived) return false;
+      if (TEST_EMAILS.has(b.customer_email.toLowerCase())) return false;
       const created = b.created_at.slice(0, 10);
       return created >= monthStart && created < nextMonth;
     });
@@ -405,8 +419,8 @@ export default function BookingsNew() {
 
     const HEADERS = [
       "booking_number", "customer_name", "rental_start", "rental_end",
-      "total_amount", "amount_paid", "amount_due", "payment_type",
-      "payment_channel", "payment_status", "status", "created_at",
+      "total_amount", "amount_paid", "amount_due", "effective_amount_received",
+      "payment_type", "payment_channel", "payment_status", "status", "created_at",
     ];
 
     const rowFor = (b: Booking) => [
@@ -417,6 +431,7 @@ export default function BookingsNew() {
       Number(b.total_amount).toFixed(2),
       b.amount_paid != null ? Number(b.amount_paid).toFixed(2) : "",
       b.amount_due != null ? Number(b.amount_due).toFixed(2) : "",
+      effectiveReceived(b).toFixed(2),
       b.payment_type ?? "",
       b.stripe_payment_intent_id ? "Stripe" : "Cash/Manual",
       b.payment_status,
@@ -424,21 +439,32 @@ export default function BookingsNew() {
       b.created_at,
     ].map(esc).join(",");
 
-    const sumTotal = (rows: Booking[]) =>
+    const sumBilled = (rows: Booking[]) =>
       rows.reduce((s, b) => s + Number(b.total_amount || 0), 0).toFixed(2);
+    const sumReceived = (rows: Booking[]) =>
+      rows.reduce((s, b) => s + effectiveReceived(b), 0).toFixed(2);
     const sumDue = (rows: Booking[]) =>
       rows.reduce((s, b) => s + Number(b.amount_due || 0), 0).toFixed(2);
 
+    // Build a fixed-width row so the TOTAL numbers land under their columns.
+    const blank = HEADERS.map(() => "");
+    const totalRow = (label: string, cells: Record<number, string>) => {
+      const row = [...blank];
+      row[0] = label;
+      for (const [i, v] of Object.entries(cells)) row[Number(i)] = v;
+      return row.map(esc).join(",");
+    };
+    // Column indices: 4=total_amount, 7=effective_amount_received, 6=amount_due
     const lines: string[] = [];
     lines.push(esc(`PAID & DEPOSITS — ${accountingMonth}`));
     lines.push(HEADERS.join(","));
     settled.forEach((b) => lines.push(rowFor(b)));
-    lines.push([esc("TOTAL"), "", "", "", esc(sumTotal(settled))].join(","));
+    lines.push(totalRow("TOTAL", { 4: sumBilled(settled), 7: sumReceived(settled) }));
     lines.push("");
     lines.push(esc(`PENDING / UNPAID (outstanding) — ${accountingMonth}`));
     lines.push(HEADERS.join(","));
     outstanding.forEach((b) => lines.push(rowFor(b)));
-    lines.push([esc("TOTAL OUTSTANDING"), "", "", "", "", "", esc(sumDue(outstanding))].join(","));
+    lines.push(totalRow("TOTAL OUTSTANDING", { 4: sumBilled(outstanding), 6: sumDue(outstanding) }));
 
     const csv = lines.join("\n");
     const blob = new Blob(["﻿" + csv], { type: "text/csv;charset=utf-8;" });
@@ -449,7 +475,7 @@ export default function BookingsNew() {
     a.click();
     URL.revokeObjectURL(url);
     toast({
-      title: `Λογιστήριο ${accountingMonth}: ${settled.length} settled, ${outstanding.length} outstanding`,
+      title: `Λογιστήριο ${accountingMonth}: ${settled.length} settled (€${sumReceived(settled)} received), ${outstanding.length} outstanding`,
     });
   }
 
