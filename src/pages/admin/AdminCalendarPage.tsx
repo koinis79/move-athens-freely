@@ -1,4 +1,4 @@
-import { useState, useMemo } from "react";
+import { useState, useMemo, type MouseEvent } from "react";
 import {
   ChevronLeft, ChevronRight, Truck, PackageCheck, Plus, Calendar as CalendarIcon,
   Clock, MapPin, Phone, Euro, ShieldCheck,
@@ -13,15 +13,6 @@ import BookingSlideOver from "@/components/admin/BookingSlideOver";
 import NewBookingModal from "@/components/admin/NewBookingModal";
 
 type ViewMode = "month" | "week" | "day";
-
-const statusBarColors: Record<string, string> = {
-  pending: "bg-amber-400/90 text-amber-950",
-  confirmed: "bg-primary/90 text-primary-foreground",
-  active: "bg-secondary/90 text-secondary-foreground",
-  delivered: "bg-secondary/90 text-secondary-foreground",
-  completed: "bg-accent/30 text-accent-foreground",
-  cancelled: "bg-muted text-muted-foreground line-through",
-};
 
 const WEEKDAYS = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
 
@@ -60,6 +51,39 @@ function getLastName(name: string) {
 
 function getEquipmentShort(b: AdminBooking) {
   return b.booking_items?.[0]?.equipment?.name_en?.split(" ").slice(0, 2).join(" ") ?? "Equipment";
+}
+
+// A single calendar event: a delivery (🚚, on rental_start) or a collection
+// (📦, on rental_end). Rendered as a calm tinted pill — brand primary-blue for
+// deliveries, accent-green for collections — with the customer's surname. It's a
+// div (not a button) because it sits inside the day-cell button; nested buttons
+// are invalid HTML.
+function EventChip({
+  b, kind, onClick,
+}: {
+  b: AdminBooking;
+  kind: "delivery" | "collection";
+  onClick: (e: MouseEvent) => void;
+}) {
+  const isDelivery = kind === "delivery";
+  return (
+    <div
+      role="button"
+      tabIndex={0}
+      onClick={onClick}
+      onKeyDown={(e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); onClick(e as unknown as MouseEvent); } }}
+      title={`${isDelivery ? "Delivery" : "Collection"}: ${getEquipmentShort(b)} — ${b.customer_name}`}
+      className={cn(
+        "flex items-center gap-1 w-full min-w-0 rounded-full px-2 py-0.5 text-[11px] font-medium leading-none cursor-pointer transition-opacity hover:opacity-80",
+        isDelivery
+          ? "bg-[#2563EB]/10 text-[#2563EB] dark:bg-[#2563EB]/25 dark:text-[#93C5FD]"
+          : "bg-[#65A30D]/10 text-[#65A30D] dark:bg-[#65A30D]/25 dark:text-[#A3E635]",
+      )}
+    >
+      <span className="shrink-0 leading-none">{isDelivery ? "🚚" : "📦"}</span>
+      <span className="truncate">{getLastName(b.customer_name)}</span>
+    </div>
+  );
 }
 
 // ─── Operations helpers ─────────────────────────────────────────
@@ -285,6 +309,22 @@ const AdminCalendarPage = () => {
 
   const getBookingsForDate = (date: Date) => bookings.filter((b) => bookingSpansDate(b, date));
 
+  // Grid shows EVENTS, not spans: cancelled + archived bookings are hidden, and
+  // each remaining booking surfaces only on its delivery day and its collection
+  // day — never on the days in between.
+  const gridBookings = useMemo(
+    () => bookings.filter((b) => !b.is_archived && b.status !== "cancelled"),
+    [bookings],
+  );
+  const eventsOn = (date: Date) => [
+    ...gridBookings
+      .filter((b) => isSameDay(parseISO(b.rental_start), date))
+      .map((b) => ({ b, kind: "delivery" as const })),
+    ...gridBookings
+      .filter((b) => isSameDay(parseISO(b.rental_end), date))
+      .map((b) => ({ b, kind: "collection" as const })),
+  ];
+
   const handleDateClick = (date: Date) => {
     setSelectedDate(date);
     if (viewMode === "month" && !isSameMonth(date, currentDate)) setCurrentDate(date);
@@ -295,49 +335,42 @@ const AdminCalendarPage = () => {
     const isToday = isSameDay(date, today);
     const isSelected = isSameDay(date, selectedDate);
     const isCurrentMonth = isSameMonth(date, currentDate);
-    const dayBookings = getBookingsForDate(date);
-    const deliveries = dayBookings.filter((b) => isDeliveryDay(b, date));
-    const pickups = dayBookings.filter((b) => isPickupDay(b, date));
+    const dow = date.getDay(); // 0=Sun … 6=Sat
+    const isWeekend = dow === 0 || dow === 6;
+    const events = eventsOn(date);
+    const shown = events.slice(0, 4);
+    const extra = events.length - shown.length;
 
     return (
       <button
         onClick={() => handleDateClick(date)}
         className={cn(
-          "relative min-h-[100px] border-b border-r border-border p-1 text-left transition-colors hover:bg-muted/30",
-          !isCurrentMonth && "bg-muted/20",
-          isSelected && "ring-2 ring-inset ring-primary/40",
+          "relative min-h-[120px] border-b border-r border-border p-1.5 text-left align-top transition-colors hover:bg-muted/30",
+          isWeekend && !isToday && "bg-muted/20",
+          !isCurrentMonth && "opacity-40",
+          isToday && "bg-primary/5 ring-1 ring-inset ring-primary/30",
+          isSelected && !isToday && "ring-2 ring-inset ring-primary/40",
         )}
       >
-        <div className="flex items-center justify-between mb-0.5">
+        <div className="mb-1">
           <span className={cn(
-            "text-xs font-medium w-6 h-6 flex items-center justify-center rounded-full",
-            isToday && "bg-primary text-primary-foreground",
-            !isToday && isCurrentMonth && "text-foreground",
-            !isToday && !isCurrentMonth && "text-muted-foreground",
+            "text-xs font-semibold",
+            isToday ? "text-primary" : isCurrentMonth ? "text-foreground" : "text-muted-foreground",
           )}>
             {format(date, "d")}
           </span>
-          <div className="flex items-center gap-0.5">
-            {deliveries.length > 0 && <span className="text-[10px]" title="Delivery">🚚</span>}
-            {pickups.length > 0 && <span className="text-[10px]" title="Pickup">📥</span>}
-          </div>
         </div>
-        <div className="space-y-0.5 overflow-hidden">
-          {dayBookings.slice(0, 3).map((b) => (
-            <div
-              key={b.id}
+        <div className="space-y-1">
+          {shown.map(({ b, kind }) => (
+            <EventChip
+              key={`${kind}-${b.id}`}
+              b={b}
+              kind={kind}
               onClick={(e) => { e.stopPropagation(); setSelectedBooking(b); }}
-              className={cn(
-                "text-[10px] leading-tight px-1 py-0.5 rounded-sm truncate cursor-pointer hover:opacity-80",
-                statusBarColors[b.status] ?? statusBarColors.pending,
-              )}
-              title={`${getEquipmentShort(b)} — ${b.customer_name}`}
-            >
-              {getEquipmentShort(b)} · {getLastName(b.customer_name)}
-            </div>
+            />
           ))}
-          {dayBookings.length > 3 && (
-            <span className="text-[10px] text-muted-foreground pl-1">+{dayBookings.length - 3} more</span>
+          {extra > 0 && (
+            <span className="block text-[10px] text-muted-foreground pl-1">+{extra} more</span>
           )}
         </div>
       </button>
@@ -348,9 +381,7 @@ const AdminCalendarPage = () => {
   const WeekDayRow = ({ date }: { date: Date }) => {
     const isToday = isSameDay(date, today);
     const isSelected = isSameDay(date, selectedDate);
-    const dayBookings = getBookingsForDate(date);
-    const deliveries = dayBookings.filter((b) => isDeliveryDay(b, date));
-    const pickups = dayBookings.filter((b) => isPickupDay(b, date));
+    const events = eventsOn(date);
 
     return (
       <button
@@ -364,30 +395,22 @@ const AdminCalendarPage = () => {
           <div className="text-xs text-muted-foreground">{format(date, "EEE")}</div>
           <div className={cn(
             "text-lg font-bold w-9 h-9 flex items-center justify-center rounded-full mx-auto",
-            isToday && "bg-primary text-primary-foreground",
-            !isToday && "text-foreground",
+            isToday ? "bg-primary/10 text-primary ring-1 ring-primary/30" : "text-foreground",
           )}>
             {format(date, "d")}
           </div>
-          <div className="flex items-center justify-center gap-0.5 mt-1">
-            {deliveries.length > 0 && <span className="text-xs">🚚</span>}
-            {pickups.length > 0 && <span className="text-xs">📥</span>}
-          </div>
         </div>
-        <div className="flex-1 flex flex-wrap gap-1.5 min-h-[40px] items-start">
-          {dayBookings.map((b) => (
-            <div
-              key={b.id}
-              onClick={(e) => { e.stopPropagation(); setSelectedBooking(b); }}
-              className={cn(
-                "text-xs px-2 py-1 rounded-md truncate cursor-pointer hover:opacity-80 max-w-[200px]",
-                statusBarColors[b.status] ?? statusBarColors.pending,
-              )}
-            >
-              {getEquipmentShort(b)} · {getLastName(b.customer_name)}
+        <div className="flex-1 flex flex-wrap gap-1.5 min-h-[40px] items-start content-start">
+          {events.map(({ b, kind }) => (
+            <div key={`${kind}-${b.id}`} className="max-w-[170px]">
+              <EventChip
+                b={b}
+                kind={kind}
+                onClick={(e) => { e.stopPropagation(); setSelectedBooking(b); }}
+              />
             </div>
           ))}
-          {dayBookings.length === 0 && <span className="text-xs text-muted-foreground italic">No bookings</span>}
+          {events.length === 0 && <span className="text-xs text-muted-foreground italic">No events</span>}
         </div>
       </button>
     );
@@ -442,13 +465,33 @@ const AdminCalendarPage = () => {
           </Button>
         </div>
 
+        {/* Legend */}
+        <div className="flex items-center gap-4 px-4 py-2 border-b border-border bg-card text-xs text-muted-foreground">
+          <span className="inline-flex items-center gap-1.5">
+            <span className="inline-flex items-center justify-center h-4 w-4 rounded-full bg-[#2563EB]/10 text-[10px]">🚚</span>
+            Delivery
+          </span>
+          <span className="inline-flex items-center gap-1.5">
+            <span className="inline-flex items-center justify-center h-4 w-4 rounded-full bg-[#65A30D]/10 text-[10px]">📦</span>
+            Collection
+          </span>
+        </div>
+
         {/* Calendar body */}
         <div className="flex-1 overflow-auto bg-card rounded-b-xl">
           {viewMode === "month" && (
             <>
               <div className="grid grid-cols-7 border-b border-border">
-                {WEEKDAYS.map((d) => (
-                  <div key={d} className="text-center text-xs font-semibold text-muted-foreground py-2 border-r border-border last:border-r-0">{d}</div>
+                {WEEKDAYS.map((d, i) => (
+                  <div
+                    key={d}
+                    className={cn(
+                      "text-center text-xs font-semibold text-muted-foreground py-2 border-r border-border last:border-r-0",
+                      i >= 5 && "bg-muted/20",
+                    )}
+                  >
+                    {d}
+                  </div>
                 ))}
               </div>
               <div className="grid grid-cols-7 group">

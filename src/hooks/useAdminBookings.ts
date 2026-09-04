@@ -23,6 +23,7 @@ export interface AdminBooking {
   payment_type: string | null;
   status: string;
   payment_status: string;
+  is_archived: boolean;
   internal_notes: string | null;
   created_at: string;
   updated_at: string;
