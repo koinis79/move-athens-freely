@@ -24,6 +24,7 @@ export interface AdminBooking {
   status: string;
   payment_status: string;
   is_archived: boolean;
+  stripe_payment_intent_id: string | null;
   internal_notes: string | null;
   created_at: string;
   updated_at: string;

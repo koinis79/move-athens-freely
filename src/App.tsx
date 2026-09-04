@@ -32,6 +32,7 @@ import Admin from "./pages/Admin";
 import AdminInventoryPage from "./pages/admin/AdminInventoryPage";
 import AdminCalendarPage from "./pages/admin/AdminCalendarPage";
 import AdminCustomersPage from "./pages/admin/AdminCustomersPage";
+import AdminAnalyticsPage from "./pages/admin/AdminAnalyticsPage";
 import BookingsNew from "./pages/admin/BookingsNew";
 import Blog from "./pages/Blog";
 import BlogPost from "./pages/BlogPost";
@@ -87,6 +88,7 @@ const App = () => (
                 <Route path="/admin/inventory" element={<AdminInventoryPage />} />
                 <Route path="/admin/calendar" element={<AdminCalendarPage />} />
                 <Route path="/admin/customers" element={<AdminCustomersPage />} />
+                <Route path="/admin/analytics" element={<AdminAnalyticsPage />} />
               </Route>
 
               <Route path="*" element={<NotFound />} />

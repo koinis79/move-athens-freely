@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import {
-  LayoutDashboard, ClipboardList, Package, CalendarDays, Users, ChevronLeft, X,
+  LayoutDashboard, ClipboardList, Package, CalendarDays, Users, BarChart3, ChevronLeft, X,
 } from "lucide-react";
 import { NavLink } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
@@ -28,6 +28,7 @@ const navItems: NavItem[] = [
   { to: "/admin/inventory", label: "Inventory", icon: Package, shortcut: "I" },
   { to: "/admin/calendar", label: "Calendar", icon: CalendarDays, shortcut: "C" },
   { to: "/admin/customers", label: "Customers", icon: Users, shortcut: "U" },
+  { to: "/admin/analytics", label: "Analytics", icon: BarChart3, shortcut: "A" },
 ];
 
 interface Stats {

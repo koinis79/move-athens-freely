@@ -5,6 +5,7 @@ import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Link, useNavigate } from "react-router-dom";
 import { useAdminBookings, type AdminBooking } from "@/hooks/useAdminBookings";
+import { isTestBooking, effectiveReceived } from "@/lib/accounting";
 
 /* ── Status badge config ── */
 const statusConfig: Record<string, { label: string; className: string }> = {
@@ -60,17 +61,8 @@ const StatCard = ({ title, value, icon: Icon, accentColor, accentBg, loading, on
 };
 
 /* ── Overview stats (derived from the loaded bookings) ── */
-// Test rows excluded from money figures — same rule as the accounting export.
-const TEST_EMAILS = new Set(["kalogeropoulosbill6@gmail.com"]);
-
-// Effective amount actually received (accounting-export rule): a fully-paid
-// booking is worth its total (absorbs the pre-Aug-16 amount_paid=0 artifact),
-// a deposit is worth what was put down.
-function effectiveReceived(b: AdminBooking): number {
-  if (b.payment_status === "paid") return Number(b.total_amount || 0);
-  if (b.payment_status === "deposit_paid") return Number(b.amount_paid || 0);
-  return Number(b.amount_paid || 0);
-}
+// Money rules (effectiveReceived / isTestBooking) come from the shared
+// src/lib/accounting.ts — same source the accounting export + analytics use.
 
 interface OverviewStats {
   revenueThisMonth: number;
@@ -96,7 +88,7 @@ function computeStats(bookings: AdminBooking[]): OverviewStats {
   let bookingsOut = 0;
 
   for (const b of bookings) {
-    const isTest = TEST_EMAILS.has((b.customer_email ?? "").toLowerCase());
+    const isTest = isTestBooking(b);
     const createdMonth = (b.created_at ?? "").slice(0, 7);
 
     if (!isTest) {

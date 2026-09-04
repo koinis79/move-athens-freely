@@ -29,6 +29,7 @@ import {
   X as XIcon,
 } from "lucide-react";
 import { detectZoneFromAddress } from "@/lib/deliveryZoneDetect";
+import { isTestBooking, effectiveReceived, paymentChannel } from "@/lib/accounting";
 
 interface BookingItem {
   quantity: number;
@@ -450,17 +451,8 @@ export default function BookingsNew() {
   // are removed by KNOWN test email only (the owner's own test account). Note
   // pending@moveability.gr is NOT a test email — it is the placeholder for real
   // manual bookings whose customer email wasn't captured, so it stays IN.
-  const TEST_EMAILS = new Set(["kalogeropoulosbill6@gmail.com"]);
-
-  // Effective amount actually received. Handles the pre-Aug-16 webhook artifact
-  // where fully-paid Stripe rows have amount_paid=0: a settled full payment is
-  // worth its total, a deposit is worth what was actually put down.
-  function effectiveReceived(b: Booking): number {
-    if (b.payment_status === "deposit_paid") return Number(b.amount_paid || 0);
-    if (b.payment_status === "paid") return Number(b.total_amount || 0);
-    return Number(b.amount_paid || 0); // outstanding rows: whatever (if anything) came in
-  }
-
+  // Money rules (effectiveReceived / isTestBooking / paymentChannel) come from
+  // src/lib/accounting.ts — the single source shared with the analytics page.
   function exportAccountingCSV() {
     const monthStart = `${accountingMonth}-01`;
     // First day of the following month, computed from the YYYY-MM string.
@@ -468,7 +460,7 @@ export default function BookingsNew() {
     const nextMonth = m === 12 ? `${y + 1}-01-01` : `${y}-${String(m + 1).padStart(2, "0")}-01`;
 
     const inMonth = bookings.filter((b) => {
-      if (TEST_EMAILS.has(b.customer_email.toLowerCase())) return false;
+      if (isTestBooking(b)) return false;
       const created = b.created_at.slice(0, 10);
       return created >= monthStart && created < nextMonth;
     });
@@ -502,7 +494,7 @@ export default function BookingsNew() {
       b.amount_due != null ? Number(b.amount_due).toFixed(2) : "",
       effectiveReceived(b).toFixed(2),
       b.payment_type ?? "",
-      b.stripe_payment_intent_id ? "Stripe" : "Cash/Manual",
+      paymentChannel(b),
       b.payment_status,
       b.status,
       b.created_at,
