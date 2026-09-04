@@ -18,12 +18,15 @@ export interface AdminBooking {
   subtotal: number;
   delivery_fee: number;
   total_amount: number;
+  amount_paid: number | null;
+  amount_due: number | null;
+  payment_type: string | null;
   status: string;
   payment_status: string;
   internal_notes: string | null;
   created_at: string;
   updated_at: string;
-  delivery_zones: { slug: string } | null;
+  delivery_zones: { slug: string; name_en: string } | null;
   booking_items: {
     id: string;
     quantity: number;
@@ -36,6 +39,7 @@ export interface AdminBooking {
       slug: string;
       images: string[];
       category_id: string;
+      deposit_amount: number | null;
     } | null;
   }[];
 }
@@ -58,8 +62,8 @@ export function useAdminBookings(filters?: Filters) {
       .from("bookings")
       .select(`
         *,
-        delivery_zones(slug),
-        booking_items(*, equipment(id, name_en, slug, images, category_id))
+        delivery_zones(slug, name_en),
+        booking_items(*, equipment(id, name_en, slug, images, category_id, deposit_amount))
       `)
       .order("created_at", { ascending: false });
 

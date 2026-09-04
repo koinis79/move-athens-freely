@@ -16,6 +16,7 @@ import {
   ChevronDown,
   Download,
   History,
+  Link2,
   List,
   MessageCircle,
   Plus,
@@ -23,6 +24,8 @@ import {
   Search,
   Truck,
   AlertTriangle,
+  Clock,
+  PackageX,
   X as XIcon,
 } from "lucide-react";
 import { detectZoneFromAddress } from "@/lib/deliveryZoneDetect";
@@ -155,6 +158,7 @@ export default function BookingsNew() {
   const [archiveConfirm, setArchiveConfirm] = useState<Booking | null>(null);
   const [cancelConfirm, setCancelConfirm] = useState<Booking | null>(null);
   const [newBookingOpen, setNewBookingOpen] = useState(false);
+  const [paymentLinkLoadingId, setPaymentLinkLoadingId] = useState<string | null>(null);
   const [sortField, setSortField] = useState<"created_at" | "rental_start">("created_at");
   const [sortDir, setSortDir] = useState<"asc" | "desc">("desc");
   // Accounting export — defaults to the current month (YYYY-MM)
@@ -276,6 +280,71 @@ export default function BookingsNew() {
     toast({ title: `Payment: ${paymentStatusLabels[newPaymentStatus] ?? newPaymentStatus}` });
     await fetchBookings();
     setSelected((p) => (p && p.id === id ? { ...p, payment_status: newPaymentStatus } : p));
+  }
+
+  // "Get payment link" — mint a Stripe checkout session for an existing booking
+  // (WhatsApp/manual customers) and copy the URL to the clipboard. Calls the
+  // SAME create-checkout-session the website uses — no new payment logic. Because
+  // the URL carries the booking_number in metadata, when the customer pays the
+  // existing stripe-webhook matches it and marks the booking paid automatically.
+  // The function stores the fresh stripe_session_id on the booking itself, and
+  // is re-clickable to mint a new session after the ~24h Stripe expiry.
+  async function getPaymentLink(b: Booking) {
+    setPaymentLinkLoadingId(b.id);
+    try {
+      const isDeposit = b.payment_type === "deposit";
+      const amount = isDeposit ? Math.ceil(Number(b.total_amount) * 0.3) : Number(b.total_amount);
+
+      const { data: { session: supabaseSession } } = await supabase.auth.getSession();
+      const res = await fetch(
+        `${import.meta.env.VITE_SUPABASE_URL ?? "https://lmgpuqgwkiapgpdsxvmb.supabase.co"}/functions/v1/create-checkout-session`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            apikey:
+              import.meta.env.VITE_SUPABASE_ANON_KEY ??
+              "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImxtZ3B1cWd3a2lhcGdwZHN4dm1iIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzIzNjc1NzksImV4cCI6MjA4Nzk0MzU3OX0.WTs1-rimMSZtPoedl7qgxiWXGOJm8-yMaUEKfU7XuCI",
+            ...(supabaseSession?.access_token
+              ? { Authorization: `Bearer ${supabaseSession.access_token}` }
+              : {}),
+          },
+          // customer_email MUST match the booking row (the function verifies it).
+          body: JSON.stringify({
+            booking_number: b.booking_number,
+            customer_email: b.customer_email,
+            payment_type: b.payment_type ?? "full",
+          }),
+        },
+      );
+      const result = await res.json();
+      if (!res.ok || !result.url) {
+        throw new Error(result.error ?? `Edge function failed (HTTP ${res.status})`);
+      }
+
+      let copied = false;
+      try {
+        await navigator.clipboard.writeText(result.url);
+        copied = true;
+      } catch {
+        // Clipboard can be blocked (permissions / non-secure context) — fall back below.
+      }
+
+      const amountLabel = isDeposit ? `Deposit €${amount}` : `Full €${amount}`;
+      toast({
+        title: copied ? "Payment link copied — valid ~24h" : "Payment link ready",
+        description: copied
+          ? `${amountLabel}. Send it to the customer.`
+          : `${amountLabel}. Copy it manually: ${result.url}`,
+      });
+      // Refresh so the stored stripe_session_id (set by the function) is reflected.
+      await fetchBookings();
+    } catch (err) {
+      const msg = err instanceof Error ? err.message : "Failed to create payment link";
+      toast({ title: "Couldn't create payment link", description: msg, variant: "destructive" });
+    } finally {
+      setPaymentLinkLoadingId(null);
+    }
   }
 
   async function setArchived(id: string, archived: boolean) {
@@ -666,6 +735,39 @@ export default function BookingsNew() {
   const activeCount = bookings.filter((b) => !b.is_archived).length;
   const archivedCount = bookings.filter((b) => b.is_archived).length;
 
+  // ── Advisory row flags (operational nudges, non-blocking) ──
+  const todayISO = new Date().toISOString().slice(0, 10);
+  const soonISO = new Date(Date.now() + 14 * 86400000).toISOString().slice(0, 10);
+  // Equipment still out past its rental end date.
+  const isCollectionOverdue = (b: Booking) =>
+    b.status === "delivered" && b.rental_end < todayISO;
+  // Unpaid and the rental starts within the next 14 days.
+  const isUnpaidStartsSoon = (b: Booking) =>
+    (b.payment_status === "pending" || b.payment_status === "failed") &&
+    b.rental_start >= todayISO && b.rental_start <= soonISO;
+  const overdueCount = filtered.filter(isCollectionOverdue).length;
+  const unpaidSoonCount = filtered.filter(isUnpaidStartsSoon).length;
+
+  const renderRowBadges = (b: Booking) => {
+    const overdue = isCollectionOverdue(b);
+    const unpaidSoon = isUnpaidStartsSoon(b);
+    if (!overdue && !unpaidSoon) return null;
+    return (
+      <div className="flex flex-wrap gap-1 mt-1">
+        {overdue && (
+          <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-[10px] font-medium bg-red-100 text-red-700">
+            <PackageX className="h-3 w-3" /> Collection overdue
+          </span>
+        )}
+        {unpaidSoon && (
+          <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-[10px] font-medium bg-amber-100 text-amber-800">
+            <Clock className="h-3 w-3" /> Unpaid, starts soon
+          </span>
+        )}
+      </div>
+    );
+  };
+
   return (
     <div className="p-4 md:p-6 space-y-4 md:space-y-6">
       <div className="flex items-center justify-between">
@@ -839,6 +941,24 @@ export default function BookingsNew() {
         </div>
       </div>
 
+      {/* Advisory counts — operational nudges across the current list */}
+      {(overdueCount > 0 || unpaidSoonCount > 0) && (
+        <div className="flex flex-wrap items-center gap-2">
+          {overdueCount > 0 && (
+            <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md bg-red-50 border border-red-200 text-xs font-medium text-red-700">
+              <PackageX className="h-3.5 w-3.5" />
+              {overdueCount} collection{overdueCount !== 1 ? "s" : ""} overdue
+            </span>
+          )}
+          {unpaidSoonCount > 0 && (
+            <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md bg-amber-50 border border-amber-200 text-xs font-medium text-amber-800">
+              <Clock className="h-3.5 w-3.5" />
+              {unpaidSoonCount} unpaid, starting soon
+            </span>
+          )}
+        </div>
+      )}
+
       {/* ─── Mobile Card View (< md) ─── */}
       <div className="md:hidden space-y-3">
         {loading && (
@@ -890,6 +1010,7 @@ export default function BookingsNew() {
                 <p className="text-xs text-gray-500 mt-1 truncate">
                   {b.booking_items.map((i) => `${i.equipment?.name_en ?? "?"} ×${i.quantity}`).join(", ")}
                 </p>
+                {renderRowBadges(b)}
               </button>
 
               {/* Quick action bar */}
@@ -983,6 +1104,7 @@ export default function BookingsNew() {
                     <td className="px-4 py-3">
                       <div className="font-medium text-gray-900">{b.customer_name}</div>
                       <div className="text-xs text-gray-500">{b.customer_email}</div>
+                      {renderRowBadges(b)}
                     </td>
                     <td className="px-4 py-3 text-xs text-gray-700">
                       {b.booking_items
@@ -1371,6 +1493,30 @@ export default function BookingsNew() {
                     {paymentStatusLabels[selected.payment_status] ?? selected.payment_status}
                   </span>
                 </div>
+
+                {/* Get payment link — only while unpaid (pending/failed). Not for
+                    deposit_paid: the 70% balance is collected in person on delivery. */}
+                {(selected.payment_status === "pending" || selected.payment_status === "failed") && (
+                  <div className="mt-3">
+                    <button
+                      type="button"
+                      disabled={paymentLinkLoadingId === selected.id}
+                      onClick={() => getPaymentLink(selected)}
+                      className="w-full flex items-center justify-center gap-2 bg-indigo-600 hover:bg-indigo-700 disabled:opacity-60 text-white font-semibold py-2.5 rounded-lg transition-colors text-sm min-h-[44px]"
+                    >
+                      <Link2 className="h-4 w-4" />
+                      {paymentLinkLoadingId === selected.id
+                        ? "Creating link…"
+                        : `Get payment link (${selected.payment_type === "deposit"
+                            ? `deposit €${Math.ceil(Number(selected.total_amount) * 0.3)}`
+                            : `€${Number(selected.total_amount).toFixed(0)}`})`}
+                    </button>
+                    <p className="text-[11px] text-gray-500 mt-1.5 leading-snug">
+                      <span className="font-semibold text-gray-600">Never create payment links in the Stripe dashboard</span> — use this button, or the booking won't know it was paid.
+                    </p>
+                  </div>
+                )}
+
                 <div className="flex flex-wrap gap-1.5 mt-2">
                   {selected.payment_status !== "paid" && (
                     <button

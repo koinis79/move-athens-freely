@@ -1,7 +1,7 @@
 import { useState, useMemo } from "react";
 import {
   ChevronLeft, ChevronRight, Truck, PackageCheck, Plus, Calendar as CalendarIcon,
-  Clock, MapPin, Package,
+  Clock, MapPin, Phone, Euro, ShieldCheck,
 } from "lucide-react";
 import { format, addMonths, subMonths, startOfMonth, endOfMonth, startOfWeek, endOfWeek, addDays, isSameMonth, isSameDay, isWithinInterval, parseISO, addWeeks, subWeeks, startOfDay, endOfDay } from "date-fns";
 import { Button } from "@/components/ui/button";
@@ -62,7 +62,42 @@ function getEquipmentShort(b: AdminBooking) {
   return b.booking_items?.[0]?.equipment?.name_en?.split(" ").slice(0, 2).join(" ") ?? "Equipment";
 }
 
-// ─── Day Detail Panel ──────────────────────────────────────────
+// ─── Operations helpers ─────────────────────────────────────────
+const TIME_SLOT_LABELS: Record<string, string> = {
+  daytime: "Daytime (09:00–17:00)",
+  evening: "Evening (17:00–21:00)",
+  morning: "Morning",
+  afternoon: "Afternoon",
+};
+function timeSlotLabel(slot: string | null): string {
+  if (!slot || slot === "tbc") return "Time to confirm";
+  return TIME_SLOT_LABELS[slot] ?? slot;
+}
+
+// Refundable security deposit (εγγύηση) held in person — sum of per-item
+// deposit_amount × qty. Collected at delivery, returned at collection.
+function securityDeposit(b: AdminBooking): number {
+  return (b.booking_items ?? []).reduce(
+    (s, i) => s + Number(i.equipment?.deposit_amount ?? 0) * i.quantity,
+    0,
+  );
+}
+
+// Cash to collect at the door on delivery, driven by payment_status.
+function amountToCollect(b: AdminBooking): { amount: number; label: string; tone: "collect" | "paid" } {
+  if (b.payment_status === "paid") return { amount: 0, label: "Paid in full", tone: "paid" };
+  if (b.payment_status === "deposit_paid") {
+    const balance = Number(b.amount_due ?? Number(b.total_amount) - Number(b.amount_paid ?? 0));
+    return { amount: balance, label: `Balance due €${balance.toFixed(0)}`, tone: "collect" };
+  }
+  // pending / failed / unpaid → collect the full amount on delivery
+  const full = Number(b.total_amount);
+  return { amount: full, label: `Collect €${full.toFixed(0)}`, tone: "collect" };
+}
+
+const phoneDigits = (p: string) => p.replace(/[^0-9]/g, "");
+
+// ─── Day Detail Panel (daily operations) ────────────────────────
 function DayDetailPanel({
   date,
   bookings,
@@ -73,45 +108,30 @@ function DayDetailPanel({
   onBookingClick: (b: AdminBooking) => void;
 }) {
   const deliveries = bookings.filter((b) => isDeliveryDay(b, date));
-  const pickups = bookings.filter((b) => isPickupDay(b, date));
-  const activeRentals = bookings.filter(
-    (b) => bookingSpansDate(b, date) && !isDeliveryDay(b, date) && !isPickupDay(b, date) && b.status !== "cancelled"
-  );
+  const collections = bookings.filter((b) => isPickupDay(b, date));
 
-  const Section = ({ title, items, color, emptyText }: { title: string; items: AdminBooking[]; color: string; emptyText: string }) => (
-    <div className="mb-5">
-      <div className="flex items-center gap-2 mb-2">
-        <div className={cn("w-2 h-2 rounded-full", color)} />
-        <h4 className="text-sm font-semibold text-foreground">{title}</h4>
-        <Badge variant="secondary" className="text-xs h-5 px-1.5">{items.length}</Badge>
-      </div>
-      {items.length === 0 ? (
-        <p className="text-xs text-muted-foreground pl-4">{emptyText}</p>
-      ) : (
-        <div className="space-y-2 pl-4">
-          {items.map((b) => (
-            <button
-              key={b.id}
-              onClick={() => onBookingClick(b)}
-              className="w-full text-left p-2.5 rounded-lg border border-border bg-card hover:bg-muted/50 transition-colors"
-            >
-              <div className="text-xs font-medium text-foreground truncate">{getEquipmentShort(b)}</div>
-              <div className="text-xs text-muted-foreground">{b.customer_name}</div>
-              {b.delivery_address && (
-                <div className="flex items-center gap-1 text-xs text-muted-foreground mt-1">
-                  <MapPin className="h-3 w-3" />
-                  <span className="truncate">{b.delivery_address}</span>
-                </div>
-              )}
-              {b.delivery_time_slot && (
-                <div className="flex items-center gap-1 text-xs text-muted-foreground mt-0.5">
-                  <Clock className="h-3 w-3" />
-                  <span>{b.delivery_time_slot}</span>
-                </div>
-              )}
-            </button>
-          ))}
-        </div>
+  const ContactRow = ({ b }: { b: AdminBooking }) => (
+    <div className="flex items-center gap-2 mt-1.5">
+      {b.customer_phone && (
+        <>
+          <a
+            href={`tel:${phoneDigits(b.customer_phone)}`}
+            onClick={(e) => e.stopPropagation()}
+            className="inline-flex items-center gap-1 text-xs text-primary hover:underline"
+          >
+            <Phone className="h-3 w-3" /> {b.customer_phone}
+          </a>
+          <a
+            href={`https://wa.me/${phoneDigits(b.customer_phone)}`}
+            target="_blank"
+            rel="noopener noreferrer"
+            onClick={(e) => e.stopPropagation()}
+            className="inline-flex items-center text-xs text-green-600 hover:underline"
+            title="WhatsApp"
+          >
+            WhatsApp
+          </a>
+        </>
       )}
     </div>
   );
@@ -120,11 +140,112 @@ function DayDetailPanel({
     <div className="w-72 xl:w-80 border-l border-border bg-card p-4 overflow-y-auto flex-shrink-0">
       <div className="mb-4">
         <h3 className="text-base font-bold text-foreground">{format(date, "EEEE, MMM d")}</h3>
-        <p className="text-xs text-muted-foreground">{deliveries.length + pickups.length + activeRentals.length} events</p>
+        <p className="text-xs text-muted-foreground">
+          {deliveries.length} deliver{deliveries.length === 1 ? "y" : "ies"} · {collections.length} collection{collections.length !== 1 ? "s" : ""}
+        </p>
       </div>
-      <Section title="Deliveries" items={deliveries} color="bg-secondary" emptyText="No deliveries" />
-      <Section title="Pickups" items={pickups} color="bg-primary" emptyText="No pickups" />
-      <Section title="Active Rentals" items={activeRentals} color="bg-emerald-500" emptyText="No active rentals" />
+
+      {/* ── DELIVERIES ── */}
+      <div className="mb-6">
+        <div className="flex items-center gap-2 mb-2">
+          <Truck className="h-4 w-4 text-secondary" />
+          <h4 className="text-sm font-bold text-foreground">Deliveries today</h4>
+          <Badge variant="secondary" className="text-xs h-5 px-1.5">{deliveries.length}</Badge>
+        </div>
+        {deliveries.length === 0 ? (
+          <p className="text-xs text-muted-foreground pl-1">No deliveries scheduled.</p>
+        ) : (
+          <div className="space-y-2">
+            {deliveries.map((b) => {
+              const collect = amountToCollect(b);
+              const deposit = securityDeposit(b);
+              return (
+                <button
+                  key={b.id}
+                  onClick={() => onBookingClick(b)}
+                  className="w-full text-left p-3 rounded-lg border-l-4 border-l-secondary border border-border bg-card hover:bg-muted/50 transition-colors"
+                >
+                  <div className="flex items-start justify-between gap-2">
+                    <div className="text-sm font-semibold text-foreground truncate">{b.customer_name}</div>
+                    <span className="inline-flex items-center gap-1 text-xs font-medium text-muted-foreground shrink-0">
+                      <Clock className="h-3 w-3" /> {timeSlotLabel(b.delivery_time_slot)}
+                    </span>
+                  </div>
+                  <div className="text-xs text-muted-foreground mt-0.5">{getEquipmentShort(b)}</div>
+                  {(b.delivery_zones?.name_en || b.delivery_address) && (
+                    <div className="flex items-start gap-1 text-xs text-muted-foreground mt-1">
+                      <MapPin className="h-3 w-3 mt-0.5 shrink-0" />
+                      <span>
+                        {b.delivery_zones?.name_en && <span className="font-medium">{b.delivery_zones.name_en}</span>}
+                        {b.delivery_zones?.name_en && b.delivery_address ? " · " : ""}
+                        {b.delivery_address}
+                      </span>
+                    </div>
+                  )}
+                  <ContactRow b={b} />
+                  <div className="flex flex-wrap items-center gap-1.5 mt-2">
+                    <span
+                      className={cn(
+                        "inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-[11px] font-semibold",
+                        collect.tone === "paid" ? "bg-emerald-100 text-emerald-800" : "bg-orange-100 text-orange-800",
+                      )}
+                    >
+                      <Euro className="h-3 w-3" /> {collect.label}
+                    </span>
+                    {deposit > 0 && (
+                      <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-[11px] font-medium bg-blue-100 text-blue-800">
+                        <ShieldCheck className="h-3 w-3" /> +€{deposit.toFixed(0)} deposit (εγγύηση)
+                      </span>
+                    )}
+                  </div>
+                </button>
+              );
+            })}
+          </div>
+        )}
+      </div>
+
+      {/* ── COLLECTIONS ── */}
+      <div>
+        <div className="flex items-center gap-2 mb-2">
+          <PackageCheck className="h-4 w-4 text-primary" />
+          <h4 className="text-sm font-bold text-foreground">Collections today</h4>
+          <Badge variant="secondary" className="text-xs h-5 px-1.5">{collections.length}</Badge>
+        </div>
+        {collections.length === 0 ? (
+          <p className="text-xs text-muted-foreground pl-1">No collections scheduled.</p>
+        ) : (
+          <div className="space-y-2">
+            {collections.map((b) => {
+              const deposit = securityDeposit(b);
+              return (
+                <button
+                  key={b.id}
+                  onClick={() => onBookingClick(b)}
+                  className="w-full text-left p-3 rounded-lg border-l-4 border-l-primary border border-border bg-card hover:bg-muted/50 transition-colors"
+                >
+                  <div className="text-sm font-semibold text-foreground truncate">{b.customer_name}</div>
+                  <div className="text-xs text-muted-foreground mt-0.5">{getEquipmentShort(b)}</div>
+                  {b.delivery_address && (
+                    <div className="flex items-start gap-1 text-xs text-muted-foreground mt-1">
+                      <MapPin className="h-3 w-3 mt-0.5 shrink-0" />
+                      <span>{b.delivery_address}</span>
+                    </div>
+                  )}
+                  <ContactRow b={b} />
+                  {deposit > 0 && (
+                    <div className="mt-2">
+                      <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-[11px] font-medium bg-blue-100 text-blue-800">
+                        <ShieldCheck className="h-3 w-3" /> Refund €{deposit.toFixed(0)} deposit (εγγύηση)
+                      </span>
+                    </div>
+                  )}
+                </button>
+              );
+            })}
+          </div>
+        )}
+      </div>
     </div>
   );
 }

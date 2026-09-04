@@ -1,11 +1,10 @@
-import { Activity, CalendarDays, CheckCircle2, ChevronRight, ClipboardList, Clock, Euro } from "lucide-react";
-import { useEffect, useState } from "react";
-import { supabase } from "@/integrations/supabase/client";
+import { ChevronRight, Clock, Truck, Package, TrendingUp, TrendingDown } from "lucide-react";
+import { useMemo } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Link, useNavigate } from "react-router-dom";
-import { useAdminBookings } from "@/hooks/useAdminBookings";
+import { useAdminBookings, type AdminBooking } from "@/hooks/useAdminBookings";
 
 /* ── Status badge config ── */
 const statusConfig: Record<string, { label: string; className: string }> = {
@@ -60,66 +59,67 @@ const StatCard = ({ title, value, icon: Icon, accentColor, accentBg, loading, on
   );
 };
 
-/* ── Overview stats ── */
-interface OverviewStats {
-  todaysBookings: number;
-  pendingBookings: number;
-  activeRentals: number;
-  weekRevenue: number;
-  completedThisMonth: number;
+/* ── Overview stats (derived from the loaded bookings) ── */
+// Test rows excluded from money figures — same rule as the accounting export.
+const TEST_EMAILS = new Set(["kalogeropoulosbill6@gmail.com"]);
+
+// Effective amount actually received (accounting-export rule): a fully-paid
+// booking is worth its total (absorbs the pre-Aug-16 amount_paid=0 artifact),
+// a deposit is worth what was put down.
+function effectiveReceived(b: AdminBooking): number {
+  if (b.payment_status === "paid") return Number(b.total_amount || 0);
+  if (b.payment_status === "deposit_paid") return Number(b.amount_paid || 0);
+  return Number(b.amount_paid || 0);
 }
 
-function useOverviewStats() {
-  const [stats, setStats] = useState<OverviewStats | null>(null);
-  const [loading, setLoading] = useState(true);
+interface OverviewStats {
+  revenueThisMonth: number;
+  revenueLastMonth: number;
+  deliveriesTodayTomorrow: number;
+  totalOutstanding: number;
+  unitsOut: number;
+  bookingsOut: number;
+}
 
-  useEffect(() => {
-    async function load() {
-      const now = new Date();
-      const todayStart = new Date(now.getFullYear(), now.getMonth(), now.getDate()).toISOString();
-      // Week start: Monday
-      const day = now.getDay(); // 0=Sun .. 6=Sat
-      const diffToMonday = (day === 0 ? -6 : 1 - day);
-      const weekStart = new Date(now.getFullYear(), now.getMonth(), now.getDate() + diffToMonday).toISOString();
-      const monthStart = new Date(now.getFullYear(), now.getMonth(), 1).toISOString();
+function computeStats(bookings: AdminBooking[]): OverviewStats {
+  const now = new Date();
+  const todayISO = now.toISOString().slice(0, 10);
+  const tomorrowISO = new Date(now.getTime() + 86400000).toISOString().slice(0, 10);
+  const thisMonth = todayISO.slice(0, 7); // YYYY-MM
+  const lastMonth = new Date(now.getFullYear(), now.getMonth() - 1, 1).toISOString().slice(0, 7);
 
-      const [todays, pending, active, week, completed] = await Promise.all([
-        supabase.from("bookings")
-          .select("id", { count: "exact", head: true })
-          .gte("created_at", todayStart),
-        supabase.from("bookings")
-          .select("id", { count: "exact", head: true })
-          .eq("status", "pending")
-          .eq("is_archived", false),
-        supabase.from("bookings")
-          .select("id", { count: "exact", head: true })
-          .in("status", ["confirmed", "delivered", "active", "out_for_delivery", "preparing"])
-          .eq("is_archived", false),
-        supabase.from("bookings")
-          .select("total_amount")
-          .gte("created_at", weekStart)
-          .eq("payment_status", "paid"),
-        supabase.from("bookings")
-          .select("id", { count: "exact", head: true })
-          .eq("status", "completed")
-          .gte("created_at", monthStart),
-      ]);
+  let revenueThisMonth = 0;
+  let revenueLastMonth = 0;
+  let totalOutstanding = 0;
+  let deliveriesTodayTomorrow = 0;
+  let unitsOut = 0;
+  let bookingsOut = 0;
 
-      const weekRevenue = (week.data ?? []).reduce((s, b) => s + Number(b.total_amount || 0), 0);
+  for (const b of bookings) {
+    const isTest = TEST_EMAILS.has((b.customer_email ?? "").toLowerCase());
+    const createdMonth = (b.created_at ?? "").slice(0, 7);
 
-      setStats({
-        todaysBookings: todays.count ?? 0,
-        pendingBookings: pending.count ?? 0,
-        activeRentals: active.count ?? 0,
-        weekRevenue,
-        completedThisMonth: completed.count ?? 0,
-      });
-      setLoading(false);
+    if (!isTest) {
+      if (createdMonth === thisMonth) revenueThisMonth += effectiveReceived(b);
+      else if (createdMonth === lastMonth) revenueLastMonth += effectiveReceived(b);
+
+      // Money still owed — deposits (balance) + unpaid bookings.
+      if (b.payment_status === "deposit_paid" || b.payment_status === "pending" || b.payment_status === "failed") {
+        totalOutstanding += Number(b.amount_due ?? 0);
+      }
     }
-    load();
-  }, []);
 
-  return { stats, loading };
+    if (b.status !== "cancelled" && (b.rental_start === todayISO || b.rental_start === tomorrowISO)) {
+      deliveriesTodayTomorrow++;
+    }
+
+    if (b.status === "delivered") {
+      bookingsOut++;
+      unitsOut += (b.booking_items ?? []).reduce((s, i) => s + (i.quantity ?? 0), 0);
+    }
+  }
+
+  return { revenueThisMonth, revenueLastMonth, deliveriesTodayTomorrow, totalOutstanding, unitsOut, bookingsOut };
 }
 
 /* ── Date formatter ── */
@@ -146,9 +146,13 @@ const TableSkeleton = ({ rows = 5, cols = 6 }: { rows?: number; cols?: number })
 /* ── Main Dashboard ── */
 const AdminDashboard = () => {
   const navigate = useNavigate();
-  const { stats: overview, loading: overviewLoading } = useOverviewStats();
   const { bookings, loading: bookingsLoading } = useAdminBookings();
+  const overview = useMemo(() => computeStats(bookings), [bookings]);
+  const overviewLoading = bookingsLoading;
   const recentBookings = bookings.slice(0, 10);
+
+  const revenueDelta = overview.revenueThisMonth - overview.revenueLastMonth;
+  const revenueUp = revenueDelta >= 0;
 
   return (
     <div className="space-y-6">
@@ -158,55 +162,50 @@ const AdminDashboard = () => {
       </div>
 
       {/* ── Top Row: Stat Cards ── */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4">
         <StatCard
-          title="Today's Bookings"
-          value={String(overview?.todaysBookings ?? 0)}
-          icon={ClipboardList}
-          accentColor="text-primary"
-          accentBg="bg-primary/10"
+          title="Revenue This Month"
+          value={`€${Math.round(overview.revenueThisMonth).toLocaleString()}`}
+          icon={revenueUp ? TrendingUp : TrendingDown}
+          accentColor="text-emerald-700"
+          accentBg="bg-emerald-100"
           loading={overviewLoading}
           onClick={() => navigate("/admin/bookings")}
-          subtitle="Created today"
+          subtitle={
+            overview.revenueLastMonth > 0 || overview.revenueThisMonth > 0
+              ? `${revenueUp ? "▲" : "▼"} €${Math.abs(Math.round(revenueDelta)).toLocaleString()} vs last month (€${Math.round(overview.revenueLastMonth).toLocaleString()})`
+              : "Effective received"
+          }
         />
         <StatCard
-          title="Pending Bookings"
-          value={String(overview?.pendingBookings ?? 0)}
+          title="Deliveries Today + Tomorrow"
+          value={String(overview.deliveriesTodayTomorrow)}
+          icon={Truck}
+          accentColor="text-blue-700"
+          accentBg="bg-blue-100"
+          loading={overviewLoading}
+          onClick={() => navigate("/admin/calendar")}
+          subtitle="Scheduled to go out"
+        />
+        <StatCard
+          title="Total Outstanding"
+          value={`€${Math.round(overview.totalOutstanding).toLocaleString()}`}
           icon={Clock}
           accentColor="text-amber-700"
           accentBg="bg-amber-100"
           loading={overviewLoading}
           onClick={() => navigate("/admin/bookings?status=pending")}
-          subtitle="Awaiting action"
+          subtitle="Balance due (deposits + unpaid)"
         />
         <StatCard
-          title="Active Rentals"
-          value={String(overview?.activeRentals ?? 0)}
-          icon={Activity}
-          accentColor="text-blue-700"
-          accentBg="bg-blue-100"
-          loading={overviewLoading}
-          onClick={() => navigate("/admin/bookings?status=active")}
-          subtitle="Currently out"
-        />
-        <StatCard
-          title="This Week Revenue"
-          value={`€${(overview?.weekRevenue ?? 0).toLocaleString()}`}
-          icon={Euro}
-          accentColor="text-emerald-700"
-          accentBg="bg-emerald-100"
-          loading={overviewLoading}
-          subtitle="Paid bookings"
-        />
-        <StatCard
-          title="Completed This Month"
-          value={String(overview?.completedThisMonth ?? 0)}
-          icon={CheckCircle2}
+          title="Equipment Out"
+          value={String(overview.bookingsOut)}
+          icon={Package}
           accentColor="text-purple-700"
           accentBg="bg-purple-100"
           loading={overviewLoading}
-          onClick={() => navigate("/admin/bookings?status=completed")}
-          subtitle="Finished rentals"
+          onClick={() => navigate("/admin/bookings?status=delivered")}
+          subtitle={`${overview.unitsOut} unit${overview.unitsOut !== 1 ? "s" : ""} on rental now`}
         />
       </div>
 
