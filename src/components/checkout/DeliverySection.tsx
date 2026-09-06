@@ -74,6 +74,7 @@ interface Props {
   onChange: (updates: Partial<DeliveryFormData>) => void;
   clearError: (field: string) => void;
   deliveryDate?: Date;
+  collectionDate?: Date;
   zones: DeliveryZone[];
   zonesLoading: boolean;
 }
@@ -113,6 +114,19 @@ export function getDeliverySurcharge(
   return TIME_SLOTS.find(s => s.id === slot)?.surcharge ?? 0;
 }
 
+/** Exported: single source of truth for the Sunday COLLECTION surcharge.
+ * €50 when the collection day (rental_end) is a Sunday and this is a delivery
+ * (store pickup = 0). Slot-independent — collections have no time slot. Mirrors
+ * the Sunday delivery surcharge in getDeliverySurcharge(). */
+export function getCollectionSurcharge(
+  method: DeliveryMethod | null,
+  collectionDate?: Date,
+): number {
+  if (method !== "delivery") return 0;
+  if (collectionDate && collectionDate.getDay() === 0) return 50; // Sunday collection
+  return 0;
+}
+
 /** Exported: returns zone fee portion only (for breakdown display). */
 export function getDeliveryZoneFee(data: DeliveryFormData, zones: DeliveryZone[]): number {
   if (data.method === "pickup") return 0;
@@ -120,11 +134,17 @@ export function getDeliveryZoneFee(data: DeliveryFormData, zones: DeliveryZone[]
   return Number(getZone(slug, zones)?.delivery_fee ?? 0);
 }
 
-export function getDeliveryFee(data: DeliveryFormData, zones: DeliveryZone[], deliveryDate?: Date): number {
+export function getDeliveryFee(
+  data: DeliveryFormData,
+  zones: DeliveryZone[],
+  deliveryDate?: Date,
+  collectionDate?: Date,
+): number {
   if (data.method === "pickup") return 0;
   const zoneFee = getDeliveryZoneFee(data, zones);
   const surcharge = getDeliverySurcharge(data.method, data.timeSlot, deliveryDate);
-  return zoneFee + surcharge;
+  const collectionSurcharge = getCollectionSurcharge(data.method, collectionDate);
+  return zoneFee + surcharge + collectionSurcharge;
 }
 
 export function getDeliveryAddress(data: DeliveryFormData): string {
@@ -170,7 +190,7 @@ const PICKUP_LOCATIONS = [
 
 /* ── Component ─────────────────────────────────────────────────────────── */
 
-export function DeliverySection({ data, errors, onChange, clearError, deliveryDate, zones, zonesLoading }: Props) {
+export function DeliverySection({ data, errors, onChange, clearError, deliveryDate, collectionDate, zones, zonesLoading }: Props) {
   const [showZoneOverride, setShowZoneOverride] = useState(false);
 
   const set = useCallback(
@@ -183,9 +203,10 @@ export function DeliverySection({ data, errors, onChange, clearError, deliveryDa
 
   const activeZoneSlug = data.manualZone || data.detectedZone;
   const activeZone = getZone(activeZoneSlug, zones);
-  const fee = getDeliveryFee(data, zones, deliveryDate);
+  const fee = getDeliveryFee(data, zones, deliveryDate, collectionDate);
   const zoneFee = getDeliveryZoneFee(data, zones);
-  const surcharge = fee - zoneFee;
+  const deliverySurcharge = getDeliverySurcharge(data.method, data.timeSlot, deliveryDate);
+  const collectionSurcharge = getCollectionSurcharge(data.method, collectionDate);
 
   const handleAddressChange = (address: string) => {
     set("deliveryAddress", address);
@@ -392,6 +413,11 @@ export function DeliverySection({ data, errors, onChange, clearError, deliveryDa
                 ⚠️ Saturday evening — a €50 surcharge applies.
               </p>
             )}
+            {collectionSurcharge > 0 && (
+              <p className="text-xs text-amber-600 bg-amber-50 border border-amber-200 rounded-md px-3 py-2">
+                ⚠️ Sunday collection — a €50 surcharge applies to the pickup run (any time).
+              </p>
+            )}
           </div>
         </div>
       )}
@@ -465,10 +491,16 @@ export function DeliverySection({ data, errors, onChange, clearError, deliveryDa
               {fee === 0 ? "Free" : `€${fee}`}
             </span>
           </div>
-          {surcharge > 0 && data.method === "delivery" && (
-            <p className="text-xs text-muted-foreground text-right">
-              €{zoneFee} zone + €{surcharge} surcharge
-            </p>
+          {data.method === "delivery" && (deliverySurcharge > 0 || collectionSurcharge > 0) && (
+            <div className="text-xs text-muted-foreground text-right space-y-0.5">
+              <p>
+                €{zoneFee} zone
+                {deliverySurcharge > 0 && ` + €${deliverySurcharge} delivery surcharge`}
+              </p>
+              {collectionSurcharge > 0 && (
+                <p>Sunday collection +€{collectionSurcharge}</p>
+              )}
+            </div>
           )}
         </div>
       )}

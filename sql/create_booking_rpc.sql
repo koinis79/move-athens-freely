@@ -2,7 +2,7 @@
 -- The live version runs in Supabase (project lmgpuqgwkiapgpdsxvmb) and is
 -- applied via SQL Editor, NOT migrations. If you change the RPC in
 -- Supabase, update this file in the same commit.
--- Last synced: July 15, 2026 (includes slot-independent Sunday surcharge fix).
+-- Last synced: September 6, 2026 (adds Sunday COLLECTION surcharge on rental_end).
 
 CREATE OR REPLACE FUNCTION public.create_booking(
   p_booking_number text,
@@ -42,6 +42,7 @@ DECLARE
   v_delivery_fee     NUMERIC := 0;
   v_zone_slug        TEXT;
   v_surcharge        NUMERIC := 0;
+  v_collection_surcharge NUMERIC := 0;
   v_dow              INTEGER;
 BEGIN
   -- 1. Compute correct delivery fee (and grab slug) from delivery_zones table
@@ -56,21 +57,32 @@ BEGIN
 
   -- 1b. Delivery time/weekend surcharge — mirrors frontend getDeliverySurcharge().
   --     DELIVERY only (store pickup = 0). EXTRACT(DOW): 0=Sun, 6=Sat (== JS getDay()).
-  IF v_zone_slug IS NOT NULL AND v_zone_slug <> 'store-pickup'
-     AND p_delivery_time_slot IS NOT NULL AND p_delivery_time_slot <> 'tbc' THEN
+  --     FIX: Sunday surcharge applies regardless of time slot (incl. NULL/'tbc');
+  --     slot-based surcharges still require a concrete slot.
+  IF v_zone_slug IS NOT NULL AND v_zone_slug <> 'store-pickup' THEN
     v_dow := EXTRACT(DOW FROM p_rental_start)::INTEGER;
     IF v_dow = 0 THEN
       v_surcharge := 50;                                   -- Sunday, any slot
-    ELSIF v_dow = 6 AND p_delivery_time_slot = 'evening' THEN
+    ELSIF p_delivery_time_slot = 'evening' AND v_dow = 6 THEN
       v_surcharge := 50;                                   -- Saturday evening
     ELSIF p_delivery_time_slot = 'evening' THEN
-      v_surcharge := 20;                                   -- weekday / Sat daytime evening slot
+      v_surcharge := 20;                                   -- weekday evening slot
     ELSE
-      v_surcharge := 0;                                    -- daytime
+      v_surcharge := 0;                                    -- daytime / unknown slot
     END IF;
   END IF;
 
-  v_delivery_fee := v_delivery_fee + v_surcharge;
+  -- 1c. Sunday COLLECTION surcharge — mirrors frontend getCollectionSurcharge().
+  --     €50 when rental_end (the pickup-run day) is a Sunday. DELIVERY only
+  --     (store pickup = 0). Slot-INDEPENDENT: collections have no time slot, so
+  --     this does NOT gate on p_delivery_time_slot. A Sunday→Sunday rental gets
+  --     both surcharges (€100). EXTRACT(DOW): 0=Sun (== JS getDay()).
+  IF v_zone_slug IS NOT NULL AND v_zone_slug <> 'store-pickup'
+     AND EXTRACT(DOW FROM p_rental_end)::INTEGER = 0 THEN
+    v_collection_surcharge := 50;
+  END IF;
+
+  v_delivery_fee := v_delivery_fee + v_surcharge + v_collection_surcharge;
 
   -- 2. Validate each item's price against the equipment table
   FOR v_item IN SELECT * FROM jsonb_array_elements(p_items)

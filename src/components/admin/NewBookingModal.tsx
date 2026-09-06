@@ -1,5 +1,5 @@
 import { useState, useEffect, useMemo } from "react";
-import { getDeliverySurcharge } from "@/components/checkout/DeliverySection";
+import { getDeliverySurcharge, getCollectionSurcharge } from "@/components/checkout/DeliverySection";
 import { format, addDays, differenceInDays } from "date-fns";
 import {
   User, Check, ChevronRight, ChevronLeft,
@@ -141,7 +141,8 @@ const NewBookingModal = ({ open, onOpenChange, defaultDate }: Props) => {
   const zoneFee = selectedZone?.delivery_fee ?? 0;
   const isStorePickup = selectedZone?.slug === "store-pickup";
   const surcharge = isStorePickup ? 0 : getDeliverySurcharge("delivery", deliveryTime, startDate);
-  const deliveryFee = zoneFee + surcharge;
+  const collectionSurcharge = isStorePickup ? 0 : getCollectionSurcharge("delivery", endDate);
+  const deliveryFee = zoneFee + surcharge + collectionSurcharge;
   const total = subtotal + deliveryFee;
 
   const tierLabel = duration <= 3 ? "1–3 days" : duration <= 7 ? "4–7 days" : duration <= 14 ? "8–14 days" : "15–30 days";
@@ -575,6 +576,11 @@ const NewBookingModal = ({ open, onOpenChange, defaultDate }: Props) => {
                         ⚠️ +€{surcharge} surcharge ({startDate.getDay() === 0 ? "Sunday" : startDate.getDay() === 6 ? "Saturday evening" : "evening"} delivery)
                       </p>
                     )}
+                    {collectionSurcharge > 0 && (
+                      <p className="text-xs text-amber-600">
+                        ⚠️ +€{collectionSurcharge} surcharge (Sunday collection — pickup run)
+                      </p>
+                    )}
                   </div>
 
                   {/* Delivery notes */}
@@ -652,10 +658,16 @@ const NewBookingModal = ({ open, onOpenChange, defaultDate }: Props) => {
                   <span className="text-muted-foreground">Delivery Fee</span>
                   <span className="text-foreground">{deliveryFee > 0 ? `€${deliveryFee}` : "Free"}</span>
                 </div>
-                {surcharge > 0 && (
-                  <p className="text-xs text-muted-foreground text-right -mt-1">
-                    €{zoneFee} zone + €{surcharge} surcharge
-                  </p>
+                {(surcharge > 0 || collectionSurcharge > 0) && (
+                  <div className="text-xs text-muted-foreground text-right -mt-1 space-y-0.5">
+                    <p>
+                      €{zoneFee} zone
+                      {surcharge > 0 && ` + €${surcharge} delivery surcharge`}
+                    </p>
+                    {collectionSurcharge > 0 && (
+                      <p>Sunday collection +€{collectionSurcharge}</p>
+                    )}
+                  </div>
                 )}
                 <Separator />
                 <div className="flex items-center justify-between text-base font-bold">

@@ -16,6 +16,7 @@ import DeliverySection, {
   getDeliveryFee,
   getDeliveryZoneFee,
   getDeliverySurcharge,
+  getCollectionSurcharge,
   getDeliveryAddress,
   getDeliveryZoneSlug,
   validateDelivery,
@@ -167,7 +168,7 @@ const Checkout = () => {
     [items]
   );
 
-  const deliveryFee = getDeliveryFee(delivery, zones, rentalStart);
+  const deliveryFee = getDeliveryFee(delivery, zones, rentalStart, rentalEnd);
   const total = equipmentTotal + deliveryFee;
   // Refundable security deposits are collected in person at delivery — shown for
   // information only, never added to the online total or charged via Stripe.
@@ -463,6 +464,7 @@ const Checkout = () => {
               onChange={handleDeliveryChange}
               clearError={clearDeliveryError}
               deliveryDate={rentalStart}
+              collectionDate={rentalEnd}
               zones={zones}
               zonesLoading={zonesLoading}
             />
@@ -627,10 +629,19 @@ const Checkout = () => {
                       : "—"}
                   </span>
                 </div>
-                {delivery.method === "delivery" && getDeliverySurcharge(delivery.method, delivery.timeSlot, rentalStart) > 0 && (
-                  <p className="text-xs text-muted-foreground text-right -mt-1">
-                    €{getDeliveryZoneFee(delivery, zones)} zone + €{getDeliverySurcharge(delivery.method, delivery.timeSlot, rentalStart)} surcharge
-                  </p>
+                {delivery.method === "delivery" &&
+                  (getDeliverySurcharge(delivery.method, delivery.timeSlot, rentalStart) > 0 ||
+                    getCollectionSurcharge(delivery.method, rentalEnd) > 0) && (
+                  <div className="text-xs text-muted-foreground text-right -mt-1 space-y-0.5">
+                    <p>
+                      €{getDeliveryZoneFee(delivery, zones)} zone
+                      {getDeliverySurcharge(delivery.method, delivery.timeSlot, rentalStart) > 0 &&
+                        ` + €${getDeliverySurcharge(delivery.method, delivery.timeSlot, rentalStart)} delivery surcharge`}
+                    </p>
+                    {getCollectionSurcharge(delivery.method, rentalEnd) > 0 && (
+                      <p>Sunday collection +€{getCollectionSurcharge(delivery.method, rentalEnd)}</p>
+                    )}
+                  </div>
                 )}
                 <div className="flex justify-between border-t pt-2">
                   <span className="font-bold text-foreground text-base">
