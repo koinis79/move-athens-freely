@@ -74,7 +74,7 @@ const sections = [
       },
       {
         q: "Which store can I pick up from, and what does delivery cost?",
-        a: "Store pickup is free from any of our 3 Koinis Healthcare locations: Athens Center (Stadiou 31), Kallithea (Davaki 16), and Chalandri (Kolokotroni 22) — you choose which one at checkout. If you'd prefer delivery, fees are: Athens City €20, Piraeus Cruise Terminal €25, Athens Airport €50.",
+        a: "Store pickup is free from any of our 3 Koinis Healthcare locations: Athens Center (Stadiou 31), Kallithea (Davaki 16), and Chalandri (Kolokotroni 22) — you choose which one at checkout. If you'd prefer delivery, fees are: Athens City €20, Piraeus Cruise Terminal €25, Athens Airport €50. Sunday deliveries and Sunday collections each carry a €50 service fee, as our team makes a dedicated trip — weekday and Saturday-daytime deliveries and collections have no extra charge.",
       },
       {
         q: "Do you deliver to the Greek islands?",

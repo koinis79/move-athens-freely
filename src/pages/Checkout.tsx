@@ -639,7 +639,7 @@ const Checkout = () => {
                         ` + €${getDeliverySurcharge(delivery.method, delivery.timeSlot, rentalStart)} delivery surcharge`}
                     </p>
                     {getCollectionSurcharge(delivery.method, rentalEnd) > 0 && (
-                      <p>Sunday collection +€{getCollectionSurcharge(delivery.method, rentalEnd)}</p>
+                      <p>Sunday collection service +€{getCollectionSurcharge(delivery.method, rentalEnd)}</p>
                     )}
                   </div>
                 )}

@@ -254,6 +254,9 @@ const HowItWorks = () => {
             <CheckCircle className="h-4 w-4 shrink-0 text-green-600" />
             Pickup is always free from all zones
           </p>
+          <p className="mx-auto mt-3 max-w-xl text-center text-xs text-muted-foreground">
+            Sunday deliveries and Sunday collections each carry a €50 service fee, as our team makes a dedicated trip — weekday and Saturday-daytime deliveries and collections have no extra charge.
+          </p>
         </Reveal>
       </div>
     </section>

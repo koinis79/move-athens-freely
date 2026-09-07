@@ -404,19 +404,25 @@ export function DeliverySection({ data, errors, onChange, clearError, deliveryDa
               })}
             </div>
             {deliveryDate && deliveryDate.getDay() === 0 && (
-              <p className="text-xs text-amber-600 bg-amber-50 border border-amber-200 rounded-md px-3 py-2">
-                ⚠️ Sunday delivery — a €50 surcharge applies to all time slots.
-              </p>
+              <div className="flex items-start gap-2 rounded-lg bg-primary/5 border border-primary/20 px-3 py-2 text-xs text-foreground">
+                <Truck className="h-4 w-4 text-primary shrink-0 mt-0.5" />
+                <span>Sunday delivery — our team makes a dedicated trip that day, so a €50 Sunday delivery service fee applies.</span>
+              </div>
             )}
             {deliveryDate && deliveryDate.getDay() === 6 && data.timeSlot === "evening" && (
-              <p className="text-xs text-amber-600 bg-amber-50 border border-amber-200 rounded-md px-3 py-2">
-                ⚠️ Saturday evening — a €50 surcharge applies.
-              </p>
+              <div className="flex items-start gap-2 rounded-lg bg-primary/5 border border-primary/20 px-3 py-2 text-xs text-foreground">
+                <Truck className="h-4 w-4 text-primary shrink-0 mt-0.5" />
+                <span>Saturday evening delivery — a €50 evening service fee applies.</span>
+              </div>
             )}
             {collectionSurcharge > 0 && (
-              <p className="text-xs text-amber-600 bg-amber-50 border border-amber-200 rounded-md px-3 py-2">
-                ⚠️ Sunday collection — a €50 surcharge applies to the pickup run (any time).
-              </p>
+              <div className="flex items-start gap-2 rounded-lg bg-primary/5 border border-primary/20 px-3 py-2 text-xs text-foreground">
+                <Truck className="h-4 w-4 text-primary shrink-0 mt-0.5" />
+                <span>
+                  Your rental ends on a Sunday — our team will come collect the equipment that day, so a €50 Sunday collection fee applies.{" "}
+                  <span className="text-muted-foreground">Tip: ending your rental on Monday instead avoids this fee.</span>
+                </span>
+              </div>
             )}
           </div>
         </div>
@@ -498,7 +504,7 @@ export function DeliverySection({ data, errors, onChange, clearError, deliveryDa
                 {deliverySurcharge > 0 && ` + €${deliverySurcharge} delivery surcharge`}
               </p>
               {collectionSurcharge > 0 && (
-                <p>Sunday collection +€{collectionSurcharge}</p>
+                <p>Sunday collection service +€{collectionSurcharge}</p>
               )}
             </div>
           )}
