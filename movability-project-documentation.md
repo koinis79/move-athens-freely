@@ -249,6 +249,7 @@ WhatsApp ask AFTER rental ends, name+equipment personalized, "family business" w
 - [ ] **Availability / double-booking system — next session's headline build.** No inventory-availability check exists today; two bookings can claim the same unit for overlapping dates. Highest-value next feature.
 
 ### Future / not urgent
+- [ ] **Bilingual FAQ + How It Works** — both components are hardcoded English with **no i18n keys** (confirmed Sep 7: `FAQ.tsx` answer array + `HowItWorks.tsx` `<p>` literals, no `useTranslation`/`t()`). Converting them means moving all copy into `en.json`/`gr.json` keys and writing the Greek. The Greek surcharge paragraph is **already drafted** (Sep 7 session: "Οι παραδόσεις 17:00–21:00 έχουν επιβάρυνση €20 (€50 τα Σαββατόβραδα). Οι παραδόσεις και οι παραλαβές εξοπλισμού την Κυριακή έχουν επιβάρυνση €50, καθώς η ομάδα μας κάνει ειδική διαδρομή. Οι παραδόσεις Δευτέρα–Σάββατο πρωί/μεσημέρι και οι καθημερινές παραλαβές δεν έχουν καμία επιπλέον χρέωση."). Medium effort, low urgency; makes the Greek site 100% consistent.
 - [ ] **Inquiry-tracking system** for custom/multi-city/one-way `contact_form` inquiries (e.g. Helen's 3-city request, Shari's one-way cruise question) that fall outside the normal booking flow — track as records with status (open/replied/converted/expired) + auto-follow-up if stale. Current volume low (6 inquiries/90 days, per Aug 6 check) — revisit if volume grows.
 
 ### Content / marketing
