@@ -13,16 +13,20 @@ type Testimonial = {
   photoCredit?: string;
 };
 
+// Only the first VISIBLE_COUNT are shown (fixed 3-column grid, no carousel);
+// the rest stay here so they can be swapped back in by reordering.
+const VISIBLE_COUNT = 3;
+
 const testimonials: Testimonial[] = [
   {
-    quote: "This company was very polite and easy to deal with. I would recommend using them if you need mobility equipment in Athens.",
-    name: "Susan K.",
+    quote: "After spraining my ankle the day prior in Milos, I was unsure if I could complete our walking tour of the Acropolis. Despite being closed on Sundays, I messaged Vasilis on WhatsApp and received a prompt reply. He advised against the knee scooter I originally wanted and arranged same-day delivery of elbow crutches when all other pharmacies in Athens were closed. I had a wonderful time on the tour and couldn't have done it without their help.",
+    name: "Amanda B.",
     location: "Google review",
   },
   {
-    quote: "Excellent service, very easy to deal with at reasonable prices. A brand new wheelchair was delivered to our address on time which made the trip far more enjoyable for my mother.",
-    name: "Berk G.",
-    location: "Local Guide, Google review",
+    quote: "Movability provided a wonderful service. An electric wheelchair in perfect condition was delivered to and collected from our Airbnb efficiently and on time. That wheelchair made our five day stay in Athens so pleasurable as my husband was able to move around the city with ease. All around top service and all the staff were such a pleasure to deal with.",
+    name: "Jennifer G.",
+    location: "Google review",
   },
   {
     quote: "Servizio ottimo! Abbiamo ricevuto la sedia a rotelle direttamente in camera prima del nostro arrivo, siamo riuscite a vedere Atene tranquillamente.",
@@ -32,6 +36,16 @@ const testimonials: Testimonial[] = [
     photo: "https://lmgpuqgwkiapgpdsxvmb.supabase.co/storage/v1/object/public/equipment-images/testimonials/eliana-hotel-room.jpg",
     photoAlt: "A wheelchair and fresh towels set up in a hotel room, ready for a guest's arrival in Athens.",
     photoCredit: "Foto: Eliana F.",
+  },
+  {
+    quote: "This company was very polite and easy to deal with. I would recommend using them if you need mobility equipment in Athens.",
+    name: "Susan K.",
+    location: "Google review",
+  },
+  {
+    quote: "Excellent service, very easy to deal with at reasonable prices. A brand new wheelchair was delivered to our address on time which made the trip far more enjoyable for my mother.",
+    name: "Berk G.",
+    location: "Local Guide, Google review",
   },
 ];
 
@@ -91,7 +105,7 @@ const TestimonialsSection = () => (
 
       {/* Grid of testimonials */}
       <div className="mt-12 grid gap-6 w-full max-w-6xl md:grid-cols-3">
-        {testimonials.map((t, i) => (
+        {testimonials.slice(0, VISIBLE_COUNT).map((t, i) => (
           <TestimonialCard key={i} {...t} />
         ))}
       </div>
