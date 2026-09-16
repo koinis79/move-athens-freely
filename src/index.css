@@ -90,6 +90,15 @@
     @apply border-border;
   }
 
+  /* Safety net for horizontal overflow. Declared on the document root so the
+     UA propagates it to the viewport rather than making an element a scroll
+     container -- putting overflow-x on an inner layout wrapper would break the
+     sticky header. This is a backstop only; off-screen/fixed elements are kept
+     inside the viewport at their source (see Header's mobile menu container). */
+  html {
+    overflow-x: hidden;
+  }
+
   body {
     @apply bg-background text-foreground font-body text-base antialiased;
   }

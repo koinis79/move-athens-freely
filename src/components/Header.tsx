@@ -191,113 +191,119 @@ const Header = () => {
         </button>
       </div>
 
-      {/* Mobile slide-in menu */}
-      <div
-        id="mobile-menu"
-        className={`fixed inset-y-0 right-0 z-50 w-72 bg-background shadow-2xl transform transition-transform duration-300 ease-in-out xl:hidden overflow-y-auto ${
-          menuOpen ? "translate-x-0" : "translate-x-full"
-        }`}
-        role="dialog"
-        aria-modal="true"
-        aria-label="Mobile navigation"
-      >
-        <div className="flex justify-end p-4">
-          <button onClick={() => setMenuOpen(false)} className="p-2 rounded-lg hover:bg-muted" aria-label="Close menu">
-            <X className="h-6 w-6" />
-          </button>
-        </div>
-        <nav className="flex flex-col px-6 gap-1" aria-label="Mobile navigation">
-          {navLinks.map((link, i) => (
-            <Link
-              key={link.to}
-              to={link.to}
-              className={`px-3 py-3 rounded-lg font-medium transition-all duration-200 hover:bg-muted hover:translate-x-1 ${
-                location.pathname.startsWith(link.to) ? "text-primary font-semibold" : "text-foreground/80"
-              }`}
-              style={{
-                opacity: menuOpen ? 1 : 0,
-                transform: menuOpen ? "translateX(0)" : "translateX(20px)",
-                transition: `opacity 300ms ease ${i * 50}ms, transform 300ms ease ${i * 50}ms`,
-              }}
-            >
-              {link.label}
-            </Link>
-          ))}
-          <hr className="my-3 border-border" />
-          {[
-            <button
-              key="lang"
-              onClick={toggleLang}
-              className="px-3 py-3 text-left rounded-lg font-medium hover:bg-muted hover:translate-x-1 transition-all duration-200"
-            >
-              {t("nav.language")}: <span className={currentLang === "EN" ? "font-bold" : "opacity-60"}>EN</span> | <span className={currentLang === "GR" ? "font-bold" : "opacity-60"}>GR</span>
-            </button>,
-            <button
-              key="theme"
-              onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
-              className="px-3 py-3 text-left rounded-lg font-medium hover:bg-muted hover:translate-x-1 transition-all duration-200 flex items-center gap-2"
-            >
-              {theme === "dark" ? <Sun className="h-4 w-4" /> : <Moon className="h-4 w-4" />}
-              {theme === "dark" ? t("nav.lightMode") : t("nav.darkMode")}
-            </button>,
-            <Link key="cart" to="/cart" className="px-3 py-3 rounded-lg font-medium hover:bg-muted hover:translate-x-1 transition-all duration-200 flex items-center gap-2">
-              <ShoppingCart className="h-4 w-4" />
-              {t("nav.cart")}
-              {itemCount > 0 && (
-                <span className="ml-auto flex h-5 w-5 items-center justify-center rounded-full bg-primary text-[10px] font-bold text-primary-foreground">
-                  {itemCount > 9 ? "9+" : itemCount}
-                </span>
-              )}
-            </Link>,
-          ].map((el, i) => (
-            <div
-              key={i}
-              style={{
-                opacity: menuOpen ? 1 : 0,
-                transform: menuOpen ? "translateX(0)" : "translateX(20px)",
-                transition: `opacity 300ms ease ${(navLinks.length + i) * 50}ms, transform 300ms ease ${(navLinks.length + i) * 50}ms`,
-              }}
-            >
-              {el}
-            </div>
-          ))}
-
-          {user ? (
-            <>
-              <Link to="/dashboard" className="px-3 py-3 rounded-lg font-medium hover:bg-muted hover:translate-x-1 transition-all duration-200">
-                {t("nav.myBookings")}
-              </Link>
-              <button
-                onClick={signOut}
-                className="px-3 py-3 text-left rounded-lg font-medium text-destructive hover:bg-muted hover:translate-x-1 transition-all duration-200"
+      {/* Mobile slide-in menu.
+          The panel is absolutely positioned inside this viewport-sized,
+          overflow-hidden container, so while it sits off-screen (closed) it is
+          clipped instead of widening the document. `invisible` when closed also
+          keeps its links out of the tab order and the accessibility tree. */}
+      <div className="fixed inset-0 z-50 overflow-hidden pointer-events-none xl:hidden">
+        <div
+          id="mobile-menu"
+          className={`absolute inset-y-0 right-0 w-72 bg-background shadow-2xl pointer-events-auto overflow-y-auto transform transition-[transform,visibility] duration-300 ease-in-out ${
+            menuOpen ? "translate-x-0 visible" : "translate-x-full invisible"
+          }`}
+          role="dialog"
+          aria-modal="true"
+          aria-label="Mobile navigation"
+        >
+          <div className="flex justify-end p-4">
+            <button onClick={() => setMenuOpen(false)} className="p-2 rounded-lg hover:bg-muted" aria-label="Close menu">
+              <X className="h-6 w-6" />
+            </button>
+          </div>
+          <nav className="flex flex-col px-6 gap-1" aria-label="Mobile navigation">
+            {navLinks.map((link, i) => (
+              <Link
+                key={link.to}
+                to={link.to}
+                className={`px-3 py-3 rounded-lg font-medium transition-all duration-200 hover:bg-muted hover:translate-x-1 ${
+                  location.pathname.startsWith(link.to) ? "text-primary font-semibold" : "text-foreground/80"
+                }`}
+                style={{
+                  opacity: menuOpen ? 1 : 0,
+                  transform: menuOpen ? "translateX(0)" : "translateX(20px)",
+                  transition: `opacity 300ms ease ${i * 50}ms, transform 300ms ease ${i * 50}ms`,
+                }}
               >
-                {t("nav.signOut")}
-              </button>
-            </>
-          ) : (
-            <Link to="/login" className="px-3 py-3 rounded-lg font-medium hover:bg-muted hover:translate-x-1 transition-all duration-200">
-              {t("nav.signIn")}
+                {link.label}
+              </Link>
+            ))}
+            <hr className="my-3 border-border" />
+            {[
+              <button
+                key="lang"
+                onClick={toggleLang}
+                className="px-3 py-3 text-left rounded-lg font-medium hover:bg-muted hover:translate-x-1 transition-all duration-200"
+              >
+                {t("nav.language")}: <span className={currentLang === "EN" ? "font-bold" : "opacity-60"}>EN</span> | <span className={currentLang === "GR" ? "font-bold" : "opacity-60"}>GR</span>
+              </button>,
+              <button
+                key="theme"
+                onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
+                className="px-3 py-3 text-left rounded-lg font-medium hover:bg-muted hover:translate-x-1 transition-all duration-200 flex items-center gap-2"
+              >
+                {theme === "dark" ? <Sun className="h-4 w-4" /> : <Moon className="h-4 w-4" />}
+                {theme === "dark" ? t("nav.lightMode") : t("nav.darkMode")}
+              </button>,
+              <Link key="cart" to="/cart" className="px-3 py-3 rounded-lg font-medium hover:bg-muted hover:translate-x-1 transition-all duration-200 flex items-center gap-2">
+                <ShoppingCart className="h-4 w-4" />
+                {t("nav.cart")}
+                {itemCount > 0 && (
+                  <span className="ml-auto flex h-5 w-5 items-center justify-center rounded-full bg-primary text-[10px] font-bold text-primary-foreground">
+                    {itemCount > 9 ? "9+" : itemCount}
+                  </span>
+                )}
+              </Link>,
+            ].map((el, i) => (
+              <div
+                key={i}
+                style={{
+                  opacity: menuOpen ? 1 : 0,
+                  transform: menuOpen ? "translateX(0)" : "translateX(20px)",
+                  transition: `opacity 300ms ease ${(navLinks.length + i) * 50}ms, transform 300ms ease ${(navLinks.length + i) * 50}ms`,
+                }}
+              >
+                {el}
+              </div>
+            ))}
+
+            {user ? (
+              <>
+                <Link to="/dashboard" className="px-3 py-3 rounded-lg font-medium hover:bg-muted hover:translate-x-1 transition-all duration-200">
+                  {t("nav.myBookings")}
+                </Link>
+                <button
+                  onClick={signOut}
+                  className="px-3 py-3 text-left rounded-lg font-medium text-destructive hover:bg-muted hover:translate-x-1 transition-all duration-200"
+                >
+                  {t("nav.signOut")}
+                </button>
+              </>
+            ) : (
+              <Link to="/login" className="px-3 py-3 rounded-lg font-medium hover:bg-muted hover:translate-x-1 transition-all duration-200">
+                {t("nav.signIn")}
+              </Link>
+            )}
+
+            <Link
+              to="/equipment"
+              className="mt-2 inline-flex items-center justify-center px-5 py-3 rounded-xl bg-primary text-primary-foreground font-semibold hover:bg-primary/90 transition-colors"
+            >
+              {t("nav.bookNow")}
             </Link>
-          )}
 
-          <Link
-            to="/equipment"
-            className="mt-2 inline-flex items-center justify-center px-5 py-3 rounded-xl bg-primary text-primary-foreground font-semibold hover:bg-primary/90 transition-colors"
-          >
-            {t("nav.bookNow")}
-          </Link>
-
-          <a
-            href="https://wa.me/306974633697?text=Hi!%20I%27m%20interested%20in%20renting%20mobility%20equipment%20in%20Athens."
-            target="_blank"
-            rel="noopener noreferrer"
-            className="mt-3 inline-flex items-center justify-center gap-2 px-5 py-3 rounded-xl font-semibold transition-colors hover:opacity-90 text-white"
-            style={{ backgroundColor: "#25D366" }}
-          >
-            <MessageCircle className="h-4 w-4" fill="white" />
-            Chat on WhatsApp
-          </a>
-        </nav>
+            <a
+              href="https://wa.me/306974633697?text=Hi!%20I%27m%20interested%20in%20renting%20mobility%20equipment%20in%20Athens."
+              target="_blank"
+              rel="noopener noreferrer"
+              className="mt-3 inline-flex items-center justify-center gap-2 px-5 py-3 rounded-xl font-semibold transition-colors hover:opacity-90 text-white"
+              style={{ backgroundColor: "#25D366" }}
+            >
+              <MessageCircle className="h-4 w-4" fill="white" />
+              Chat on WhatsApp
+            </a>
+          </nav>
+        </div>
       </div>
 
       {menuOpen && (

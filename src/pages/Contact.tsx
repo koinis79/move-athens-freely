@@ -343,7 +343,10 @@ const Contact = () => {
           <div className="space-y-8">
             {/* WhatsApp */}
             <Card className="border-accent/30 bg-accent/5">
-              <CardContent className="flex items-center gap-4 p-6">
+              {/* flex-wrap: the icon + text + button row needs ~320px on one
+                  line, which overflows a 320px-wide screen. Wrapping lets the
+                  button drop to a second line there; no change at wider sizes. */}
+              <CardContent className="flex flex-wrap items-center gap-4 p-6">
                 <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-full bg-accent text-accent-foreground">
                   <MessageCircle className="h-6 w-6" />
                 </div>
