@@ -1095,6 +1095,10 @@ The elevator takes you to the main plateau where the Parthenon sits.
 
 \u2705 **Propylaea (entrance gate)** \u2014 Partially viewable
 
+![Amanda B. at the Propylaea at sunset, on elbow crutches rented the same day after a sprained ankle — Photo: Amanda B.](https://lmgpuqgwkiapgpdsxvmb.supabase.co/storage/v1/object/public/equipment-images/testimonials/amanda-acropolis.webp "Woman standing on elbow crutches at the Acropolis of Athens at sunset, with the Propylaea behind her.")
+
+If you\u2019ve picked up an injury mid-trip, you may not need a wheelchair at all \u2014 crutches or a rollator can be enough for the paved main route.
+
 ## What You CANNOT Access
 
 \u274c **Inside the Parthenon** \u2014 Nobody can, it\u2019s closed to all visitors

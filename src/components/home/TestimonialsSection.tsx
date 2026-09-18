@@ -11,6 +11,9 @@ type Testimonial = {
   photo?: string;
   photoAlt?: string;
   photoCredit?: string;
+  /** Height/fit overrides for the photo box. Defaults suit a landscape
+   *  photo; a portrait one needs a taller box or it crops to a strip. */
+  photoClass?: string;
 };
 
 // Only the first VISIBLE_COUNT are shown (fixed 3-column grid, no carousel);
@@ -22,6 +25,12 @@ const testimonials: Testimonial[] = [
     quote: "After spraining my ankle the day prior in Milos, I was unsure if I could complete our walking tour of the Acropolis. Despite being closed on Sundays, I messaged Vasilis on WhatsApp and received a prompt reply. He advised against the knee scooter I originally wanted and arranged same-day delivery of elbow crutches when all other pharmacies in Athens were closed. I had a wonderful time on the tour and couldn't have done it without their help.",
     name: "Amanda B.",
     location: "Google review",
+    photo: "https://lmgpuqgwkiapgpdsxvmb.supabase.co/storage/v1/object/public/equipment-images/testimonials/amanda-acropolis-card.webp",
+    photoAlt:
+      "Woman standing on elbow crutches at the Acropolis of Athens at sunset, with the Propylaea behind her.",
+    photoCredit: "Photo: Amanda B.",
+    // Portrait (600x800) — h-32 would crop to her torso.
+    photoClass: "h-56",
   },
   {
     quote: "Movability provided a wonderful service. An electric wheelchair in perfect condition was delivered to and collected from our Airbnb efficiently and on time. That wheelchair made our five day stay in Athens so pleasurable as my husband was able to move around the city with ease. All around top service and all the staff were such a pleasure to deal with.",
@@ -57,7 +66,7 @@ const Stars = () => (
   </div>
 );
 
-const TestimonialCard = ({ quote, translation, name, location, photo, photoAlt, photoCredit }: Testimonial) => (
+const TestimonialCard = ({ quote, translation, name, location, photo, photoAlt, photoCredit, photoClass }: Testimonial) => (
   <Card className="h-full border-none shadow-md text-left">
     <CardContent className="flex h-full flex-col justify-between p-6 md:p-8">
       <div>
@@ -67,7 +76,7 @@ const TestimonialCard = ({ quote, translation, name, location, photo, photoAlt, 
               src={photo}
               alt={photoAlt ?? `Customer photo shared by ${name}`}
               loading="lazy"
-              className="h-32 w-full rounded-xl object-cover"
+              className={`w-full rounded-xl object-cover ${photoClass ?? "h-32"}`}
             />
             {photoCredit && (
               <figcaption className="mt-1.5 text-xs text-muted-foreground">{photoCredit}</figcaption>

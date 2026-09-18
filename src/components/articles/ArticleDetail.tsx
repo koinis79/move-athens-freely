@@ -89,16 +89,18 @@ function renderMarkdown(md: string, midBanner?: { node: React.ReactNode; afterPa
           {line.slice(4)}
         </h3>
       );
-    } else if (/^!\[[^\]]*\]\([^)]+\)$/.test(line)) {
-      // Image: ![caption](url) on its own line. Caption doubles as alt text.
+    } else if (/^!\[([^\]]*)\]\(\s*([^)\s"]+)(?:\s+"([^"]*)")?\s*\)$/.test(line)) {
+      // Image: ![caption](url) on its own line -- caption doubles as alt
+      // text. Use ![caption](url "alt text") when the caption reads as a
+      // credit/context line and the image needs a proper description instead.
       flushList();
-      const m = line.match(/^!\[([^\]]*)\]\(([^)]+)\)$/)!;
-      const [, caption, src] = m;
+      const m = line.match(/^!\[([^\]]*)\]\(\s*([^)\s"]+)(?:\s+"([^"]*)")?\s*\)$/)!;
+      const [, caption, src, altText] = m;
       nodes.push(
         <figure key={key++} className="my-8">
           <img
             src={src}
-            alt={caption}
+            alt={altText || caption}
             loading="lazy"
             className="mx-auto max-h-[520px] w-auto rounded-xl border border-border"
           />
