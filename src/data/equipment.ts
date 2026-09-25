@@ -12,7 +12,8 @@ export type EquipmentCategory =
   | "Wheelchair"
   | "Power Wheelchair"
   | "Mobility Scooter"
-  | "Rollator";
+  | "Rollator"
+  | "Oxygen & Respiratory";
 
 export type Availability = "Available" | "Limited" | "Unavailable";
 
@@ -49,6 +50,7 @@ export const categorySlugMap: Record<string, EquipmentCategory> = {
   "power-wheelchairs": "Power Wheelchair",
   "mobility-scooters": "Mobility Scooter",
   "walking-aids": "Rollator",
+  "oxygen-respiratory": "Oxygen & Respiratory",
 };
 
 export const categoryFilterLabels = [
@@ -57,6 +59,7 @@ export const categoryFilterLabels = [
   { label: "Power Wheelchairs", slug: "power-wheelchairs" },
   { label: "Mobility Scooters", slug: "mobility-scooters" },
   { label: "Rollators", slug: "walking-aids" },
+  { label: "Oxygen & Respiratory", slug: "oxygen-respiratory" },
 ];
 
 export const equipmentItems: EquipmentItem[] = [

@@ -120,6 +120,7 @@ const Partners = () => {
       <SEOHead
         title="Partner with Movability — Mobility Equipment for Hotels, Airbnbs & Travel Businesses"
         description="Offer wheelchairs, scooters, and mobility aids to your guests. Zero inventory, commission-based, full support. Partner with Movability in Athens."
+      canonical="/partners"
       />
 
       <section className="relative overflow-hidden bg-gradient-to-br from-primary/10 via-background to-background py-20 md:py-28">

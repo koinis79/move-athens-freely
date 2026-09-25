@@ -1,6 +1,7 @@
 import { useParams, Navigate } from "react-router-dom";
 import ArticleDetail from "@/components/articles/ArticleDetail";
 import { Article as ArticleSD, BreadcrumbList as BreadcrumbSD } from "@/components/StructuredData";
+import SEOHead from "@/components/SEOHead";
 import { guides } from "@/data/articles";
 
 const AccessibleAthensGuide = () => {
@@ -13,6 +14,13 @@ const AccessibleAthensGuide = () => {
 
   return (
     <>
+      <SEOHead
+        title={article.seoTitle || `${article.title} | Movability`}
+        description={article.seoDescription || article.excerpt}
+        image={article.image}
+        canonical={`/accessible-athens/${article.slug}`}
+        type="article"
+      />
       <ArticleSD
         title={article.title}
         description={article.excerpt}

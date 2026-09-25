@@ -38,6 +38,10 @@ const categoryHeroImages: Record<string, { src: string; alt: string }> = {
     src: "https://lmgpuqgwkiapgpdsxvmb.supabase.co/storage/v1/object/public/assets/scooter-street.png",
     alt: "Smiling elderly woman on a red mobility scooter on Ermou Street in Athens",
   },
+  "oxygen-respiratory": {
+    src: "https://lmgpuqgwkiapgpdsxvmb.supabase.co/storage/v1/object/public/equipment-images/equipment/portable-oxygen-concentrator-1.webp",
+    alt: "Portable oxygen concentrator with carry bag, available to rent in Athens",
+  },
 };
 
 const EquipmentListing = ({ categorySlug }: Props) => {

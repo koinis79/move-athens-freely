@@ -32,6 +32,7 @@ const About = () => (
     <SEOHead
       title="About Movability – Athens Mobility Equipment Rental"
       description="We're an Athens-based team delivering quality wheelchairs, scooters &amp; mobility aids to your hotel. Local expertise, genuine care."
+    canonical="/about"
     />
     {/* Hero */}
     <section className="relative overflow-hidden bg-gradient-to-br from-primary/10 via-background to-background py-20 md:py-28">

@@ -130,6 +130,7 @@ const HowItWorks = () => {
     <SEOHead
       title="How It Works – Rent Mobility Equipment in Athens | Movability"
       description="Book online, we deliver to your hotel, enjoy Athens, we pick up. Simple wheelchair & scooter rental in 5 easy steps."
+    canonical="/how-it-works"
     />
 
     {/* ── Hero ── */}

@@ -24,6 +24,10 @@ export interface Article {
   content?: string;
   /** Equipment slugs to show as CTAs at the end of the article */
   recommendedEquipment?: string[];
+  /** Search-result title. Falls back to `title` + brand when absent. */
+  seoTitle?: string;
+  /** Search-result description. Falls back to `excerpt` when absent. */
+  seoDescription?: string;
 }
 
 /* ── Accessible Athens guides ───────────────────────────── */
@@ -493,7 +497,7 @@ A thermal lake fed by underground springs, right on the Athens Riviera. Warm wat
 
 ## Need Mobility Equipment?
 
-If you\u2019re planning day trips from Athens, a [mobility scooter](/equipment/electric-mobility-scooter) gives you range and independence. Our [foldable travel scooter](/equipment/foldable-travel-scooter) fits in car trunks for excursions.
+If you\u2019re planning day trips from Athens, a [mobility scooter](/equipment/mobility-scooters/electric-mobility-scooter) gives you range and independence. Our [foldable travel scooter](/equipment/mobility-scooters/foldable-travel-scooter) fits in car trunks for excursions.
 
 [Browse equipment](/equipment) or [contact us](/contact) to plan your Athens adventures.
 `,
@@ -527,7 +531,7 @@ A mobility scooter is ideal if you:
 - Have some mobility but tire easily walking
 - Are traveling with a group and want to keep up
 
-If you need full upper body support or have limited hand control, a [power wheelchair](/equipment/foldable-power-wheelchair) might be a better fit.
+If you need full upper body support or have limited hand control, a [power wheelchair](/equipment/power-wheelchairs/foldable-power-wheelchair) might be a better fit.
 
 ## What Types of Scooters Are Available?
 

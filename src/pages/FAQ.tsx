@@ -127,6 +127,7 @@ const FAQ = () => (
     <SEOHead
       title="FAQ – Mobility Equipment Rental Athens | Movability"
       description="Answers to common questions about renting wheelchairs and mobility scooters in Athens. Delivery, pricing, cancellation and more."
+    canonical="/faq"
     />
     <FAQPageSD questions={sections.flatMap((s) => s.items)} />
 

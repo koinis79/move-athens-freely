@@ -1,6 +1,7 @@
 import { Helmet } from "react-helmet-async";
 
-const SITE = "https://movability.gr";
+// Must match the host that serves 200 (see SEOHead) — the apex 307s to www.
+const SITE = "https://www.movability.gr";
 const LOGO = "https://lmgpuqgwkiapgpdsxvmb.supabase.co/storage/v1/object/public/assets/movability-logo.png";
 
 function JsonLd({ data }: { data: Record<string, unknown> }) {
