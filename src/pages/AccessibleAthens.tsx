@@ -76,6 +76,7 @@ const AccessibleAthens = () => (
     <SEOHead
       title="Accessible Athens Guide – Wheelchair Travel Tips | Movability"
       description="Practical guides for wheelchair users visiting Athens. Acropolis access, accessible restaurants, metro info &amp; more."
+    canonical="/accessible-athens"
     />
 
     {/* Hero */}

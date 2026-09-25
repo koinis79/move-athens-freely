@@ -24,6 +24,10 @@ export interface Article {
   content?: string;
   /** Equipment slugs to show as CTAs at the end of the article */
   recommendedEquipment?: string[];
+  /** Search-result title. Falls back to `title` + brand when absent. */
+  seoTitle?: string;
+  /** Search-result description. Falls back to `excerpt` when absent. */
+  seoDescription?: string;
 }
 
 /* ── Accessible Athens guides ───────────────────────────── */

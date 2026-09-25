@@ -18,6 +18,8 @@ interface EquipmentRow {
   thumbnail_url: string | null;
   images: string[] | null;
   specifications: Record<string, string> | null;
+  meta_title: string | null;
+  meta_description: string | null;
   equipment_categories: {
     name_en: string;
     slug: string;
@@ -111,6 +113,10 @@ export interface EquipmentDetailData {
   images: string[];
   specifications: Record<string, string>;
   longDescription: string;
+  /** equipment.meta_title — null when nobody has written one yet. */
+  metaTitle: string | null;
+  /** equipment.meta_description — null when nobody has written one yet. */
+  metaDescription: string | null;
 }
 
 export function useEquipmentDetail(slug: string | undefined) {
@@ -148,6 +154,8 @@ export function useEquipmentDetail(slug: string | undefined) {
         images: typed.images?.length ? typed.images : (typed.thumbnail_url ? [typed.thumbnail_url] : []),
         specifications: typed.specifications ?? {},
         longDescription: typed.description_en ?? "",
+        metaTitle: typed.meta_title,
+        metaDescription: typed.meta_description,
       });
       setLoading(false);
     }

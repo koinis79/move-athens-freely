@@ -40,7 +40,13 @@ const EquipmentCategory = () => {
 
   return (
     <>
-      {meta && <SEOHead title={meta.title} description={meta.description} />}
+      {meta && (
+        <SEOHead
+          title={meta.title}
+          description={meta.description}
+          canonical={`/equipment/${categorySlug}`}
+        />
+      )}
       <BreadcrumbSD
         items={[
           { name: "Home", href: "/" },

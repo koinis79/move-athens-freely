@@ -179,6 +179,7 @@ const Contact = () => {
       <SEOHead
         title="Contact Movability – Athens Wheelchair Rental"
         description="Get in touch for wheelchair, scooter, or rollator rental in Athens. WhatsApp, email, or phone. We respond within 2 hours."
+      canonical="/contact"
       />
       {/* ── Hero ──────────────────────────────────────── */}
       <section className="bg-gradient-to-br from-primary/10 via-background to-background py-16 md:py-20">
