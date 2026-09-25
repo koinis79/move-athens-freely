@@ -23,6 +23,10 @@ const categoryMeta: Record<string, { title: string; description: string }> = {
     title: "Rollator Rental Athens | Movability",
     description: "Rent rollators and walking aids in Athens. Lightweight, foldable options. Delivered to your hotel.",
   },
+  "oxygen-respiratory": {
+    title: "Portable Oxygen Concentrator Rental Athens | Movability",
+    description: "Rent a portable oxygen concentrator in Athens from €120 per rental period. Lightweight, quiet, up to 6 hours of battery. Delivered to your hotel.",
+  },
 };
 
 const EquipmentCategory = () => {

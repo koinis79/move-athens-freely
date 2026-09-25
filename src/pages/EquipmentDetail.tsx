@@ -1,4 +1,4 @@
-import { useParams, Link } from "react-router-dom";
+import { useParams, Link, Navigate } from "react-router-dom";
 import { Badge } from "@/components/ui/badge";
 import { CheckCircle2, MapPin } from "lucide-react";
 import { categoryFilterLabels } from "@/data/equipment";
@@ -30,6 +30,8 @@ const categoryColors: Record<string, string> = {
   "Power Wheelchair": "bg-primary/10 text-primary",
   "Mobility Scooter": "bg-secondary/10 text-secondary",
   "Walking Aid": "bg-accent/10 text-accent",
+  Rollator: "bg-accent/10 text-accent",
+  "Oxygen & Respiratory": "bg-primary/10 text-primary",
 };
 
 const EquipmentDetail = () => {
@@ -72,6 +74,15 @@ const EquipmentDetail = () => {
   if (error || !data) return <NotFound />;
 
   const { item, images, specifications, longDescription } = data;
+
+  // Canonical URL guard — a product is reachable only under its own category.
+  // Any other /equipment/<category>/<slug> combination redirects to the real
+  // path, so the same product can't be indexed under many duplicate URLs.
+  if (item.categorySlug && categorySlug !== item.categorySlug) {
+    return (
+      <Navigate to={`/equipment/${item.categorySlug}/${item.slug}`} replace />
+    );
+  }
 
   const categoryLabel =
     categoryFilterLabels.find((c) => c.slug === item.categorySlug)?.label ??
