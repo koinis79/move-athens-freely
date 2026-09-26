@@ -1,4 +1,5 @@
 import { useParams, Link, Navigate } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 import { Badge } from "@/components/ui/badge";
 import { CheckCircle2, MapPin } from "lucide-react";
 import { categoryFilterLabels } from "@/data/equipment";
@@ -37,6 +38,7 @@ const categoryColors: Record<string, string> = {
 
 const EquipmentDetail = () => {
   const { categorySlug, slug } = useParams();
+  const { i18n } = useTranslation();
   const { data, loading, error } = useEquipmentDetail(slug);
   const { related, loading: relatedLoading } = useRelatedEquipment(
     data?.item.categorySlug,
@@ -74,8 +76,16 @@ const EquipmentDetail = () => {
 
   if (error || !data) return <NotFound />;
 
-  const { item, images, specifications, longDescription, metaTitle, metaDescription } =
-    data;
+  const {
+    item,
+    images,
+    specifications,
+    longDescription,
+    metaTitle,
+    metaDescription,
+    metaTitleEl,
+    metaDescriptionEl,
+  } = data;
 
   // Canonical URL guard — a product is reachable only under its own category.
   // Any other /equipment/<category>/<slug> combination redirects to the real
@@ -90,13 +100,21 @@ const EquipmentDetail = () => {
     categoryFilterLabels.find((c) => c.slug === item.categorySlug)?.label ??
     item.category;
 
-  // Prefer the hand-written meta fields on the equipment row; fall back to a
-  // generated title/description so no product is ever left on the generic
-  // site-wide <title> from index.html.
+  // Match Header.tsx's exact check. i18next reports the *detected* language, so
+  // a browser advertising "el-GR" leaves i18n.language as "el-GR" while the UI
+  // falls back to English (resources are only "en" and "gr"). Testing for "gr"
+  // alone keeps the meta language locked to the language actually on screen.
+  const isGreek = i18n.language === "gr";
+
+  // Prefer the hand-written meta fields on the equipment row, Greek first when
+  // the UI is Greek; fall back EL -> EN -> generated, so no product is ever
+  // left on the generic site-wide <title> from index.html.
   const canonicalPath = `/equipment/${item.categorySlug}/${item.slug}`;
-  const seoTitle = metaTitle || `${item.name} Rental Athens | Movability`;
+  const seoTitle =
+    (isGreek ? metaTitleEl || metaTitle : metaTitle) ||
+    `${item.name} Rental Athens | Movability`;
   const seoDescription =
-    metaDescription ||
+    (isGreek ? metaDescriptionEl || metaDescription : metaDescription) ||
     `Rent a ${item.name.toLowerCase()} in Athens from €${item.priceTier1} per rental period. Delivered to your hotel, apartment, or cruise port.`;
 
   // ── Spec label, value formatter, and icon mapping ──
@@ -159,6 +177,7 @@ const EquipmentDetail = () => {
         description={seoDescription}
         image={Array.isArray(images) && images[0] ? images[0] : undefined}
         canonical={canonicalPath}
+        locale={isGreek ? "el_GR" : "en_US"}
       />
       <ProductSD
         name={item.name}

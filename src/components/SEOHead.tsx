@@ -21,6 +21,13 @@ interface SEOHeadProps {
   canonical?: string;
   /** Open Graph type — "article" for guides and blog posts. */
   type?: "website" | "article";
+  /**
+   * OG locale for the language this page's copy is actually in. The site has no
+   * per-language URLs (i18next stores the choice in localStorage), so the
+   * canonical URL is deliberately the SAME for both languages — only the copy
+   * and og:locale change.
+   */
+  locale?: "en_US" | "el_GR";
 }
 
 const SEOHead = ({
@@ -30,6 +37,7 @@ const SEOHead = ({
   url,
   canonical,
   type = "website",
+  locale = "en_US",
 }: SEOHeadProps) => {
   const canonicalUrl = canonical
     ? `${SITE}${canonical.startsWith("/") ? canonical : `/${canonical}`}`
@@ -46,6 +54,7 @@ const SEOHead = ({
       <meta property="og:image" content={image} />
       <meta property="og:site_name" content={SITE_NAME} />
       <meta property="og:type" content={type} />
+      <meta property="og:locale" content={locale} />
       {(url || canonicalUrl) && (
         <meta property="og:url" content={url ?? canonicalUrl} />
       )}
