@@ -148,5 +148,8 @@
   "product": {
     "securityDepositNote": "€{{amount}} refundable security deposit — collected at delivery, returned when the equipment is picked up.",
     "securityDepositShort": "€{{amount}} refundable security deposit (collected at delivery, not included above)"
+  },
+  "chat": {
+    "notice": "AI-assisted chat. Conversations are stored to improve our service — please don't share medical details."
   }
 }
