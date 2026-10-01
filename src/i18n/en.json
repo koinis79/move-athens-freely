@@ -151,11 +151,7 @@
   },
   "chat": {
     "notice": "AI-assisted chat. Conversations are stored to improve our service — please don't share medical details.",
-    "launcherAria": "Open chat and contact options",
-    "optionWhatsapp": "Chat on WhatsApp",
-    "optionWhatsappHint": "A real person, usually within the hour",
-    "optionBot": "Ask our AI assistant",
-    "optionBotHint": "Instant answers about equipment and delivery",
+    "launcherAria": "Open chat with our assistant",
     "panelTitle": "Movability assistant",
     "close": "Close chat",
     "placeholder": "Ask about equipment, prices or delivery…",
@@ -165,6 +161,10 @@
     "errorMessage": "Something went wrong. Please try again, or message us on WhatsApp.",
     "limitMessage": "This chat has reached its length limit. Please message us on WhatsApp to continue.",
     "thinking": "Typing…",
-    "newChat": "Start a new chat"
+    "newChat": "Start a new chat",
+    "launcherLabel": "Ask us anything",
+    "launcherLabelShort": "Ask us",
+    "teaser": "Questions about delivery or prices? Ask our assistant.",
+    "teaserDismiss": "Dismiss"
   }
 }

@@ -1,61 +1,85 @@
 import { useEffect, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
-import { MessageCircle, Sparkles, X } from "lucide-react";
+import { useLocation } from "react-router-dom";
+import { MessageSquareText, X } from "lucide-react";
+import { trackEvent } from "@/lib/analytics";
 import ChatPanel from "./ChatPanel";
 
-const WHATSAPP_URL =
-  "https://wa.me/306974633697?text=Hi!%20I%27m%20interested%20in%20renting%20mobility%20equipment%20in%20Athens.";
+/** Set once the teaser has been seen or the chat opened — never shown again. */
+const TEASER_KEY = "chat_teaser_seen";
+const TEASER_DELAY_MS = 8000;
+
+/** Reads the flag defensively: private mode and blocked storage both throw. */
+function teaserAlreadySeen(): boolean {
+  try {
+    return localStorage.getItem(TEASER_KEY) === "1";
+  } catch {
+    // No storage means we cannot promise "once per visitor", so suppress the
+    // teaser rather than risk showing it on every page view.
+    return true;
+  }
+}
+
+function markTeaserSeen() {
+  try {
+    localStorage.setItem(TEASER_KEY, "1");
+  } catch {
+    /* non-fatal */
+  }
+}
 
 /**
- * Single floating launcher that expands to two choices, WhatsApp first.
+ * Floating chat launcher: a labelled pill, not a bare circle.
  *
- * Why one launcher and not two stacked buttons: the 678px mobile-overflow bug
- * (docs §11, Sep 16) was caused by a fixed off-canvas element widening the
- * document. One launcher keeps the single fixed footprint and z-index that were
- * already validated at 320-414px, and leaves room above the sticky product CTA
- * bar that pushes this control to bottom-24 on mobile.
+ * The round green circle tested badly for discoverability — it read as the
+ * WhatsApp button it replaced, so visitors did not know a chat existed. This is
+ * brand blue with a visible text label, which is also why the label is real text
+ * rather than an icon with a tooltip: a tooltip is invisible on touch.
  *
- * The cost, accepted deliberately: WhatsApp is two taps instead of one. It is
- * therefore listed FIRST and visually primary, and both paths carry
- * data-analytics attributes so the trade can actually be measured rather than
- * argued about.
- *
- * Nothing is rendered off-screen. The menu and the panel mount and unmount;
- * neither is parked outside the viewport with a transform.
+ * Still exactly ONE fixed element, at the same anchor, keeping the single
+ * footprint validated at 320-414px. `bottom-24` on mobile clears the sticky
+ * product CTA bar; `md:bottom-6` drops it on desktop where no such bar exists.
+ * Nothing is rendered off-screen — the teaser and panel mount and unmount rather
+ * than being parked outside the viewport with a transform, which is the mistake
+ * that made every page pan sideways at 390px (docs §11, Sep 16).
  */
 const ChatLauncher = () => {
   const { t } = useTranslation();
-  const [menuOpen, setMenuOpen] = useState(false);
+  const { pathname } = useLocation();
   const [panelOpen, setPanelOpen] = useState(false);
+  const [teaserOpen, setTeaserOpen] = useState(false);
   const launcherRef = useRef<HTMLButtonElement>(null);
-  const menuRef = useRef<HTMLDivElement>(null);
 
-  // Escape closes the menu; click outside dismisses it.
+  // Checkout is a payment flow — never interrupt it with a promotional bubble.
+  const suppressTeaser = pathname.startsWith("/checkout");
+
   useEffect(() => {
-    if (!menuOpen) return;
-    const onKey = (e: KeyboardEvent) => {
-      if (e.key === "Escape") { setMenuOpen(false); launcherRef.current?.focus(); }
-    };
-    const onPointer = (e: PointerEvent) => {
-      const target = e.target as Node;
-      if (!menuRef.current?.contains(target) && !launcherRef.current?.contains(target)) {
-        setMenuOpen(false);
-      }
-    };
-    window.addEventListener("keydown", onKey);
-    window.addEventListener("pointerdown", onPointer);
-    return () => {
-      window.removeEventListener("keydown", onKey);
-      window.removeEventListener("pointerdown", onPointer);
-    };
-  }, [menuOpen]);
+    if (suppressTeaser || panelOpen || teaserAlreadySeen()) return;
+    const id = window.setTimeout(() => {
+      setTeaserOpen(true);
+      markTeaserSeen();              // shown once, whatever happens next
+      trackEvent("chat_teaser_shown");
+    }, TEASER_DELAY_MS);
+    return () => window.clearTimeout(id);
+  }, [suppressTeaser, panelOpen]);
 
-  const openPanel = () => { setMenuOpen(false); setPanelOpen(true); };
+  const openPanel = (source: "launcher" | "teaser") => {
+    setTeaserOpen(false);
+    markTeaserSeen();
+    setPanelOpen(true);
+    trackEvent(source === "teaser" ? "chat_teaser_clicked" : "chat_launcher_click");
+  };
+
+  const dismissTeaser = () => {
+    setTeaserOpen(false);
+    markTeaserSeen();
+    trackEvent("chat_teaser_dismissed");
+  };
 
   const closePanel = () => {
     setPanelOpen(false);
-    // Return focus to where it came from, so keyboard users are not dumped at
-    // the top of the document.
+    // Focus returns to the launcher so a keyboard user is not dumped at the top
+    // of the document.
     launcherRef.current?.focus();
   };
 
@@ -63,57 +87,32 @@ const ChatLauncher = () => {
 
   return (
     <>
-      {menuOpen && (
-        <div
-          ref={menuRef}
-          role="menu"
-          aria-label={t("chat.launcherAria")}
-          className="fixed bottom-[6.5rem] right-3 z-50 w-[17rem] max-w-[calc(100vw-1.5rem)] overflow-hidden rounded-2xl border border-border bg-background shadow-2xl md:bottom-24 md:right-6"
-        >
-          {/* WhatsApp first and visually primary — it is the proven channel. */}
-          <a
-            href={WHATSAPP_URL}
-            target="_blank"
-            rel="noopener noreferrer"
-            role="menuitem"
-            data-analytics="chat-launcher-whatsapp"
-            onClick={() => setMenuOpen(false)}
-            className="flex items-start gap-3 px-4 py-3 transition-colors hover:bg-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-ring"
-          >
-            <span
-              className="mt-0.5 flex h-8 w-8 shrink-0 items-center justify-center rounded-full"
-              style={{ backgroundColor: "#25D366" }}
-            >
-              <MessageCircle className="h-4 w-4 text-white" fill="white" />
-            </span>
-            <span className="min-w-0">
-              <span className="block text-sm font-semibold text-foreground">
-                {t("chat.optionWhatsapp")}
-              </span>
-              <span className="block text-xs text-muted-foreground">
-                {t("chat.optionWhatsappHint")}
-              </span>
-            </span>
-          </a>
-
+      {teaserOpen && (
+        /* Deliberately NOT role="alert"/aria-live: an unprompted promotional
+           bubble must not interrupt a screen reader or steal focus. It sits in
+           DOM order before the launcher so it is still reachable by keyboard.
+           No transition class, so prefers-reduced-motion has nothing to honour —
+           the bubble simply appears.
+           Offsets are derived, not guessed: on mobile the launcher sits at
+           bottom-24 (96px) and is 40px tall (py-2.5 + 20px content), so it
+           occupies 96-136px and the teaser must clear 144px = 9rem. On md the
+           launcher is at 24px and 44px tall (py-3), occupying 24-68px, so
+           5.25rem (84px) clears it. */
+        <div className="fixed bottom-[9rem] right-3 z-50 w-[15rem] max-w-[calc(100vw-1.5rem)] rounded-2xl border border-border bg-background p-3 shadow-xl md:bottom-[5.25rem] md:right-6">
           <button
             type="button"
-            role="menuitem"
-            onClick={openPanel}
-            data-analytics="chat-launcher-bot"
-            className="flex w-full items-start gap-3 border-t border-border px-4 py-3 text-left transition-colors hover:bg-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-ring"
+            onClick={dismissTeaser}
+            aria-label={t("chat.teaserDismiss")}
+            className="absolute right-1.5 top-1.5 rounded-md p-1 text-muted-foreground transition-colors hover:bg-muted hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
           >
-            <span className="mt-0.5 flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-primary/10">
-              <Sparkles className="h-4 w-4 text-primary" />
-            </span>
-            <span className="min-w-0">
-              <span className="block text-sm font-semibold text-foreground">
-                {t("chat.optionBot")}
-              </span>
-              <span className="block text-xs text-muted-foreground">
-                {t("chat.optionBotHint")}
-              </span>
-            </span>
+            <X className="h-3.5 w-3.5" />
+          </button>
+          <button
+            type="button"
+            onClick={() => openPanel("teaser")}
+            className="block w-full pr-5 text-left text-sm leading-snug text-foreground hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+          >
+            {t("chat.teaser")}
           </button>
         </div>
       )}
@@ -121,18 +120,21 @@ const ChatLauncher = () => {
       <button
         ref={launcherRef}
         type="button"
-        onClick={() => setMenuOpen((v) => !v)}
+        onClick={() => openPanel("launcher")}
         aria-label={t("chat.launcherAria")}
-        aria-expanded={menuOpen}
-        aria-haspopup="menu"
-        className="fixed bottom-24 right-6 z-50 flex h-[60px] w-[60px] items-center justify-center rounded-full shadow-lg transition-transform duration-200 hover:scale-110 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 md:bottom-6 max-md:h-[50px] max-md:w-[50px]"
-        style={{ backgroundColor: "#25D366" }}
+        className="fixed bottom-24 right-6 z-50 flex items-center gap-2 rounded-full px-4 py-3 text-white shadow-lg transition-transform duration-200 hover:scale-105 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 md:bottom-6 max-md:px-3.5 max-md:py-2.5"
+        style={{ backgroundColor: "#2563EB" }}
       >
-        {menuOpen ? (
-          <X className="h-6 w-6 text-white" />
-        ) : (
-          <MessageCircle className="h-7 w-7 max-md:h-6 max-md:w-6 text-white" fill="white" />
-        )}
+        <MessageSquareText className="h-5 w-5 shrink-0" aria-hidden="true" />
+        {/* Two labels rather than JS width detection: the short one shows at
+            <=480px via Tailwind's max-[480px] variant, so there is no layout
+            shift on resize and no hydration mismatch. */}
+        <span className="whitespace-nowrap text-sm font-semibold max-[480px]:hidden">
+          {t("chat.launcherLabel")}
+        </span>
+        <span className="hidden whitespace-nowrap text-sm font-semibold max-[480px]:inline">
+          {t("chat.launcherLabelShort")}
+        </span>
       </button>
     </>
   );

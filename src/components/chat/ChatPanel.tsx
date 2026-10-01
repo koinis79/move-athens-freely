@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { X, Send, MessageCircle, RotateCcw } from "lucide-react";
+import { trackEvent } from "@/lib/analytics";
 import { useChatStream } from "./useChatStream";
 import { autolink } from "./autolink";
 
@@ -137,9 +138,15 @@ const ChatPanel = ({ onClose }: Props) => {
         target="_blank"
         rel="noopener noreferrer"
         data-analytics="chat-panel-whatsapp"
+        onClick={() => trackEvent("chat_panel_whatsapp_click")}
         className="flex shrink-0 items-center gap-2 border-t border-border px-4 py-2.5 text-sm font-medium text-foreground transition-colors hover:bg-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-ring"
       >
-        <MessageCircle className="h-4 w-4 shrink-0" style={{ color: "#25D366" }} />
+        {/* WhatsApp green is used as an ICON accent, not as a filled button with
+            white text: white on #25D366 measures 1.98:1, which fails WCAG AA
+            (4.5:1) and even the 3:1 non-text minimum. The label therefore sits on
+            the panel background at full contrast, and the green carries brand
+            recognition without carrying the text. */}
+        <MessageCircle className="h-4 w-4 shrink-0" style={{ color: "#25D366" }} aria-hidden="true" />
         <span className="truncate">{t("chat.whatsappInPanel")}</span>
       </a>
 
