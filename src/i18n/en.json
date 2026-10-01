@@ -150,6 +150,21 @@
     "securityDepositShort": "€{{amount}} refundable security deposit (collected at delivery, not included above)"
   },
   "chat": {
-    "notice": "AI-assisted chat. Conversations are stored to improve our service — please don't share medical details."
+    "notice": "AI-assisted chat. Conversations are stored to improve our service — please don't share medical details.",
+    "launcherAria": "Open chat and contact options",
+    "optionWhatsapp": "Chat on WhatsApp",
+    "optionWhatsappHint": "A real person, usually within the hour",
+    "optionBot": "Ask our AI assistant",
+    "optionBotHint": "Instant answers about equipment and delivery",
+    "panelTitle": "Movability assistant",
+    "close": "Close chat",
+    "placeholder": "Ask about equipment, prices or delivery…",
+    "send": "Send message",
+    "whatsappInPanel": "Talk to a person on WhatsApp",
+    "empty": "Ask us anything about renting mobility equipment in Athens.",
+    "errorMessage": "Something went wrong. Please try again, or message us on WhatsApp.",
+    "limitMessage": "This chat has reached its length limit. Please message us on WhatsApp to continue.",
+    "thinking": "Typing…",
+    "newChat": "Start a new chat"
   }
 }

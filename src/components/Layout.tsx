@@ -1,7 +1,7 @@
 import { Outlet } from "react-router-dom";
 import Header from "./Header";
 import Footer from "./Footer";
-import WhatsAppButton from "./WhatsAppButton";
+import ChatLauncher from "./chat/ChatLauncher";
 import CookieConsent from "./CookieConsent";
 
 const Layout = () => {
@@ -15,7 +15,7 @@ const Layout = () => {
         <Outlet />
       </main>
       <Footer />
-      <WhatsAppButton />
+      <ChatLauncher />
       <CookieConsent />
     </div>
   );
