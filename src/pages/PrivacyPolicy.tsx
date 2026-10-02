@@ -1,38 +1,102 @@
+import type { ReactNode } from "react";
 import { useTranslation } from "react-i18next";
 import SEOHead from "@/components/SEOHead";
-import { privacyPolicy, type PolicySection } from "@/data/privacyPolicy";
+import {
+  privacyPolicy,
+  type PolicyBlock,
+  type PolicyTable,
+} from "@/data/privacyPolicy";
 
 /**
  * Privacy policy.
  *
- * Structure only — the legal text lives in src/data/privacyPolicy.ts so the final
- * wording can be dropped in without touching this component. Sections marked
- * `placeholder: true` render a visible PENDING badge, so an unfinished policy can
- * never be mistaken for a finished one by whoever looks at the page next.
+ * Content comes from src/data/privacyPolicy.ts, which is GENERATED from
+ * privacy-policy-el.md (authoritative) and privacy-policy-en.md. Edit the
+ * markdown and re-run scripts/generate-privacy-policy.mjs — do not edit either
+ * the data file or this component to change wording.
  *
- * Styled to match the article pages: `container` + `mx-auto max-w-prose`, the same
- * measure used by ArticleDetail, so it reads like the rest of the site rather than
- * like a legal annex.
+ * Styled like the article pages: `container` + `mx-auto max-w-prose`, the same
+ * measure ArticleDetail uses, so a legal document still reads like the site.
  */
+
+const isTable = (b: PolicyBlock): b is PolicyTable =>
+  typeof b === "object" && !Array.isArray(b) && "headers" in b;
+
+/**
+ * Renders `**bold**` runs as <strong>, and nothing else.
+ *
+ * Deliberately not a markdown renderer: the only inline markup the lawyer's text
+ * uses is bold lead-ins ("**Health information.**"), and parsing arbitrary
+ * markdown into a page is how stray markup gets rendered. Everything else stays
+ * a text node, so React escapes it.
+ */
+function inline(text: string): ReactNode[] {
+  return text.split(/(\*\*[^*]+\*\*)/g).map((part, i) =>
+    part.startsWith("**") && part.endsWith("**") ? (
+      <strong key={i} className="font-semibold text-foreground">
+        {part.slice(2, -2)}
+      </strong>
+    ) : (
+      part
+    ),
+  );
+}
+
+function Block({ block }: { block: PolicyBlock }) {
+  if (typeof block === "string") {
+    return <p className="my-3 leading-relaxed">{inline(block)}</p>;
+  }
+
+  if (Array.isArray(block)) {
+    return (
+      <ul className="my-3 list-disc space-y-1.5 pl-5">
+        {block.map((li, i) => (
+          <li key={i}>{inline(li)}</li>
+        ))}
+      </ul>
+    );
+  }
+
+  // Tables carry the retention periods and legal bases — the parts most likely
+  // to be read closely — so they get real table semantics, not a styled grid.
+  // Horizontally scrollable rather than squeezed, which keeps them legible at
+  // 320px without the page itself overflowing.
+  return (
+    <div className="my-5 -mx-4 overflow-x-auto px-4 sm:mx-0 sm:px-0">
+      <table className="w-full min-w-[32rem] border-collapse text-sm">
+        <thead>
+          <tr className="border-b border-border">
+            {block.headers.map((h, i) => (
+              <th
+                key={i}
+                scope="col"
+                className="py-2 pr-4 text-left align-top font-heading font-semibold text-foreground"
+              >
+                {inline(h)}
+              </th>
+            ))}
+          </tr>
+        </thead>
+        <tbody>
+          {block.rows.map((row, r) => (
+            <tr key={r} className="border-b border-border/60 last:border-0">
+              {row.map((cell, c) => (
+                <td key={c} className="py-2.5 pr-4 align-top leading-relaxed">
+                  {inline(cell)}
+                </td>
+              ))}
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    </div>
+  );
+}
+
 const PrivacyPolicy = () => {
   const { i18n } = useTranslation();
   const lang: "en" | "gr" = i18n.language === "gr" ? "gr" : "en";
   const doc = privacyPolicy[lang];
-
-  const renderBody = (section: PolicySection) =>
-    section.body.map((para, i) =>
-      Array.isArray(para) ? (
-        <ul key={i} className="my-3 list-disc space-y-1.5 pl-5">
-          {para.map((li, j) => (
-            <li key={j}>{li}</li>
-          ))}
-        </ul>
-      ) : (
-        <p key={i} className="my-3">
-          {para}
-        </p>
-      ),
-    );
 
   return (
     <>
@@ -51,27 +115,24 @@ const PrivacyPolicy = () => {
             {doc.lastUpdatedLabel}: {doc.lastUpdated}
           </p>
 
-          {doc.intro.map((para, i) => (
-            <p key={i} className="mt-4 text-foreground/90">
-              {para}
-            </p>
-          ))}
+          <div className="text-foreground/90">
+            {doc.intro.map((block, i) => (
+              <Block key={`i-${i}`} block={block} />
+            ))}
+          </div>
 
-          <div className="mt-8 space-y-8 text-foreground/90">
+          <div className="mt-6 space-y-8 text-foreground/90">
             {doc.sections.map((section) => (
-              <section key={section.heading} aria-labelledby={`s-${section.id}`}>
+              <section key={section.id} aria-labelledby={`policy-${section.id}`}>
                 <h2
-                  id={`s-${section.id}`}
-                  className="flex flex-wrap items-center gap-2 text-xl font-heading font-semibold text-foreground"
+                  id={`policy-${section.id}`}
+                  className="text-xl font-heading font-semibold text-foreground"
                 >
                   {section.heading}
-                  {section.placeholder && (
-                    <span className="rounded-full bg-secondary/15 px-2 py-0.5 text-[11px] font-semibold uppercase tracking-wide text-secondary">
-                      {doc.pendingLabel}
-                    </span>
-                  )}
                 </h2>
-                {renderBody(section)}
+                {section.body.map((block, i) => (
+                  <Block key={i} block={block} />
+                ))}
               </section>
             ))}
           </div>
