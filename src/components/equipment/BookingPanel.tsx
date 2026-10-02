@@ -1,5 +1,5 @@
 import { useState, useEffect, useMemo, useRef } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { Link, useNavigate, useSearchParams } from "react-router-dom";
 import { format, differenceInDays } from "date-fns";
 import type { DateRange } from "react-day-picker";
 import { ArrowRight, CalendarIcon, Minus, Plus, ShieldCheck, ShoppingCart } from "lucide-react";
@@ -43,11 +43,42 @@ const TIER_LABELS = [
   { days: "15–30 days", tier: "priceTier4" as const },
 ];
 
+/**
+ * Maximum prefillable rental span, in days.
+ *
+ * Taken from the top pricing tier's own label ("15–30 days"). NOTE: the app does
+ * not actually enforce a ceiling anywhere — getPriceForDays() returns tier 4 for
+ * any span above 14 days, and the calendar only disables dates before today. So
+ * this cap makes the PREFILL stricter than manual selection on purpose: a link is
+ * attacker-controllable input, a calendar click is not.
+ */
+const MAX_PREFILL_DAYS = 30;
+
+/**
+ * Parse a strict YYYY-MM-DD string into a LOCAL-midnight Date, or null.
+ *
+ * Local midnight, not `new Date(str)`, which parses as UTC and can land on the
+ * previous calendar day west of Greenwich — that would make a same-day link fail
+ * the "today or later" test for some visitors.
+ *
+ * The round-trip check rejects real-looking nonsense: "2026-02-30" would
+ * otherwise roll forward to March 2nd rather than being refused.
+ */
+function parseIsoDateLocal(value: string | null): Date | null {
+  if (!value || !/^\d{4}-\d{2}-\d{2}$/.test(value)) return null;
+  const [y, m, d] = value.split("-").map(Number);
+  const dt = new Date(y, m - 1, d);
+  dt.setHours(0, 0, 0, 0);
+  if (dt.getFullYear() !== y || dt.getMonth() !== m - 1 || dt.getDate() !== d) return null;
+  return dt;
+}
+
 const BookingPanel = ({ item }: Props) => {
   const { t } = useTranslation();
   const { addItem, items: cartItems } = useCart();
   const { toast } = useToast();
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
   const [dateRange, setDateRange] = useState<DateRange | undefined>();
   const [qty, setQty] = useState(1);
   const [zoneId, setZoneId] = useState<string>();
@@ -64,6 +95,37 @@ const BookingPanel = ({ item }: Props) => {
 
   const startDate = dateRange?.from;
   const endDate = dateRange?.to;
+
+  /**
+   * Optional ?start=YYYY-MM-DD&end=YYYY-MM-DD prefill (used by the chat
+   * assistant's product links).
+   *
+   * This ONLY fills the picker. Every downstream step is derived rather than
+   * stored — numDays is a useMemo on the dates, subtotal a useMemo on numDays via
+   * getPriceForDays(), total adds the zone fee — so a prefilled range recomputes
+   * the price exactly as a click would, and nothing can be bypassed. Add-to-cart
+   * and checkout keep their own guards.
+   *
+   * Any invalid or hostile combination is ignored SILENTLY, leaving an empty
+   * picker and no error: a bad link should look like an ordinary visit, not like
+   * a broken page.
+   *
+   * Applied once, guarded by a ref, so it can never fight a later manual edit.
+   */
+  const prefillApplied = useRef(false);
+  useEffect(() => {
+    if (prefillApplied.current) return;
+    prefillApplied.current = true;
+
+    const from = parseIsoDateLocal(searchParams.get("start"));
+    const to = parseIsoDateLocal(searchParams.get("end"));
+    if (!from || !to) return;
+    if (from < today) return;                                  // no past starts
+    if (to <= from) return;                                    // end must follow start
+    if (differenceInDays(to, from) > MAX_PREFILL_DAYS) return;  // bounded span
+
+    setDateRange({ from, to });
+  }, [searchParams, today]);
 
   // Fetch delivery zones from Supabase
   useEffect(() => {
