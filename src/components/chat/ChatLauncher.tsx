@@ -96,12 +96,14 @@ const ChatLauncher = () => {
            DOM order before the launcher so it is still reachable by keyboard.
            No transition class, so prefers-reduced-motion has nothing to honour —
            the bubble simply appears.
-           Offsets are derived, not guessed. The launcher ROW is as tall as its
-           tallest child, which is the 44px WhatsApp button (the pill is 40px on
-           mobile) — so on mobile the row occupies 96-140px from bottom-24 and
-           the teaser must clear 148px, hence 9.5rem (152px). On md the row is
-           44px at bottom-6, occupying 24-68px, so 5.25rem (84px) clears it. */
-        <div className="fixed bottom-[9.5rem] right-3 z-50 w-[15rem] max-w-[calc(100vw-1.5rem)] rounded-2xl border border-border bg-background p-3 shadow-xl md:bottom-[5.25rem] md:right-6">
+           Offsets are derived, not guessed, and the dark-mode ring counts: it is
+           a box-shadow drawn 2px OUTSIDE the box, so it extends the visual edge
+           without taking layout space.
+             phone  — row 52px at bottom-24: occupies 96-148px, ring to 150px,
+                      so the teaser needs >=162px. 10.5rem = 168px -> 18px clear.
+             md     — row 56px at bottom-6: occupies 24-80px, ring to 82px,
+                      so the teaser needs >=94px. 6.5rem = 104px -> 22px clear. */
+        <div className="fixed bottom-[10.5rem] right-3 z-50 w-[15rem] max-w-[calc(100vw-1.5rem)] rounded-2xl border border-border bg-background p-3 shadow-xl md:bottom-[6.5rem] md:right-6">
           <button
             type="button"
             onClick={dismissTeaser}
@@ -129,23 +131,27 @@ const ChatLauncher = () => {
           type="button"
           onClick={() => openPanel("launcher")}
           aria-label={t("chat.launcherAria")}
-          className="flex items-center gap-2 rounded-full px-4 py-3 text-white shadow-lg transition-transform duration-200 hover:scale-105 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 max-md:px-3.5 max-md:py-2.5"
+          /* Heights are explicit rather than derived from padding, so the row
+             height used in the teaser arithmetic above is exact: 52px phone,
+             56px from md up — matching the WhatsApp button at both breakpoints. */
+          className="flex h-[52px] items-center gap-2 rounded-full px-5 text-white shadow-lg transition-transform duration-200 hover:scale-105 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 max-md:px-4 md:h-14"
           style={{ backgroundColor: "#2563EB" }}
         >
-          <MessageSquareText className="h-5 w-5 shrink-0" aria-hidden="true" />
+          <MessageSquareText className="h-[22px] w-[22px] shrink-0" aria-hidden="true" />
           {/* Two labels rather than JS width detection: the short one shows at
               <=480px via Tailwind's max-[480px] variant, so there is no layout
               shift on resize and no hydration mismatch. */}
-          <span className="whitespace-nowrap text-sm font-semibold max-[480px]:hidden">
+          <span className="whitespace-nowrap text-base font-semibold md:text-[17px] max-[480px]:hidden">
             {t("chat.launcherLabel")}
           </span>
-          <span className="hidden whitespace-nowrap text-sm font-semibold max-[480px]:inline">
+          <span className="hidden whitespace-nowrap text-base font-semibold md:text-[17px] max-[480px]:inline">
             {t("chat.launcherLabelShort")}
           </span>
         </button>
 
         {/* One-tap WhatsApp, restored without a menu.
-            44x44 minimum target (WCAG 2.5.5). Fill #075E54 measures 7.67:1
+            52x52 phone / 56x56 md, matching the pill and well past the 44x44
+            minimum target (WCAG 2.5.5). Fill #075E54 measures 7.67:1
             against the white glyph, and 7.37:1 against the light page
             background — but only 2.32:1 against the dark-mode background, which
             FAILS the 3:1 non-text minimum (WCAG 1.4.11). The dark-mode-only
@@ -157,10 +163,10 @@ const ChatLauncher = () => {
           aria-label={t("chat.waLauncherAria")}
           data-analytics="wa-launcher"
           onClick={() => trackEvent("wa_launcher_click")}
-          className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full text-white shadow-lg transition-transform duration-200 hover:scale-105 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 dark:ring-2 dark:ring-white"
+          className="flex h-[52px] w-[52px] shrink-0 items-center justify-center rounded-full md:h-14 md:w-14 text-white shadow-lg transition-transform duration-200 hover:scale-105 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 dark:ring-2 dark:ring-white"
           style={{ backgroundColor: "#075E54" }}
         >
-          <MessageCircle className="h-5 w-5" fill="white" aria-hidden="true" />
+          <MessageCircle className="h-6 w-6" fill="white" aria-hidden="true" />
         </a>
       </div>
     </>
