@@ -165,6 +165,7 @@
     "launcherLabel": "Ask us anything",
     "launcherLabelShort": "Ask us",
     "teaser": "Questions about delivery or prices? Ask our assistant.",
-    "teaserDismiss": "Dismiss"
+    "teaserDismiss": "Dismiss",
+    "waLauncherAria": "Message us on WhatsApp"
   }
 }
