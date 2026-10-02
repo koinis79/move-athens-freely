@@ -5,6 +5,9 @@
 -- Last synced: September 6, 2026 (adds Sunday COLLECTION surcharge on rental_end).
 -- Oct 2, 2026: added the 30-day maximum rental length (layer 3 of 3), validated
 --   on rental_end - rental_start rather than the client-supplied p_num_days.
+--   Admins are exempt from the cap (is_admin()) so hand-entered monthly rentals
+--   remain possible; only a REVERSED range is rejected, so same-day manual
+--   bookings keep working.
 
 CREATE OR REPLACE FUNCTION public.create_booking(
   p_booking_number text,
@@ -58,13 +61,26 @@ BEGIN
     RAISE EXCEPTION 'Rental dates are required';
   END IF;
 
-  IF (p_rental_end - p_rental_start) > 30 THEN
+  --    The cap is CUSTOMER-FACING only. Admins are exempt: the product page sends
+  --    long-rental enquiries to WhatsApp for a monthly rate, and Bill then enters
+  --    that booking by hand in the admin panel — which calls this same RPC. A cap
+  --    that blocked the very path the nudge sends people to would make the offer
+  --    impossible to fulfil.
+  --
+  --    Exemption is keyed on is_admin() (profiles.role = 'admin' for auth.uid()),
+  --    NOT on a parameter: a boolean flag in the payload would be forgeable by any
+  --    caller, which is the whole class of bug this function exists to prevent.
+  IF (p_rental_end - p_rental_start) > 30 AND NOT public.is_admin() THEN
     RAISE EXCEPTION 'Rental too long: % days exceeds the 30-day maximum. Contact us on WhatsApp for a monthly rate.',
       (p_rental_end - p_rental_start);
   END IF;
 
-  IF (p_rental_end - p_rental_start) <= 0 THEN
-    RAISE EXCEPTION 'Rental end date must be after the start date';
+  --    Reject only a REVERSED range. A same-day range (span 0) stays permitted:
+  --    manual bookings have created one (MOV-BCE17FBA3D), and rejecting it here
+  --    would break a path that works today. The website cannot produce span 0 —
+  --    BookingPanel requires numDays > 0 — so this is a manual-entry allowance.
+  IF (p_rental_end - p_rental_start) < 0 THEN
+    RAISE EXCEPTION 'Rental end date cannot be before the start date';
   END IF;
 
   -- 1. Compute correct delivery fee (and grab slug) from delivery_zones table
