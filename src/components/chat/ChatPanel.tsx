@@ -57,8 +57,15 @@ const ChatPanel = ({ onClose }: Props) => {
    * button would both announce it as the panel's content and make Enter fire it
    * by accident. The suggestions sit before the input in DOM order, so they are
    * still reachable with Shift+Tab.
+   *
+   * `preventScroll` matters: focusing an element normally scrolls it into view,
+   * which can move the transcript's scroll position as a side effect. The
+   * composer is outside the scrolling transcript so it should not, but the
+   * greeting is a legal disclosure and it is not worth relying on "should not".
    */
-  useEffect(() => { inputRef.current?.focus(); }, []);
+  useEffect(() => {
+    inputRef.current?.focus({ preventScroll: true });
+  }, []);
 
   // Escape closes from anywhere inside the panel.
   useEffect(() => {
@@ -67,9 +74,27 @@ const ChatPanel = ({ onClose }: Props) => {
     return () => window.removeEventListener("keydown", onKey);
   }, [onClose]);
 
-  // Keep the newest message in view as it streams.
+  /**
+   * Keep the newest message in view as it streams — but ONLY once a conversation
+   * exists.
+   *
+   * This effect has `messages` in its deps, so it also fired on mount with an
+   * empty array and scrolled straight to `scrollHeight`. With the greeting plus
+   * the suggestion buttons taller than the transcript viewport, that opened the
+   * panel scrolled past the greeting — which is the AI Act disclosure and has to
+   * be the first thing a visitor sees.
+   *
+   * Empty conversation therefore pins to the TOP, explicitly rather than by
+   * omission, so nothing else that touches scroll can leave it mid-list.
+   */
   useEffect(() => {
-    logRef.current?.scrollTo({ top: logRef.current.scrollHeight });
+    const el = logRef.current;
+    if (!el) return;
+    if (messages.length === 0) {
+      el.scrollTo({ top: 0 });
+      return;
+    }
+    el.scrollTo({ top: el.scrollHeight });
   }, [messages]);
 
   /**
