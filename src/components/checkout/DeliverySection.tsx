@@ -1,4 +1,5 @@
 import { useState, useCallback } from "react";
+import { useTranslation } from "react-i18next";
 import {
   Truck,
   Store,
@@ -54,6 +55,9 @@ export interface DeliveryFormData {
   timeSlot: string;
   whatsappUpdates: boolean;
   specialInstructions: string;
+  /** GDPR Art. 9(2)(a) explicit consent, required only when
+   *  specialInstructions has content. Unticked by default. */
+  healthConsent: boolean;
   // Legacy — kept for compat but unused in new flow
   hotelName: string;
   neighborhood: string;
@@ -96,6 +100,17 @@ export function formatTimeSlot(slot: string | null): string {
   if (!slot || slot === "tbc") return "To be confirmed";
   const found = TIME_SLOTS.find(s => s.id === slot);
   return found?.label ?? slot;
+}
+
+/**
+ * Exported: is the special-requirements consent satisfied?
+ *
+ * Content without a tick blocks submission. An empty field needs no consent, so
+ * it passes. Single source of truth — Checkout imports this rather than
+ * re-deriving the condition and drifting from the UI.
+ */
+export function isHealthConsentSatisfied(data: DeliveryFormData): boolean {
+  return data.specialInstructions.trim().length === 0 || data.healthConsent === true;
 }
 
 /** Exported: single source of truth for delivery surcharge. */
@@ -177,6 +192,13 @@ export function validateDelivery(data: DeliveryFormData): DeliveryErrors {
   if (data.method === "pickup" && !data.pickupLocation) {
     errs.pickupLocation = "Please select a pickup location";
   }
+  // GDPR Art. 9(2)(a): free text in special requirements may contain health
+  // information, so submission is blocked until the consent box is ticked.
+  // Enforced HERE rather than in Checkout so there is one rule, and so any future
+  // caller of validateDelivery inherits it.
+  if (!isHealthConsentSatisfied(data)) {
+    errs.healthConsent = "Please tick the consent box, or clear the special instructions field.";
+  }
   return errs;
 }
 
@@ -191,6 +213,7 @@ const PICKUP_LOCATIONS = [
 /* ── Component ─────────────────────────────────────────────────────────── */
 
 export function DeliverySection({ data, errors, onChange, clearError, deliveryDate, collectionDate, zones, zonesLoading }: Props) {
+  const { t } = useTranslation();
   const [showZoneOverride, setShowZoneOverride] = useState(false);
 
   const set = useCallback(
@@ -463,14 +486,37 @@ export function DeliverySection({ data, errors, onChange, clearError, deliveryDa
       {data.method && (
         <div className="space-y-4 rounded-xl border bg-card p-5">
           <div className="space-y-1.5">
-            <Label htmlFor="specialInstructions">Special Instructions (optional)</Label>
+            <Label htmlFor="specialInstructions">{t("checkout.specialLabel")}</Label>
             <Textarea
               id="specialInstructions"
-              placeholder="Room number, accessibility needs, gate code..."
+              /* Placeholder steers to FUNCTIONAL needs. The old one ("accessibility
+                 needs") invited diagnoses, which is special-category data we would
+                 rather not be handed at all. */
+              placeholder={t("checkout.specialPlaceholder")}
               value={data.specialInstructions}
               onChange={(e) => set("specialInstructions", e.target.value)}
               className="min-h-[60px]"
             />
+
+            {/* Appears only once there is something to consent to, so an empty
+                field never asks for a health consent it does not need. */}
+            {data.specialInstructions.trim().length > 0 && (
+              <label className="mt-2 flex items-start gap-2.5 rounded-lg border border-border bg-muted/30 p-3 text-xs leading-snug text-foreground">
+                <input
+                  type="checkbox"
+                  checked={data.healthConsent}
+                  onChange={(e) => set("healthConsent", e.target.checked)}
+                  className="mt-0.5 h-4 w-4 shrink-0 rounded border-input accent-primary"
+                  aria-describedby="health-consent-text"
+                />
+                <span id="health-consent-text">{t("checkout.healthConsent")}</span>
+              </label>
+            )}
+            {errors.healthConsent && (
+              <p role="alert" className="text-xs font-medium text-destructive">
+                {t("checkout.healthConsentRequired")}
+              </p>
+            )}
           </div>
           <div className="flex items-center justify-between rounded-lg border px-4 py-3">
             <div className="flex items-center gap-2">

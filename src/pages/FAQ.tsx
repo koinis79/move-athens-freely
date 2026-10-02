@@ -17,7 +17,7 @@ const sections = [
     items: [
       {
         q: "What equipment do you offer?",
-        a: "We offer manual wheelchairs, power wheelchairs, mobility scooters, rollators, knee scooters, crutches, and portable ramps. Browse our full range on the Equipment page.",
+        a: "We rent manual, transit and lightweight folding wheelchairs, a foldable power wheelchair, mobility scooters, a rollator walker, a knee walker, and a portable oxygen concentrator. Browse our full range on the Equipment page. Need something else? Message us on WhatsApp and we'll see what we can arrange.",
       },
       {
         q: "How far in advance should I book?",

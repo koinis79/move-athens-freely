@@ -87,7 +87,8 @@
     "rollators": "Rollators",
     "contactTitle": "Contact",
     "privacyPolicy": "Privacy Policy",
-    "termsOfService": "Terms of Service"
+    "termsOfService": "Terms of Service",
+    "cookieSettings": "Cookie settings"
   },
   "equipmentListing": {
     "title": "Mobility Equipment for Rent",
@@ -147,6 +148,43 @@
   },
   "product": {
     "securityDepositNote": "€{{amount}} refundable security deposit — collected at delivery, returned when the equipment is picked up.",
-    "securityDepositShort": "€{{amount}} refundable security deposit (collected at delivery, not included above)"
+    "securityDepositShort": "€{{amount}} refundable security deposit (collected at delivery, not included above)",
+    "maxRentalNudge": "Need longer than 30 days? Message us on WhatsApp for a monthly rate."
+  },
+  "chat": {
+    "notice": "AI-assisted chat. Conversations are stored to improve our service — please don't share medical details.",
+    "launcherAria": "Open chat with our assistant",
+    "panelTitle": "Movability assistant",
+    "close": "Close chat",
+    "placeholder": "Ask about equipment, prices or delivery…",
+    "send": "Send message",
+    "whatsappInPanel": "Talk to a person on WhatsApp",
+    "empty": "Ask us anything about renting mobility equipment in Athens.",
+    "errorMessage": "Something went wrong. Please try again, or message us on WhatsApp.",
+    "limitMessage": "This chat has reached its length limit. Please message us on WhatsApp to continue.",
+    "thinking": "Typing…",
+    "newChat": "Start a new chat",
+    "launcherLabel": "Ask us anything",
+    "launcherLabelShort": "Ask us",
+    "teaser": "Questions about delivery or prices? Ask our assistant.",
+    "teaserDismiss": "Dismiss",
+    "waLauncherAria": "Message us on WhatsApp",
+    "greeting": "Movability AI Assistant — you're chatting with an AI, not a human. I can answer questions about our equipment, prices, delivery and getting around Athens. Try one of these:",
+    "medicalNote": "For medical questions, please ask your doctor.",
+    "suggestionsLabel": "Suggested questions",
+    "s1": "What do you rent?",
+    "s2": "I want to book from … to …",
+    "s2Prefill": "I want to book from ",
+    "s3": "How much is a wheelchair for a week?",
+    "s4": "Can you deliver to my hotel? What does it cost?",
+    "s5": "I hurt my ankle on holiday. What can I get today?",
+    "s6": "Is the Acropolis wheelchair accessible?",
+    "s7": "How does the security deposit work?"
+  },
+  "checkout": {
+    "specialLabel": "Special Instructions (optional)",
+    "specialPlaceholder": "e.g. step-free access, narrow doorways — no diagnosis needed",
+    "healthConsent": "I explicitly consent to KOINIS IKE processing this information solely to arrange and fulfil my rental.",
+    "healthConsentRequired": "Please tick the consent box, or clear the special instructions field."
   }
 }
