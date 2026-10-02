@@ -39,7 +39,12 @@ const MODEL = "claude-sonnet-5";
 const MAX_TOKENS = 1024;           // replies are 2-5 sentences by design
 const MAX_USER_TURNS = 20;         // enforced server-side; never trust the client
 const RATE_LIMIT_WINDOW_MIN = 60;
-const RATE_LIMIT_MAX_CONVERSATIONS = 8;
+// 60/hour, not 8. Customers are in hotels, at the airport and at the cruise
+// terminal, where many guests share one public IP — at 8 a single hotel's guests
+// would exhaust the limit between them and get a 429 that reads as a broken chat.
+// This is abuse protection, not metering: one visitor opening 60 conversations in
+// an hour is not a customer, but 60 guests opening one each is a Tuesday.
+const RATE_LIMIT_MAX_CONVERSATIONS = 60;
 const WHATSAPP_NUMBER = "306974633697";
 const SITE = "https://www.movability.gr";
 
