@@ -167,6 +167,17 @@
     "launcherLabelShort": "Ask us",
     "teaser": "Questions about delivery or prices? Ask our assistant.",
     "teaserDismiss": "Dismiss",
-    "waLauncherAria": "Message us on WhatsApp"
+    "waLauncherAria": "Message us on WhatsApp",
+    "greeting": "Hi! I can answer questions about our equipment, prices, delivery and getting around Athens. Try one of these:",
+    "medicalNote": "For medical questions, please ask your doctor.",
+    "suggestionsLabel": "Suggested questions",
+    "s1": "What do you rent?",
+    "s2": "I want to book from … to …",
+    "s2Prefill": "I want to book from ",
+    "s3": "How much is a wheelchair for a week?",
+    "s4": "Can you deliver to my hotel? What does it cost?",
+    "s5": "I hurt my ankle on holiday. What can I get today?",
+    "s6": "Is the Acropolis wheelchair accessible?",
+    "s7": "How does the security deposit work?"
   }
 }

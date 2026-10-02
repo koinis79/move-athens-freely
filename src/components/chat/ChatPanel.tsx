@@ -21,6 +21,27 @@ interface Props {
  * bug made every page pan sideways at 390px. Nothing here is rendered
  * off-screen; when the panel is closed it is unmounted, not translated away.
  */
+/**
+ * B1 — suggested questions, shown only while the conversation is empty.
+ *
+ * `prefillKey` marks the booking button: it fills the input instead of sending,
+ * because "I want to book from … to …" is not a question — sending it verbatim
+ * would make the bot ask what the ellipses mean.
+ *
+ * `smallScreen` marks the four kept at 320px width. The input must stay visible
+ * with suggestions showing (B4), and seven buttons push it off a 568px-tall
+ * viewport.
+ */
+const SUGGESTIONS: { key: string; prefillKey?: string; smallScreen: boolean }[] = [
+  { key: "chat.s1", smallScreen: true },
+  { key: "chat.s2", prefillKey: "chat.s2Prefill", smallScreen: true },
+  { key: "chat.s3", smallScreen: true },
+  { key: "chat.s4", smallScreen: true },
+  { key: "chat.s5", smallScreen: false },
+  { key: "chat.s6", smallScreen: false },
+  { key: "chat.s7", smallScreen: false },
+];
+
 const ChatPanel = ({ onClose }: Props) => {
   const { t } = useTranslation();
   const { messages, status, send, reset, atLimit } = useChatStream();
@@ -29,7 +50,14 @@ const ChatPanel = ({ onClose }: Props) => {
   const inputRef = useRef<HTMLInputElement>(null);
   const logRef = useRef<HTMLDivElement>(null);
 
-  // Focus the input on open so a keyboard user lands somewhere useful.
+  /**
+   * B4 — focus on open.
+   *
+   * Focus goes to the INPUT, never to a suggestion: auto-focusing the first
+   * button would both announce it as the panel's content and make Enter fire it
+   * by accident. The suggestions sit before the input in DOM order, so they are
+   * still reachable with Shift+Tab.
+   */
   useEffect(() => { inputRef.current?.focus(); }, []);
 
   // Escape closes from anywhere inside the panel.
@@ -43,6 +71,31 @@ const ChatPanel = ({ onClose }: Props) => {
   useEffect(() => {
     logRef.current?.scrollTo({ top: logRef.current.scrollHeight });
   }, [messages]);
+
+  /**
+   * B2 — the booking suggestion fills the input and focuses it with the caret at
+   * the end; every other suggestion sends its text as the visitor's first
+   * message, exactly as if typed.
+   */
+  const handleSuggestion = (index: number) => {
+    const sg = SUGGESTIONS[index];
+    trackEvent("chat_suggestion_click", { index });
+
+    if (sg.prefillKey) {
+      const seed = t(sg.prefillKey);
+      setDraft(seed);
+      // Focus after paint, then drop the caret at the end rather than selecting.
+      requestAnimationFrame(() => {
+        const el = inputRef.current;
+        if (!el) return;
+        el.focus();
+        el.setSelectionRange(seed.length, seed.length);
+      });
+      return;
+    }
+
+    void send(t(sg.key));
+  };
 
   const submit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -99,7 +152,33 @@ const ChatPanel = ({ onClose }: Props) => {
         aria-relevant="additions text"
       >
         {messages.length === 0 && (
-          <p className="text-sm text-muted-foreground">{t("chat.empty")}</p>
+          <div className="space-y-3">
+            {/* B3 — static UI copy. Never sent to the model, never logged, never
+                counted against the turn cap: it is not part of `messages`. */}
+            <p className="text-sm text-foreground">{t("chat.greeting")}</p>
+
+            <div
+              role="group"
+              aria-label={t("chat.suggestionsLabel")}
+              className="flex flex-col gap-1.5"
+            >
+              {SUGGESTIONS.map((sg, i) => (
+                <button
+                  key={sg.key}
+                  type="button"
+                  onClick={() => handleSuggestion(i)}
+                  /* B5 — index, not text, so renaming a question does not
+                     fragment the analytics series. */
+                  data-analytics={`chat-suggestion-${i}`}
+                  className={`min-h-[44px] rounded-xl border border-border bg-background px-3 py-2 text-left text-sm text-foreground transition-colors hover:bg-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring ${
+                    sg.smallScreen ? "" : "max-[360px]:hidden"
+                  }`}
+                >
+                  {t(sg.key)}
+                </button>
+              ))}
+            </div>
+          </div>
         )}
 
         {messages.map((m, i) => (
@@ -157,6 +236,10 @@ const ChatPanel = ({ onClose }: Props) => {
             {t("chat.notice")}
           </p>
         )}
+        {/* B3 — static, always shown, never sent or logged. */}
+        <p className="mb-2 text-[11px] leading-snug text-muted-foreground">
+          {t("chat.medicalNote")}
+        </p>
         <div className="flex items-end gap-2">
           <label htmlFor="chat-input" className="sr-only">
             {t("chat.placeholder")}
