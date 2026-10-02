@@ -52,6 +52,40 @@ function enableGA() {
   document.head.appendChild(s);
 }
 
+/** Event the footer's "Cookie settings" link dispatches to re-open the banner. */
+const REOPEN_EVENT = "cookie-settings:open";
+
+/**
+ * Clears the stored choice and re-shows the banner.
+ *
+ * Exported for the footer link. The privacy policy promises the choice can be
+ * changed at any time, so this is the mechanism that makes that true — GDPR
+ * requires withdrawal to be as easy as granting it.
+ *
+ * A custom event rather than a page reload: reloading purely to show a banner is
+ * jarring, and this component is mounted in Layout on every route anyway.
+ */
+export function openCookieSettings() {
+  try {
+    localStorage.removeItem(CONSENT_KEY);
+  } catch {
+    /* blocked storage — the banner still re-opens for this page view */
+  }
+  window.dispatchEvent(new Event(REOPEN_EVENT));
+}
+
+/**
+ * Stops GA4 sending, for a visitor who accepted earlier in this page view and has
+ * now changed their mind.
+ *
+ * gtag.js cannot be unloaded once injected, so removing the script tag would NOT
+ * stop tracking. `window['ga-disable-<ID>'] = true` is Google's documented opt-out
+ * and is checked at send time, so it takes effect immediately with no reload.
+ */
+function disableGA() {
+  (window as unknown as Record<string, boolean>)[`ga-disable-${GA_ID}`] = true;
+}
+
 const CookieConsent = () => {
   const [visible, setVisible] = useState(false);
 
@@ -66,6 +100,13 @@ const CookieConsent = () => {
     if (consent.accepted) enableGA();
   }, []);
 
+  // Re-open on demand from the footer's "Cookie settings" link.
+  useEffect(() => {
+    const onReopen = () => setVisible(true);
+    window.addEventListener(REOPEN_EVENT, onReopen);
+    return () => window.removeEventListener(REOPEN_EVENT, onReopen);
+  }, []);
+
   const handleAccept = () => {
     setConsent(true);
     enableGA();
@@ -74,6 +115,9 @@ const CookieConsent = () => {
 
   const handleDecline = () => {
     setConsent(false);
+    // Matters when the visitor accepted earlier and is now changing their mind:
+    // gtag.js is already loaded and would keep sending without this.
+    disableGA();
     setVisible(false);
   };
 

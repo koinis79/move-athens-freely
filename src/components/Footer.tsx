@@ -1,5 +1,6 @@
 import { Link } from "react-router-dom";
 import { useTranslation } from "react-i18next";
+import { openCookieSettings } from "@/components/CookieConsent";
 
 const footerFg = "hsl(var(--footer-fg))";
 const footerFg70 = "hsl(var(--footer-fg) / 0.7)";
@@ -131,6 +132,15 @@ const Footer = () => {
           <div className="flex gap-6">
             <Link to="/privacy-policy" className="hover:opacity-100 transition-colors">{t("footer.privacyPolicy")}</Link>
             <Link to="/terms-of-service" className="hover:opacity-100 transition-colors">{t("footer.termsOfService")}</Link>
+            {/* A real <button>, not a link: it performs an action rather than
+                navigating, so it must be announced and behave as a button. */}
+            <button
+              type="button"
+              onClick={openCookieSettings}
+              className="rounded underline-offset-4 transition-colors hover:underline hover:opacity-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+            >
+              {t("footer.cookieSettings")}
+            </button>
           </div>
         </div>
       </div>
