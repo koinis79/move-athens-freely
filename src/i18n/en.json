@@ -168,7 +168,7 @@
     "teaser": "Questions about delivery or prices? Ask our assistant.",
     "teaserDismiss": "Dismiss",
     "waLauncherAria": "Message us on WhatsApp",
-    "greeting": "Hi! I can answer questions about our equipment, prices, delivery and getting around Athens. Try one of these:",
+    "greeting": "Movability AI Assistant — you're chatting with an AI, not a human. I can answer questions about our equipment, prices, delivery and getting around Athens. Try one of these:",
     "medicalNote": "For medical questions, please ask your doctor.",
     "suggestionsLabel": "Suggested questions",
     "s1": "What do you rent?",
@@ -179,5 +179,11 @@
     "s5": "I hurt my ankle on holiday. What can I get today?",
     "s6": "Is the Acropolis wheelchair accessible?",
     "s7": "How does the security deposit work?"
+  },
+  "checkout": {
+    "specialLabel": "Special Instructions (optional)",
+    "specialPlaceholder": "e.g. step-free access, narrow doorways — no diagnosis needed",
+    "healthConsent": "I explicitly consent to KOINIS IKE processing this information solely to arrange and fulfil my rental.",
+    "healthConsentRequired": "Please tick the consent box, or clear the special instructions field."
   }
 }

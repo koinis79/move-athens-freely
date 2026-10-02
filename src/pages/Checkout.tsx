@@ -47,6 +47,7 @@ const INITIAL_DELIVERY: DeliveryFormData = {
   timeSlot: "daytime",
   whatsappUpdates: true,
   specialInstructions: "",
+  healthConsent: false,
   // Legacy compat
   hotelName: "",
   neighborhood: "",
@@ -319,6 +320,31 @@ const Checkout = () => {
         throw new Error(
           `Booking created but no booking_number returned. Raw: ${JSON.stringify(data)}`
         );
+      }
+
+      /**
+       * Record the Art. 9(2)(a) consent against the booking.
+       *
+       * Written as an UPDATE after create_booking rather than as new RPC
+       * parameters, deliberately: changing the signature of the price-validating
+       * booking RPC to carry a consent flag is risk with no benefit, and the
+       * anonymous-insert path has no business writing to that function's contract.
+       * The booking exists either way; only the consent record would be missing if
+       * this failed, which is why it does not throw and block the payment.
+       *
+       * NULL stays NULL when no text was entered — no text, no consent needed.
+       */
+      if (delivery.specialInstructions.trim().length > 0) {
+        // Via RPC, not a direct UPDATE: the bookings UPDATE policy is
+        // (auth.uid() = user_id AND status = 'pending'), and a guest booking has
+        // user_id NULL — so a direct write is silently dropped by RLS for exactly
+        // the customers who most often use this field.
+        const { error: consentErr } = await supabase.rpc("record_health_consent", {
+          p_booking_number: bookingNumber,
+        });
+        if (consentErr) {
+          console.error("Failed to record health consent:", consentErr.message);
+        }
       }
 
       const {

@@ -120,8 +120,10 @@ Deno.serve(async (req: Request) => {
   <hr style="border: none; border-top: 1px solid #eee; margin: 32px 0;">
   <p style="font-size: 12px; color: #999; text-align: center;">
     Movability by Koinis Healthcare Group · Athens, Greece<br>
-    <a href="https://movability.gr" style="color: #00838F;">movability.gr</a> ·
-    <a href="mailto:info@movability.gr" style="color: #00838F;">info@movability.gr</a>
+    <a href="https://www.movability.gr" style="color: #00838F;">movability.gr</a> ·
+    <a href="mailto:info@movability.gr" style="color: #00838F;">info@movability.gr</a><br>
+    Don't want these emails?
+    <a href="mailto:info@movability.gr?subject=Unsubscribe%20${booking.booking_number}" style="color: #00838F;">Opt out</a>
   </p>
 </body>
 </html>`;

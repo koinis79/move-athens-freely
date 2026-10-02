@@ -1,14 +1,12 @@
 <!doctype html>
 <html lang="en">
   <head>
-    <!-- Google Analytics 4 -->
-    <script async src="https://www.googletagmanager.com/gtag/js?id=G-8RD4VHF74X"></script>
-    <script>
-      window.dataLayer = window.dataLayer || [];
-      function gtag(){dataLayer.push(arguments);}
-      gtag('js', new Date());
-      gtag('config', 'G-8RD4VHF74X');
-    </script>
+    <!-- Google Analytics 4 is NOT loaded here.
+         It loaded unconditionally from this file until Oct 2 2026, which made the
+         cookie banner cosmetic: gtag.js was already running before anyone clicked
+         anything, and Decline changed nothing. GA is now injected by
+         src/components/CookieConsent.tsx only after consent is given. Do not add a
+         tag back here. -->
 
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
