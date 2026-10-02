@@ -1,6 +1,6 @@
 import { useState, useEffect, useMemo, useRef } from "react";
 import { Link, useNavigate, useSearchParams } from "react-router-dom";
-import { format, differenceInDays } from "date-fns";
+import { format, differenceInDays, addDays } from "date-fns";
 import type { DateRange } from "react-day-picker";
 import { ArrowRight, CalendarIcon, Minus, Plus, ShieldCheck, ShoppingCart } from "lucide-react";
 import { cn } from "@/lib/utils";
@@ -52,7 +52,13 @@ const TIER_LABELS = [
  * this cap makes the PREFILL stricter than manual selection on purpose: a link is
  * attacker-controllable input, a calendar click is not.
  */
-const MAX_PREFILL_DAYS = 30;
+const MAX_RENTAL_DAYS = 30;
+
+const WHATSAPP_MONTHLY_URL =
+  "https://wa.me/306974633697?text=Hi!%20I%27d%20like%20a%20monthly%20rate%20for%20a%20rental%20longer%20than%2030%20days.";
+
+/** The link path reuses the same ceiling — one number, three layers. */
+const MAX_PREFILL_DAYS = MAX_RENTAL_DAYS;
 
 /**
  * Parse a strict YYYY-MM-DD string into a LOCAL-midnight Date, or null.
@@ -150,6 +156,9 @@ const BookingPanel = ({ item }: Props) => {
     return getPriceForDays(item, numDays) * qty;
   }, [numDays, qty, item]);
 
+  /** True once the picked span hits the ceiling; drives the WhatsApp nudge. */
+  const atMaxRental = numDays >= MAX_RENTAL_DAYS;
+
   const selectedZone = zones.find((z) => z.id === zoneId);
   const deliveryFee = selectedZone?.delivery_fee ?? 0;
   const total = subtotal + deliveryFee;
@@ -166,6 +175,9 @@ const BookingPanel = ({ item }: Props) => {
 
   const handleAddToCart = () => {
     if (!startDate || !endDate || numDays === 0) return;
+    // Layer 2 of 3. The calendar should make this unreachable, but a guard that
+    // depends on another layer being correct is not a guard.
+    if (numDays > MAX_RENTAL_DAYS) return;
 
     // Nudge user to select zone, but don't block
     if (!zoneId) {
@@ -224,6 +236,10 @@ const BookingPanel = ({ item }: Props) => {
 
   const handleRentNow = () => {
     if (!startDate || !endDate || numDays === 0) {
+      datePickerRef.current?.scrollIntoView({ behavior: "smooth", block: "center" });
+      return;
+    }
+    if (numDays > MAX_RENTAL_DAYS) {
       datePickerRef.current?.scrollIntoView({ behavior: "smooth", block: "center" });
       return;
     }
@@ -368,13 +384,40 @@ const BookingPanel = ({ item }: Props) => {
                   setDateRange(range);
                   if (range?.from && range?.to) setCalOpen(false);
                 }}
-                disabled={(d) => d < today}
+                disabled={(d) => {
+                  if (d < today) return true;
+                  // Layer 1 of 3: while the end date is being picked, nothing
+                  // beyond start + MAX_RENTAL_DAYS is selectable. Only applied
+                  // mid-range — once both ends are set, a fresh click starts a
+                  // new range and must not be constrained by the old start.
+                  if (dateRange?.from && !dateRange?.to) {
+                    return d > addDays(dateRange.from, MAX_RENTAL_DAYS);
+                  }
+                  return false;
+                }}
                 numberOfMonths={1}
                 initialFocus
                 className="p-3 pointer-events-auto max-w-[calc(100vw-2rem)]"
               />
             </PopoverContent>
           </Popover>
+
+          {/* Shown the moment the ceiling is reached, so the limit reads as an
+              offer to help rather than a dead end. */}
+          {atMaxRental && (
+            <p className="text-xs leading-snug text-muted-foreground">
+              {t("product.maxRentalNudge")}{" "}
+              <a
+                href={WHATSAPP_MONTHLY_URL}
+                target="_blank"
+                rel="noopener noreferrer"
+                onClick={() => trackEvent("max_rental_whatsapp_click")}
+                className="font-medium text-primary underline underline-offset-2"
+              >
+                WhatsApp
+              </a>
+            </p>
+          )}
         </div>
 
         {/* Quantity */}

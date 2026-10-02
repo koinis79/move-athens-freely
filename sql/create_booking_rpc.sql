@@ -3,6 +3,8 @@
 -- applied via SQL Editor, NOT migrations. If you change the RPC in
 -- Supabase, update this file in the same commit.
 -- Last synced: September 6, 2026 (adds Sunday COLLECTION surcharge on rental_end).
+-- Oct 2, 2026: added the 30-day maximum rental length (layer 3 of 3), validated
+--   on rental_end - rental_start rather than the client-supplied p_num_days.
 
 CREATE OR REPLACE FUNCTION public.create_booking(
   p_booking_number text,
@@ -45,6 +47,26 @@ DECLARE
   v_collection_surcharge NUMERIC := 0;
   v_dow              INTEGER;
 BEGIN
+  -- 0. Maximum rental length. Layer 3 of 3 (calendar + add-to-cart guard are
+  --    layers 1 and 2 in BookingPanel.tsx).
+  --
+  --    Validated on the DATES, not on p_num_days: p_num_days is client-supplied,
+  --    so checking it would let a caller send num_days=3 alongside a 90-day date
+  --    range and slip past the cap. rental_end - rental_start is the only
+  --    authoritative span the server has.
+  IF p_rental_start IS NULL OR p_rental_end IS NULL THEN
+    RAISE EXCEPTION 'Rental dates are required';
+  END IF;
+
+  IF (p_rental_end - p_rental_start) > 30 THEN
+    RAISE EXCEPTION 'Rental too long: % days exceeds the 30-day maximum. Contact us on WhatsApp for a monthly rate.',
+      (p_rental_end - p_rental_start);
+  END IF;
+
+  IF (p_rental_end - p_rental_start) <= 0 THEN
+    RAISE EXCEPTION 'Rental end date must be after the start date';
+  END IF;
+
   -- 1. Compute correct delivery fee (and grab slug) from delivery_zones table
   IF p_delivery_zone_id IS NOT NULL THEN
     SELECT dz.delivery_fee, dz.slug INTO v_delivery_fee, v_zone_slug

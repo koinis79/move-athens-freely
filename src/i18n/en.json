@@ -147,7 +147,8 @@
   },
   "product": {
     "securityDepositNote": "€{{amount}} refundable security deposit — collected at delivery, returned when the equipment is picked up.",
-    "securityDepositShort": "€{{amount}} refundable security deposit (collected at delivery, not included above)"
+    "securityDepositShort": "€{{amount}} refundable security deposit (collected at delivery, not included above)",
+    "maxRentalNudge": "Need longer than 30 days? Message us on WhatsApp for a monthly rate."
   },
   "chat": {
     "notice": "AI-assisted chat. Conversations are stored to improve our service — please don't share medical details.",
