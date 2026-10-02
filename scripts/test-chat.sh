@@ -34,27 +34,13 @@ print(json.dumps({"session_id": sess, "language": lang,
                   "messages": [{"role": "user", "content": msg}]}))
 PY
 )
-  curl -s -X POST "$FN_URL" \
+  # -w appends the HTTP status so a non-SSE error (429, 401, 500) is visible
+  # instead of silently rendering as "no text returned" — which is exactly how a
+  # rate-limit block first looked like a broken function.
+  curl -s -w $'\n__HTTP_STATUS__%{http_code}' -X POST "$FN_URL" \
     -H "Content-Type: application/json" -H "apikey: $KEY" -H "Authorization: Bearer $KEY" \
     --max-time 90 -d "$body" \
-  | python3 - <<'PY'
-import sys, json
-text, usage = [], None
-for line in sys.stdin:
-    line = line.strip()
-    if not line.startswith("data:"): continue
-    try: d = json.loads(line[5:])
-    except Exception: continue
-    if "text" in d: text.append(d["text"])
-    if "usage" in d: usage = d["usage"]
-    if d.get("error"): print(f"[ERROR event: {d['error']}]")
-print("".join(text) or "[no text returned]")
-if usage:
-    print(f"\n   [usage] in={usage.get('input_tokens')} "
-          f"cache_read={usage.get('cache_read_input_tokens')} "
-          f"cache_write={usage.get('cache_creation_input_tokens')} "
-          f"out={usage.get('output_tokens')}")
-PY
+  | python3 "$(dirname "$0")/_chat_parse.py"
 }
 
 echo "════════════════════════════════════════════════════════"
