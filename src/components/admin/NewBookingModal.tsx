@@ -23,6 +23,7 @@ import {
 import { Calendar } from "@/components/ui/calendar";
 import { cn } from "@/lib/utils";
 import { toast } from "@/hooks/use-toast";
+import { normalizePhone, PHONE_ERROR } from "@/lib/phone";
 import { supabase } from "@/integrations/supabase/client";
 
 /* ── Static helpers ─────────────────────────────────────── */
@@ -148,7 +149,8 @@ const NewBookingModal = ({ open, onOpenChange, defaultDate }: Props) => {
   const tierLabel = duration <= 3 ? "1–3 days" : duration <= 7 ? "4–7 days" : duration <= 14 ? "8–14 days" : "15–30 days";
 
   // Validation
-  const step1Valid = !!(customerName.trim() && customerEmail.trim());
+  const phoneInvalid = customerPhone.trim() !== "" && normalizePhone(customerPhone) === null;
+  const step1Valid = !!(customerName.trim() && customerEmail.trim()) && !phoneInvalid;
   const step2Valid = !!selectedEquipment && !!deliveryZoneId && startDate < endDate;
   const canProceed = (s: number) => {
     if (s === 1) return step1Valid;
@@ -208,7 +210,7 @@ const NewBookingModal = ({ open, onOpenChange, defaultDate }: Props) => {
         p_user_id: null,
         p_customer_name: customerName.trim(),
         p_customer_email: customerEmail.trim(),
-        p_customer_phone: customerPhone.trim() || null,
+        p_customer_phone: normalizePhone(customerPhone),
         p_delivery_zone_id: deliveryZoneId,
         p_delivery_address: deliveryAddress.trim() || null,
         p_delivery_time_slot: deliveryTime,
@@ -409,6 +411,9 @@ const NewBookingModal = ({ open, onOpenChange, defaultDate }: Props) => {
                     value={customerPhone}
                     onChange={(e) => setCustomerPhone(e.target.value)}
                   />
+                  {phoneInvalid && (
+                    <p className="text-xs text-destructive">{PHONE_ERROR}</p>
+                  )}
                 </div>
               </div>
             </div>

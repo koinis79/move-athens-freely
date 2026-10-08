@@ -3,7 +3,7 @@ import { useTranslation } from "react-i18next";
 import { useNavigate, Link } from "react-router-dom";
 import { cn } from "@/lib/utils";
 import { format, differenceInDays } from "date-fns";
-import { ChevronDown, CreditCard, Loader2, ShieldCheck, Wallet } from "lucide-react";
+import { CreditCard, Loader2, ShieldCheck, Wallet } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -12,6 +12,7 @@ import { useAuth } from "@/context/AuthContext";
 import { useDeliveryZones } from "@/hooks/useDeliveryZones";
 import { supabase } from "@/integrations/supabase/client";
 import { getPriceForDays } from "@/data/equipment";
+import { normalizePhone, PHONE_ERROR } from "@/lib/phone";
 import DeliverySection, {
   getDeliveryFee,
   getDeliveryZoneFee,
@@ -58,18 +59,6 @@ const INITIAL_DELIVERY: DeliveryFormData = {
   preferredDate: undefined,
 };
 
-const COUNTRY_CODES = [
-  { flag: "🇬🇷", code: "+30",  label: "GR" },
-  { flag: "🇬🇧", code: "+44",  label: "UK" },
-  { flag: "🇺🇸", code: "+1",   label: "US" },
-  { flag: "🇩🇪", code: "+49",  label: "DE" },
-  { flag: "🇫🇷", code: "+33",  label: "FR" },
-  { flag: "🇮🇹", code: "+39",  label: "IT" },
-  { flag: "🇳🇱", code: "+31",  label: "NL" },
-  { flag: "🇪🇸", code: "+34",  label: "ES" },
-  { flag: "🇦🇺", code: "+61",  label: "AU" },
-  { flag: "🇨🇦", code: "+1",   label: "CA" },
-];
 
 
 const Checkout = () => {
@@ -81,9 +70,6 @@ const Checkout = () => {
 
   const [submitting, setSubmitting] = useState(false);
   const [submitError, setSubmitError] = useState<string | null>(null);
-
-  // Country code state — Greece default
-  const [countryCode, setCountryCode] = useState("+30");
 
   // Customer info
   const [customer, setCustomer] = useState<CustomerForm>({
@@ -210,6 +196,7 @@ const Checkout = () => {
     if (!customer.email.trim() || !/\S+@\S+\.\S+/.test(customer.email))
       cErr.email = "Valid email is required";
     if (!customer.phone.trim()) cErr.phone = "Phone number is required";
+    else if (!normalizePhone(customer.phone)) cErr.phone = PHONE_ERROR;
     if (!customer.agreeTerms) cErr.agreeTerms = "You must agree to the terms";
 
     const dErr: DeliveryErrors = validateDelivery(delivery);
@@ -227,8 +214,8 @@ const Checkout = () => {
     setSubmitting(true);
     setSubmitError(null);
 
-    // Combine country code + local number
-    const fullPhone = `${countryCode} ${customer.phone.trim()}`;
+    // validate() guarantees this parses
+    const fullPhone = normalizePhone(customer.phone)!;
 
     try {
       const itemsPayload = lineItems.map((line) => ({
@@ -447,33 +434,19 @@ const Checkout = () => {
                 {/* Phone with country code */}
                 <div className="space-y-1.5 sm:col-span-2">
                   <Label htmlFor="phone">Phone Number *</Label>
-                  <div className={`flex rounded-md border bg-background focus-within:ring-2 focus-within:ring-ring focus-within:ring-offset-0 ${customerErrors.phone ? "border-destructive" : "border-input"}`}>
-                    {/* Country code selector */}
-                    <div className="relative flex shrink-0 items-center">
-                      <select
-                        value={countryCode}
-                        onChange={(e) => setCountryCode(e.target.value)}
-                        aria-label="Country code"
-                        className="h-10 appearance-none bg-transparent pl-3 pr-7 text-sm font-medium text-foreground focus:outline-none cursor-pointer border-r border-input"
-                      >
-                        {COUNTRY_CODES.map(({ flag, code, label }) => (
-                          <option key={`${label}-${code}`} value={code}>
-                            {flag} {code} ({label})
-                          </option>
-                        ))}
-                      </select>
-                      <ChevronDown className="pointer-events-none absolute right-1.5 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-muted-foreground" />
-                    </div>
-                    {/* Phone number input */}
-                    <input
-                      id="phone"
-                      type="tel"
-                      placeholder="Phone number"
-                      value={customer.phone}
-                      onChange={(e) => setC("phone", e.target.value)}
-                      className="h-10 flex-1 bg-transparent px-3 text-sm focus:outline-none placeholder:text-muted-foreground"
-                    />
-                  </div>
+                  <Input
+                    id="phone"
+                    type="tel"
+                    inputMode="tel"
+                    autoComplete="tel"
+                    placeholder="+44 7700 900123"
+                    value={customer.phone}
+                    onChange={(e) => setC("phone", e.target.value)}
+                    className={customerErrors.phone ? "border-destructive" : ""}
+                  />
+                  <p className="text-xs text-muted-foreground">
+                    Include your country code (+30 Greece, +44 UK, +81 Japan…)
+                  </p>
                   {customerErrors.phone && (
                     <p className="text-xs text-destructive">
                       {customerErrors.phone}
