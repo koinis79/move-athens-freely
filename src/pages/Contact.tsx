@@ -2,6 +2,7 @@ import SEOHead from "@/components/SEOHead";
 import { useState } from "react";
 import { Link } from "react-router-dom";
 import { z } from "zod";
+import { normalizePhone, PHONE_ERROR } from "@/lib/phone";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Button } from "@/components/ui/button";
@@ -58,9 +59,8 @@ const contactSchema = z.object({
   phone: z
     .string()
     .trim()
-    .max(30, "Phone number is too long")
-    .optional()
-    .or(z.literal("")),
+    .refine((v) => v === "" || normalizePhone(v) !== null, PHONE_ERROR)
+    .optional(),
   subject: z.string().min(1, "Please select a subject"),
   message: z
     .string()
@@ -142,7 +142,7 @@ const Contact = () => {
     // Capture trimmed values for the notification call below
     const name = data.fullName.trim();
     const email = data.email.trim();
-    const phone = data.phone?.trim() || null;
+    const phone = data.phone ? normalizePhone(data.phone) : null;
     const subject = data.subject;
     const message = data.message.trim();
 
@@ -267,7 +267,7 @@ const Contact = () => {
                           <FormControl>
                             <Input
                               type="tel"
-                              placeholder="+30 210 ..."
+                              placeholder="+44 7700 900123"
                               {...field}
                             />
                           </FormControl>
