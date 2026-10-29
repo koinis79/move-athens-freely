@@ -224,6 +224,11 @@ const Checkout = () => {
         price_per_day: line.equipment.priceTier1,
         num_days: line.days,
         subtotal: line.subtotal,
+        // Per-item dates: create_booking will price each item from these
+        // instead of the client's num_days (rental_start/rental_end are the
+        // min/max envelope across items, so they cannot price a mixed cart).
+        start_date: format(line.startDate, "yyyy-MM-dd"),
+        end_date: format(line.endDate, "yyyy-MM-dd"),
       }));
 
       const availabilityPayload: {

@@ -191,6 +191,9 @@ const NewBookingModal = ({ open, onOpenChange, defaultDate }: Props) => {
           num_days: numDays,
           price_per_day: unitPrice,
           subtotal: subtotal,
+          // Per-item dates — create_booking prices from these (see Checkout.tsx).
+          start_date: format(startDate, "yyyy-MM-dd"),
+          end_date: format(endDate, "yyyy-MM-dd"),
         },
       ];
 
