@@ -24,13 +24,11 @@ Deno.serve(async (req) => {
     // Anything else (including missing) is treated as full payment.
     const isDeposit = payment_type === "deposit";
 
-    // Service role client — bypasses RLS
     const supabase = createClient(
       Deno.env.get("SUPABASE_URL")!,
       Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!,
     );
 
-    // Fetch booking with items — also verify customer_email matches
     const { data: booking, error: bookingErr } = await supabase
       .from("bookings")
       .select(`
@@ -41,6 +39,7 @@ Deno.serve(async (req) => {
         subtotal,
         delivery_fee,
         total_amount,
+        deposit_amount,
         payment_status,
         booking_items (
           quantity,
@@ -53,7 +52,6 @@ Deno.serve(async (req) => {
       .eq("customer_email", customer_email)
       .single();
 
-    // Normalize error responses — don't reveal whether booking exists or is already paid
     if (bookingErr || !booking || booking.payment_status === "paid") {
       return new Response(JSON.stringify({ error: "Unable to process this booking" }), {
         status: 400,
@@ -65,11 +63,12 @@ Deno.serve(async (req) => {
       apiVersion: "2024-06-20",
     });
 
-    // Amounts. total_amount is the SERVER-computed full total (subtotal +
-    // delivery + surcharge). The 30% deposit uses the SAME Math.ceil rounding
-    // the frontend shows, so the button amount and the Stripe charge match.
     const fullTotal = Number(booking.total_amount);
-    const depositAmount = Math.ceil(fullTotal * 0.30);
+    const downPayment = Math.ceil(fullTotal * 0.30);
+    // Refundable SECURITY deposit (separate from the 30% down-payment).
+    // It is NOT charged here: the card is saved and a hold (authorization,
+    // not a charge) is placed the day before delivery by the deposit-holds job.
+    const securityDeposit = Number(booking.deposit_amount ?? 0);
 
     type BookingItem = {
       quantity: number;
@@ -80,9 +79,7 @@ Deno.serve(async (req) => {
 
     let lineItems: Stripe.Checkout.SessionCreateParams.LineItem[];
     if (isDeposit) {
-      // Single line item for the 30% down-payment. The 70% balance is collected
-      // in person on delivery, so it is NOT part of this Stripe charge.
-      const balance = fullTotal - depositAmount;
+      const balance = fullTotal - downPayment;
       lineItems = [{
         price_data: {
           currency: "eur",
@@ -90,12 +87,11 @@ Deno.serve(async (req) => {
             name: `30% Deposit — booking ${booking.booking_number}`,
             description: `€${balance} balance due in person on delivery (booking total €${fullTotal}).`,
           },
-          unit_amount: depositAmount * 100,
+          unit_amount: downPayment * 100,
         },
         quantity: 1,
       }];
     } else {
-      // Full payment — one line item per equipment type, plus delivery.
       lineItems = (booking.booking_items as BookingItem[]).map((item) => ({
         price_data: {
           currency: "eur",
@@ -121,23 +117,35 @@ Deno.serve(async (req) => {
 
     const origin = req.headers.get("origin") ?? "https://lmgpuqgwkiapgpdsxvmb.lovableproject.com";
 
-    const session = await stripe.checkout.sessions.create({
+    const sessionParams: Stripe.Checkout.SessionCreateParams = {
       mode: "payment",
       payment_method_types: ["card"],
       customer_email: booking.customer_email,
+      customer_creation: "always",
       line_items: lineItems,
       metadata: {
         booking_number: booking.booking_number,
         booking_id: booking.id,
-        // The webhook records paid/due from these — keep them authoritative.
         payment_type: isDeposit ? "deposit" : "full",
         full_total: String(fullTotal),
+        security_deposit: String(securityDeposit),
       },
       success_url: `${origin}/booking/confirmation/${booking.booking_number}?paid=1`,
       cancel_url: `${origin}/cart`,
-    });
+    };
 
-    // Save session ID + chosen payment type to the booking row.
+    if (securityDeposit > 0) {
+      // Save the card so the security-deposit hold can be placed later.
+      sessionParams.payment_intent_data = { setup_future_usage: "off_session" };
+      sessionParams.custom_text = {
+        submit: {
+          message: `A refundable security deposit of €${securityDeposit} will be held (not charged) on this card the day before delivery and released after the equipment is returned in good condition.`,
+        },
+      };
+    }
+
+    const session = await stripe.checkout.sessions.create(sessionParams);
+
     await supabase
       .from("bookings")
       .update({ stripe_session_id: session.id, payment_type: isDeposit ? "deposit" : "full" })
