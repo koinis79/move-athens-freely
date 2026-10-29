@@ -12,7 +12,7 @@ const AdminLayout = () => {
 
   const handleOpenCommand = useCallback(() => setCommandOpen(true), []);
 
-  // Keyboard shortcuts: D=dashboard, B=bookings, I=inventory, C=calendar, U=customers, A=analytics
+  // Keyboard shortcuts: D=dashboard, B=bookings, I=inventory, C=calendar, U=customers, A=analytics, H=chats
   const navigate = useNavigate();
   useEffect(() => {
     const shortcuts: Record<string, string> = {
@@ -22,6 +22,7 @@ const AdminLayout = () => {
       c: "/admin/calendar",
       u: "/admin/customers",
       a: "/admin/analytics",
+      h: "/admin/chats",
     };
     const handler = (e: KeyboardEvent) => {
       // Ignore if typing in an input/textarea or a modifier key is held

@@ -266,6 +266,66 @@ export type Database = {
           },
         ]
       }
+      chat_conversations: {
+        Row: {
+          admin_notes: string | null
+          cache_read_tokens: number | null
+          created_at: string
+          handoff_target: string | null
+          handoff_type: string | null
+          id: string
+          input_tokens: number | null
+          ip_hash: string | null
+          is_read: boolean
+          language: string
+          messages: Json
+          model: string | null
+          output_tokens: number | null
+          session_id: string
+          turn_count: number
+          updated_at: string
+          user_agent: string | null
+        }
+        Insert: {
+          admin_notes?: string | null
+          cache_read_tokens?: number | null
+          created_at?: string
+          handoff_target?: string | null
+          handoff_type?: string | null
+          id?: string
+          input_tokens?: number | null
+          ip_hash?: string | null
+          is_read?: boolean
+          language?: string
+          messages?: Json
+          model?: string | null
+          output_tokens?: number | null
+          session_id: string
+          turn_count?: number
+          updated_at?: string
+          user_agent?: string | null
+        }
+        Update: {
+          admin_notes?: string | null
+          cache_read_tokens?: number | null
+          created_at?: string
+          handoff_target?: string | null
+          handoff_type?: string | null
+          id?: string
+          input_tokens?: number | null
+          ip_hash?: string | null
+          is_read?: boolean
+          language?: string
+          messages?: Json
+          model?: string | null
+          output_tokens?: number | null
+          session_id?: string
+          turn_count?: number
+          updated_at?: string
+          user_agent?: string | null
+        }
+        Relationships: []
+      }
       contact_inquiries: {
         Row: {
           admin_notes: string | null

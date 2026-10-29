@@ -35,6 +35,7 @@ import AdminCalendarPage from "./pages/admin/AdminCalendarPage";
 import AdminCustomersPage from "./pages/admin/AdminCustomersPage";
 import AdminAnalyticsPage from "./pages/admin/AdminAnalyticsPage";
 import BookingsNew from "./pages/admin/BookingsNew";
+import AdminChatsPage from "./pages/admin/AdminChatsPage";
 import Blog from "./pages/Blog";
 import BlogPost from "./pages/BlogPost";
 import Partners from "./pages/Partners";
@@ -91,6 +92,7 @@ const App = () => (
                 <Route path="/admin/calendar" element={<AdminCalendarPage />} />
                 <Route path="/admin/customers" element={<AdminCustomersPage />} />
                 <Route path="/admin/analytics" element={<AdminAnalyticsPage />} />
+                <Route path="/admin/chats" element={<AdminChatsPage />} />
               </Route>
 
               <Route path="*" element={<NotFound />} />

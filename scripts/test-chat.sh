@@ -73,6 +73,20 @@ if [ "$LANG_CODE" = "en" ]; then
   ask "links the Acropolis guide; does NOT state the entrance or lift location" \
       "Is the Acropolis wheelchair accessible?"
   ask "deposit vs 30% down payment kept separate" "How does the security deposit work?"
+  # fix/chatbot-review — failures seen in the first 3 weeks of real transcripts.
+  # Dates assume the suite runs between Oct 2026 and Dec 2026.
+  ask "6 days (NOT 7), SECOND tier, link ?start=2026-12-29&end=2027-01-04; no Sunday mention (29 Dec Tue, 4 Jan Mon)" \
+      "Transit wheelchair from 29 December to 4 January"
+  ask "7 days, SECOND tier; 1 and 8 Nov are BOTH Sundays, so a Sunday service fee mention is correct" \
+      "Foldable travel scooter 1 to 8 November"
+  ask "must NOT claim it fits a taxi/trunk or give a weight (no such spec); says it doesn't have that detail + WhatsApp" \
+      "Does the transit wheelchair fit in a taxi?"
+  ask "must NOT say it is lighter (transit has no weight spec); may state Lightweight Folding is 9 kg" \
+      "Is the transit wheelchair lighter than the lightweight folding one?"
+  ask "collection 15 Nov IS a Sunday: mentions the Sunday collection fee, no amount" \
+      "Knee walker from 10 to 15 November, delivered to my hotel in Athens"
+  ask "14 Nov is a Saturday: NO Sunday mention at all" \
+      "Knee walker from 10 to 14 November, delivered to my hotel in Athens"
 else
   ask "3 ημέρες, πρώτη κλίμακα, σωστή χρονιά στο link" \
       "Πτυσσόμενο scooter ταξιδίου από 5 έως 8 Οκτωβρίου, πόσο κοστίζει;"
@@ -92,9 +106,9 @@ echo
 echo "════════════════════════════════════════════════════════"
 echo " A2 cache check — two IDENTICAL requests back to back."
 echo " Expect: 1st writes the cache, 2nd reads it (cache_read > 0)."
-echo " A zero on the second run means the date block is invalidating"
-echo " the prefix — it must sit after the last breakpoint with no"
-echo " cache_control of its own."
+echo " A zero on the second run means the date/Sundays block is"
+echo " invalidating the prefix — it must sit after the last breakpoint"
+echo " with no cache_control of its own."
 echo "════════════════════════════════════════════════════════"
 ask "cache WRITE on this first call" "What do you rent?"
 ask "cache READ > 0 on this second, identical call" "What do you rent?"
