@@ -1,13 +1,21 @@
 -- Source-controlled copy of the create_booking RPC.
--- The live version runs in Supabase (project lmgpuqgwkiapgpdsxvmb) and is
--- applied via SQL Editor, NOT migrations. If you change the RPC in
--- Supabase, update this file in the same commit.
+-- The live version runs in Supabase (project lmgpuqgwkiapgpdsxvmb). If you
+-- change the RPC in Supabase, update this file AND add a migration in the same
+-- commit. Check pg_get_functiondef against this file before every change: on
+-- 14 Oct 2026 two DB-only migrations rewrote it from an old base and silently
+-- dropped the Sunday collection surcharge and the 30-day cap.
 -- Last synced: September 6, 2026 (adds Sunday COLLECTION surcharge on rental_end).
 -- Oct 2, 2026: added the 30-day maximum rental length (layer 3 of 3), validated
 --   on rental_end - rental_start rather than the client-supplied p_num_days.
 --   Admins are exempt from the cap (is_admin()) so hand-entered monthly rentals
 --   remain possible; only a REVERSED range is rejected, so same-day manual
 --   bookings keep working.
+-- Oct 29, 2026: MERGED with the two DB-only migrations of 14 Oct 2026
+--   (customer_blacklist, security_deposit_hold_columns), which had rewritten
+--   this function from the pre-September base. Restores 1c (Sunday collection
+--   surcharge) and step 0 (30-day cap + is_admin() exemption); keeps their
+--   is_blacklisted() check and the deposit_amount total. Migration:
+--   supabase/migrations/20261029000000_merge_create_booking.sql
 
 CREATE OR REPLACE FUNCTION public.create_booking(
   p_booking_number text,
@@ -41,6 +49,8 @@ DECLARE
   v_computed_subtotal NUMERIC := 0;
   v_computed_total    NUMERIC;
   v_eq_price         NUMERIC;
+  v_eq_deposit       NUMERIC;
+  v_deposit_total    NUMERIC := 0;
   v_item_subtotal    NUMERIC;
   v_item_qty         INTEGER;
   v_item_days        INTEGER;
@@ -50,6 +60,12 @@ DECLARE
   v_collection_surcharge NUMERIC := 0;
   v_dow              INTEGER;
 BEGIN
+  -- 0a. Blacklist (customer_blacklist, via is_blacklisted()). Neutral message:
+  --     nothing about the reason or the match is leaked to the caller.
+  IF public.is_blacklisted(p_customer_email, p_customer_phone) THEN
+    RAISE EXCEPTION 'This booking cannot be completed online. Please contact us at info@movability.gr.';
+  END IF;
+
   -- 0. Maximum rental length. Layer 3 of 3 (calendar + add-to-cart guard are
   --    layers 1 and 2 in BookingPanel.tsx).
   --
@@ -133,7 +149,7 @@ BEGIN
       WHEN v_item_days <= 7  THEN e.price_tier2
       WHEN v_item_days <= 14 THEN e.price_tier3
       ELSE e.price_tier4
-    END INTO v_eq_price
+    END, COALESCE(e.deposit_amount, 0) INTO v_eq_price, v_eq_deposit
     FROM public.equipment e
     WHERE e.id = (v_item->>'equipment_id')::UUID AND e.is_active = true;
 
@@ -143,6 +159,10 @@ BEGIN
 
     v_item_subtotal := v_eq_price * v_item_qty;
     v_computed_subtotal := v_computed_subtotal + v_item_subtotal;
+    -- Refundable SECURITY deposit, stored on the booking (not part of the
+    -- total). create-checkout-session saves the card when it is > 0 and the
+    -- deposit-holds job places the hold before delivery.
+    v_deposit_total := v_deposit_total + v_eq_deposit * v_item_qty;
   END LOOP;
 
   v_computed_total := v_computed_subtotal + v_delivery_fee;
@@ -163,7 +183,7 @@ BEGIN
     p_booking_number, p_user_id, p_customer_name, p_customer_email, p_customer_phone,
     p_delivery_zone_id, p_delivery_address, p_delivery_time_slot, p_delivery_notes,
     p_rental_start, p_rental_end, p_num_days,
-    v_computed_subtotal, v_delivery_fee, 0, v_computed_total, 0,
+    v_computed_subtotal, v_delivery_fee, 0, v_computed_total, v_deposit_total,
     'pending', 'pending'
   )
   RETURNING id, bookings.booking_number
