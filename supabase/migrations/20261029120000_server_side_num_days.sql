@@ -1,0 +1,281 @@
+-- Server-side num_days for create_booking (step 2 of 3).
+--
+-- Each item is priced from its own start_date/end_date, sent in p_items by
+-- Checkout and NewBookingModal since PR #5. The client's num_days is no longer
+-- trusted for pricing: it must equal the computed value or the booking is
+-- rejected. booking_items stores the computed num_days.
+--
+-- Fallback (option b): an item WITHOUT dates (old cached frontend) is priced on
+-- the booking span, must match it, and logs a WARNING. Remove one week after
+-- PR #5 is deployed (step 3).
+--
+-- APPLY ONLY AFTER PR #5 IS DEPLOYED. Run sql/verify_create_booking.sql before
+-- and after; every column must be true afterwards. Body identical to
+-- sql/create_booking_rpc.sql.
+
+CREATE OR REPLACE FUNCTION public.create_booking(
+  p_booking_number text,
+  p_user_id uuid,
+  p_customer_name text,
+  p_customer_email text,
+  p_customer_phone text,
+  p_delivery_zone_id uuid,
+  p_delivery_address text,
+  p_delivery_time_slot text,
+  p_delivery_notes text,
+  p_rental_start date,
+  p_rental_end date,
+  p_num_days integer,
+  p_subtotal numeric,
+  p_delivery_fee numeric,
+  p_total_amount numeric,
+  p_items jsonb,
+  p_availability jsonb
+)
+RETURNS TABLE(booking_id uuid, booking_number text)
+LANGUAGE plpgsql
+SECURITY DEFINER
+SET search_path TO 'public'
+AS $function$
+DECLARE
+  v_booking_id     UUID;
+  v_booking_number TEXT;
+  v_item           JSONB;
+  v_avail          JSONB;
+  v_computed_subtotal NUMERIC := 0;
+  v_computed_total    NUMERIC;
+  v_eq_price         NUMERIC;
+  v_eq_deposit       NUMERIC;
+  v_deposit_total    NUMERIC := 0;
+  v_item_subtotal    NUMERIC;
+  v_item_qty         INTEGER;
+  v_item_days        INTEGER;
+  v_client_days      INTEGER;
+  v_item_start       DATE;
+  v_item_end         DATE;
+  v_item_span        INTEGER;
+  v_days_arr         INTEGER[] := '{}';
+  v_price_arr        NUMERIC[] := '{}';
+  v_idx              INTEGER := 0;
+  v_delivery_fee     NUMERIC := 0;
+  v_zone_slug        TEXT;
+  v_surcharge        NUMERIC := 0;
+  v_collection_surcharge NUMERIC := 0;
+  v_dow              INTEGER;
+BEGIN
+  -- 0a. Blacklist (customer_blacklist, via is_blacklisted()). Neutral message:
+  --     nothing about the reason or the match is leaked to the caller.
+  IF public.is_blacklisted(p_customer_email, p_customer_phone) THEN
+    RAISE EXCEPTION 'This booking cannot be completed online. Please contact us at info@movability.gr.';
+  END IF;
+
+  -- 0. Maximum rental length. Layer 3 of 3 (calendar + add-to-cart guard are
+  --    layers 1 and 2 in BookingPanel.tsx).
+  --
+  --    Validated on the DATES, not on p_num_days: p_num_days is client-supplied,
+  --    so checking it would let a caller send num_days=3 alongside a 90-day date
+  --    range and slip past the cap. rental_end - rental_start is the only
+  --    authoritative span the server has.
+  IF p_rental_start IS NULL OR p_rental_end IS NULL THEN
+    RAISE EXCEPTION 'Rental dates are required';
+  END IF;
+
+  --    The cap is CUSTOMER-FACING only. Admins are exempt: the product page sends
+  --    long-rental enquiries to WhatsApp for a monthly rate, and Bill then enters
+  --    that booking by hand in the admin panel — which calls this same RPC. A cap
+  --    that blocked the very path the nudge sends people to would make the offer
+  --    impossible to fulfil.
+  --
+  --    Exemption is keyed on is_admin() (profiles.role = 'admin' for auth.uid()),
+  --    NOT on a parameter: a boolean flag in the payload would be forgeable by any
+  --    caller, which is the whole class of bug this function exists to prevent.
+  IF (p_rental_end - p_rental_start) > 30 AND NOT public.is_admin() THEN
+    RAISE EXCEPTION 'Rental too long: % days exceeds the 30-day maximum. Contact us on WhatsApp for a monthly rate.',
+      (p_rental_end - p_rental_start);
+  END IF;
+
+  --    Reject only a REVERSED range. A same-day range (span 0) stays permitted:
+  --    manual bookings have created one (MOV-BCE17FBA3D), and rejecting it here
+  --    would break a path that works today. The website cannot produce span 0 —
+  --    BookingPanel requires numDays > 0 — so this is a manual-entry allowance.
+  IF (p_rental_end - p_rental_start) < 0 THEN
+    RAISE EXCEPTION 'Rental end date cannot be before the start date';
+  END IF;
+
+  -- 1. Compute correct delivery fee (and grab slug) from delivery_zones table
+  IF p_delivery_zone_id IS NOT NULL THEN
+    SELECT dz.delivery_fee, dz.slug INTO v_delivery_fee, v_zone_slug
+    FROM public.delivery_zones dz
+    WHERE dz.id = p_delivery_zone_id AND dz.is_active = true;
+    IF NOT FOUND THEN
+      RAISE EXCEPTION 'Invalid delivery zone';
+    END IF;
+  END IF;
+
+  -- 1b. Delivery time/weekend surcharge — mirrors frontend getDeliverySurcharge().
+  --     DELIVERY only (store pickup = 0). EXTRACT(DOW): 0=Sun, 6=Sat (== JS getDay()).
+  --     FIX: Sunday surcharge applies regardless of time slot (incl. NULL/'tbc');
+  --     slot-based surcharges still require a concrete slot.
+  IF v_zone_slug IS NOT NULL AND v_zone_slug <> 'store-pickup' THEN
+    v_dow := EXTRACT(DOW FROM p_rental_start)::INTEGER;
+    IF v_dow = 0 THEN
+      v_surcharge := 50;                                   -- Sunday, any slot
+    ELSIF p_delivery_time_slot = 'evening' AND v_dow = 6 THEN
+      v_surcharge := 50;                                   -- Saturday evening
+    ELSIF p_delivery_time_slot = 'evening' THEN
+      v_surcharge := 20;                                   -- weekday evening slot
+    ELSE
+      v_surcharge := 0;                                    -- daytime / unknown slot
+    END IF;
+  END IF;
+
+  -- 1c. Sunday COLLECTION surcharge — mirrors frontend getCollectionSurcharge().
+  --     €50 when rental_end (the pickup-run day) is a Sunday. DELIVERY only
+  --     (store pickup = 0). Slot-INDEPENDENT: collections have no time slot, so
+  --     this does NOT gate on p_delivery_time_slot. A Sunday→Sunday rental gets
+  --     both surcharges (€100). EXTRACT(DOW): 0=Sun (== JS getDay()).
+  IF v_zone_slug IS NOT NULL AND v_zone_slug <> 'store-pickup'
+     AND EXTRACT(DOW FROM p_rental_end)::INTEGER = 0 THEN
+    v_collection_surcharge := 50;
+  END IF;
+
+  v_delivery_fee := v_delivery_fee + v_surcharge + v_collection_surcharge;
+
+  -- 2. Price each item from SERVER-COMPUTED days.
+  --
+  --    The client's num_days is never used for pricing: a forged item with a
+  --    30-day range and num_days 3 would otherwise pay the 1-3 day tier. Nor
+  --    can the booking's rental_start/rental_end price it: Checkout stores the
+  --    min/max ENVELOPE across items, which would overcharge mixed carts. So
+  --    each item carries its own start_date/end_date (PR #5), and the days are
+  --    computed from those.
+  FOR v_item IN SELECT * FROM jsonb_array_elements(p_items)
+  LOOP
+    v_item_qty    := (v_item->>'quantity')::INTEGER;
+    v_client_days := (v_item->>'num_days')::INTEGER;
+
+    IF v_item->>'start_date' IS NOT NULL OR v_item->>'end_date' IS NOT NULL THEN
+      IF v_item->>'start_date' IS NULL OR v_item->>'end_date' IS NULL THEN
+        RAISE EXCEPTION 'Item dates incomplete: both start_date and end_date are required';
+      END IF;
+      v_item_start := (v_item->>'start_date')::DATE;
+      v_item_end   := (v_item->>'end_date')::DATE;
+      v_item_span  := v_item_end - v_item_start;
+
+      IF v_item_span < 0 THEN
+        RAISE EXCEPTION 'Item end date cannot be before its start date';
+      END IF;
+      -- Same cap and admin exemption as the booking-level check in step 0.
+      IF v_item_span > 30 AND NOT public.is_admin() THEN
+        RAISE EXCEPTION 'Rental too long: % days exceeds the 30-day maximum. Contact us on WhatsApp for a monthly rate.',
+          v_item_span;
+      END IF;
+      IF v_item_start < p_rental_start OR v_item_end > p_rental_end THEN
+        RAISE EXCEPTION 'Item dates % to % lie outside the booking % to %',
+          v_item_start, v_item_end, p_rental_start, p_rental_end;
+      END IF;
+
+      -- Exclusive count, floored at 1: identical to the frontend's
+      -- Math.max(1, differenceInDays(end, start)) in Checkout/NewBookingModal.
+      v_item_days := GREATEST(1, v_item_span);
+    ELSE
+      -- FALLBACK for an old cached frontend that sends no item dates. Remove
+      -- one week after PR #5 is deployed (step 3). The item must then span the
+      -- whole booking, so a short forged num_days is still rejected below; the
+      -- only cost is that an old mixed-date cart is rejected, never underpriced.
+      v_item_days := GREATEST(1, p_rental_end - p_rental_start);
+      RAISE WARNING 'create_booking %: item % has no start_date/end_date (old frontend?) - priced on the booking span (% days)',
+        p_booking_number, v_item->>'equipment_id', v_item_days;
+    END IF;
+
+    IF v_client_days IS DISTINCT FROM v_item_days THEN
+      RAISE EXCEPTION 'Rental length mismatch: item % is % days, got %',
+        v_item->>'equipment_id', v_item_days, v_client_days;
+    END IF;
+
+    SELECT CASE
+      WHEN v_item_days <= 3  THEN e.price_tier1
+      WHEN v_item_days <= 7  THEN e.price_tier2
+      WHEN v_item_days <= 14 THEN e.price_tier3
+      ELSE e.price_tier4
+    END, COALESCE(e.deposit_amount, 0) INTO v_eq_price, v_eq_deposit
+    FROM public.equipment e
+    WHERE e.id = (v_item->>'equipment_id')::UUID AND e.is_active = true;
+
+    IF NOT FOUND THEN
+      RAISE EXCEPTION 'Equipment not found or inactive: %', v_item->>'equipment_id';
+    END IF;
+
+    v_item_subtotal := v_eq_price * v_item_qty;
+    v_computed_subtotal := v_computed_subtotal + v_item_subtotal;
+    -- Refundable SECURITY deposit, stored on the booking (not part of the
+    -- total). create-checkout-session saves the card when it is > 0 and the
+    -- deposit-holds job places the hold before delivery.
+    v_deposit_total := v_deposit_total + v_eq_deposit * v_item_qty;
+
+    -- Remember what was priced, so step 5 stores exactly these values.
+    v_days_arr  := v_days_arr  || v_item_days;
+    v_price_arr := v_price_arr || v_eq_price;
+  END LOOP;
+
+  v_computed_total := v_computed_subtotal + v_delivery_fee;
+
+  -- 3. Reject if client-supplied total differs from server-computed total
+  IF ABS(p_total_amount - v_computed_total) > 0.50 THEN
+    RAISE EXCEPTION 'Price mismatch: expected %, got %', v_computed_total, p_total_amount;
+  END IF;
+
+  -- 4. Insert booking with SERVER-COMPUTED prices
+  INSERT INTO public.bookings (
+    booking_number, user_id, customer_name, customer_email, customer_phone,
+    delivery_zone_id, delivery_address, delivery_time_slot, delivery_notes,
+    rental_start, rental_end, num_days,
+    subtotal, delivery_fee, discount_amount, total_amount, deposit_amount,
+    status, payment_status
+  ) VALUES (
+    p_booking_number, p_user_id, p_customer_name, p_customer_email, p_customer_phone,
+    p_delivery_zone_id, p_delivery_address, p_delivery_time_slot, p_delivery_notes,
+    p_rental_start, p_rental_end, p_num_days,
+    v_computed_subtotal, v_delivery_fee, 0, v_computed_total, v_deposit_total,
+    'pending', 'pending'
+  )
+  RETURNING id, bookings.booking_number
+  INTO v_booking_id, v_booking_number;
+
+  -- 5. Insert booking items with the SERVER-COMPUTED days and tier price from
+  --    step 2 (same array order), never re-derived from the client payload.
+  FOR v_item IN SELECT * FROM jsonb_array_elements(p_items)
+  LOOP
+    v_idx       := v_idx + 1;
+    v_item_qty  := (v_item->>'quantity')::INTEGER;
+    v_item_days := v_days_arr[v_idx];
+    v_eq_price  := v_price_arr[v_idx];
+
+    INSERT INTO public.booking_items (
+      booking_id, equipment_id, quantity, price_per_day, num_days, subtotal
+    ) VALUES (
+      v_booking_id,
+      (v_item->>'equipment_id')::UUID,
+      v_item_qty,
+      v_eq_price,
+      v_item_days,
+      v_eq_price * v_item_qty
+    );
+  END LOOP;
+
+  -- 6. Insert availability records
+  FOR v_avail IN SELECT * FROM jsonb_array_elements(p_availability)
+  LOOP
+    INSERT INTO public.equipment_availability (
+      equipment_id, booking_id, date, quantity_booked
+    ) VALUES (
+      (v_avail->>'equipment_id')::UUID,
+      v_booking_id,
+      (v_avail->>'date')::DATE,
+      (v_avail->>'quantity_booked')::INTEGER
+    );
+  END LOOP;
+
+  RETURN QUERY SELECT v_booking_id, v_booking_number;
+END;
+$function$;
