@@ -18,7 +18,8 @@ type Testimonial = {
 
 // Only the first VISIBLE_COUNT are shown (fixed 3-column grid, no carousel);
 // the rest stay here so they can be swapped back in by reordering.
-const VISIBLE_COUNT = 3;
+// Keep the two photo cards (Amanda, Eliana) in different rows.
+const VISIBLE_COUNT = 6;
 
 const testimonials: Testimonial[] = [
   {
@@ -38,6 +39,11 @@ const testimonials: Testimonial[] = [
     location: "Google review",
   },
   {
+    quote: "Having hurt myself during my trip it was fabulous to be able to access mobility equipment so that the sightseeing and eating amazing Greek food could continue! The mobility equipment arrived at the hotel before I did! The service was excellent and I highly recommend Movability to anyone needing to access mobility equipment when in Athens.",
+    name: "Sue A.",
+    location: "Local Guide, Google review",
+  },
+  {
     quote: "Servizio ottimo! Abbiamo ricevuto la sedia a rotelle direttamente in camera prima del nostro arrivo, siamo riuscite a vedere Atene tranquillamente.",
     translation: "(Excellent service! We received the wheelchair right in our room before our arrival, and we were able to see Athens with ease.)",
     name: "Eliana F.",
@@ -47,13 +53,13 @@ const testimonials: Testimonial[] = [
     photoCredit: "Foto: Eliana F.",
   },
   {
-    quote: "This company was very polite and easy to deal with. I would recommend using them if you need mobility equipment in Athens.",
-    name: "Susan K.",
-    location: "Google review",
-  },
-  {
     quote: "Excellent service, very easy to deal with at reasonable prices. A brand new wheelchair was delivered to our address on time which made the trip far more enjoyable for my mother.",
     name: "Berk G.",
+    location: "Local Guide, Google review",
+  },
+  {
+    quote: "Excellent communication and very easy to pickup and drop off. Their walker help me a lot!! It saved my Athens trip.",
+    name: "Gabriela M.",
     location: "Local Guide, Google review",
   },
 ];
