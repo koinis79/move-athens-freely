@@ -30,6 +30,80 @@ import "jsr:@supabase/functions-js/edge-runtime.d.ts";
 import { createClient } from "jsr:@supabase/supabase-js@2";
 import Anthropic from "npm:@anthropic-ai/sdk@0.69.0";
 
+/* ── app_errors logging ───────────────────────────────────────────────────────
+ * Same block in every edge function (they are deliberately self-contained so
+ * each can be pasted into the dashboard) — keep the copies in sync; only
+ * APP_ERROR_SOURCE differs. Rows are emailed hourly by send-error-alerts.
+ *
+ * context = identifiers only (booking_number, slugs, dates, HTTP status, Stripe
+ * event type). Never names, emails, phones, addresses, card data, API keys or
+ * special-requirements text. As a backstop, keys that look personal or secret
+ * are dropped and emails / key-shaped strings are masked. Never throws.
+ *
+ * Alert test: a request with header `x-alert-test: <INTERNAL_API_KEY>` logs one
+ * synthetic 'info' row and returns before any real work.
+ */
+const APP_ERROR_SOURCE = "claude-chat";
+const APP_ERROR_BLOCKED_KEY = /(email|phone|name|address|card|cvc|iban|secret|token|key|password|note|requirement|health)/i;
+
+function scrubAppErrorText(s: string): string {
+  return s
+    .replace(/[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}/g, "[email]")
+    .replace(/\b(sk|rk|pk)_(live|test)_[A-Za-z0-9]+/g, "$1_$2_[redacted]")
+    .replace(/\bwhsec_[A-Za-z0-9]+/g, "whsec_[redacted]")
+    .replace(/\bsk-ant-[A-Za-z0-9_-]+/g, "sk-ant-[redacted]")
+    .replace(/\bre_[A-Za-z0-9_]{16,}/g, "re_[redacted]")
+    .replace(/Bearer\s+[A-Za-z0-9._-]+/gi, "Bearer [redacted]");
+}
+
+function scrubAppErrorContext(value: unknown, depth = 0): unknown {
+  if (depth > 3) return "[truncated]";
+  if (typeof value === "string") return scrubAppErrorText(value).slice(0, 300);
+  if (Array.isArray(value)) return value.slice(0, 20).map((v) => scrubAppErrorContext(v, depth + 1));
+  if (value && typeof value === "object") {
+    const out: Record<string, unknown> = {};
+    for (const [k, v] of Object.entries(value)) {
+      if (!APP_ERROR_BLOCKED_KEY.test(k)) out[k] = scrubAppErrorContext(v, depth + 1);
+    }
+    return out;
+  }
+  return value;
+}
+
+async function logAppError(
+  message: string,
+  context: Record<string, unknown> = {},
+  severity: "error" | "warning" | "info" = "error",
+): Promise<void> {
+  const row = {
+    source: APP_ERROR_SOURCE,
+    severity,
+    message: scrubAppErrorText(message).slice(0, 1000),
+    context: scrubAppErrorContext(context),
+  };
+  // Always in the function logs too, so nothing depends on the insert working.
+  console.error(`[app_errors] ${row.message}`, JSON.stringify(row.context));
+  try {
+    const key = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
+    const res = await fetch(`${Deno.env.get("SUPABASE_URL")}/rest/v1/app_errors`, {
+      method: "POST",
+      headers: { apikey: key, Authorization: `Bearer ${key}`, "Content-Type": "application/json", Prefer: "return=minimal" },
+      body: JSON.stringify(row),
+    });
+    if (!res.ok) console.error("[app_errors] insert failed:", res.status, await res.text());
+  } catch (e) {
+    console.error("[app_errors] insert threw:", e instanceof Error ? e.message : e);
+  }
+}
+
+async function alertTestResponse(req: Request): Promise<Response | null> {
+  const key = Deno.env.get("INTERNAL_API_KEY");
+  if (!key || req.headers.get("x-alert-test") !== key) return null;
+  await logAppError("TEST: synthetic error to check alerting", { test: true }, "info");
+  return new Response(JSON.stringify({ ok: true, test: true }), { headers: { "Content-Type": "application/json" } });
+}
+/* ── end app_errors logging ─────────────────────────────────────────────────── */
+
 const SUPABASE_URL = Deno.env.get("SUPABASE_URL")!;
 const SUPABASE_SERVICE_ROLE_KEY = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
 const ANTHROPIC_API_KEY = Deno.env.get("ANTHROPIC_API_KEY")!;
@@ -464,11 +538,109 @@ function upcomingSundaysAthens(weeks: number): string[] {
   });
 }
 
+/**
+ * C — the weekday of every date the customer has actually mentioned, computed
+ * here rather than looked up by the model.
+ *
+ * Even with the Sundays list above, a real reply for "Transit wheelchair 29
+ * November to 6 December" missed the Sunday fee although BOTH dates are
+ * Sundays. So the user messages are scanned for dates and the block gets a
+ * line like "Note: 29 Nov 2026 is a Sunday; 6 Dec 2026 is a Sunday."
+ *
+ * Understands "29 November", "Nov 29th", "29-31 Dec", "29 Νοεμβρίου", ISO
+ * 2026-11-29 and d/m/y when the day is > 12. An ambiguous 03/04 is skipped —
+ * the prompt tells the model to ask. A date without a year is the next
+ * upcoming occurrence (same rule the prompt gives the model).
+ *
+ * Goes in the uncached date block: it varies per conversation.
+ */
+const MONTH_PREFIXES: Array<[RegExp, number]> = [
+  [/^(jan|ιαν)/, 0], [/^(feb|φεβ)/, 1], [/^(mar|μαρ)/, 2], [/^(apr|απρ)/, 3],
+  [/^(may|μαι|μαΐ)/, 4], [/^(jun|ιουν)/, 5], [/^(jul|ιουλ)/, 6], [/^(aug|αυγ)/, 7],
+  [/^(sep|σεπ)/, 8], [/^(oct|οκτ)/, 9], [/^(nov|νοε)/, 10], [/^(dec|δεκ)/, 11],
+];
+// English names must end at a non-letter ("29 maybe" is not May); Greek words
+// are matched whole and then checked against the prefixes above.
+const MONTH_WORD = "((?:january|february|march|april|may|june|july|august|september|october|november|december|jan|feb|mar|apr|jun|jul|aug|sept|sep|oct|nov|dec)(?![a-z])|[\\u0370-\\u03ff\\u1f00-\\u1fff]{3,})";
+const WEEKDAYS = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
+
+function monthIndex(word: string): number | null {
+  const w = word.normalize("NFD").replace(/[̀-ͯ]/g, "").toLowerCase();
+  for (const [re, m] of MONTH_PREFIXES) if (re.test(w)) return m;
+  return null;
+}
+
+function mentionedDates(texts: string[], todayUtc: Date): Date[] {
+  const found: Date[] = [];
+  const add = (day: number, month: number | null, year: number | null) => {
+    if (month === null || day < 1 || day > 31) return;
+    let y = year ?? todayUtc.getUTCFullYear();
+    if (year !== null && year < 100) y = 2000 + year;
+    let d = new Date(Date.UTC(y, month, day));
+    if (d.getUTCMonth() !== month) return; // 31 Nov etc.
+    if (year === null && d < todayUtc) {
+      d = new Date(Date.UTC(y + 1, month, day));
+      if (d.getUTCMonth() !== month) return;
+    }
+    if (!found.some((f) => f.getTime() === d.getTime())) found.push(d);
+  };
+
+  for (const raw of texts) {
+    const t = raw.toLowerCase();
+    const yr = "(?:,?\\s*(\\d{4}))?";
+    // "29-31 December", "29 to 31 Dec 2026"
+    for (const m of t.matchAll(new RegExp(`\\b(\\d{1,2})(?:st|nd|rd|th)?\\s*(?:-|–|to|until|έως|ως)\\s*(\\d{1,2})(?:st|nd|rd|th)?\\s+(?:of\\s+)?${MONTH_WORD}${yr}`, "gu"))) {
+      const month = monthIndex(m[3]);
+      const year = m[4] ? Number(m[4]) : null;
+      add(Number(m[1]), month, year);
+      add(Number(m[2]), month, year);
+    }
+    // "29 November", "29th of Nov 2026", "29 Νοεμβρίου"
+    for (const m of t.matchAll(new RegExp(`\\b(\\d{1,2})(?:st|nd|rd|th)?\\s+(?:of\\s+)?${MONTH_WORD}${yr}`, "gu"))) {
+      add(Number(m[1]), monthIndex(m[2]), m[3] ? Number(m[3]) : null);
+    }
+    // "November 29", "Nov 29th, 2026"
+    for (const m of t.matchAll(new RegExp(`${MONTH_WORD}\\s+(\\d{1,2})(?:st|nd|rd|th)?\\b${yr}`, "gu"))) {
+      add(Number(m[2]), monthIndex(m[1]), m[3] ? Number(m[3]) : null);
+    }
+    // ISO 2026-11-29
+    for (const m of t.matchAll(/\b(\d{4})-(\d{2})-(\d{2})\b/g)) {
+      add(Number(m[3]), Number(m[2]) - 1, Number(m[1]));
+    }
+    // 29/11, 29/11/2026, 29.11.2026 — day-first, and only when unambiguous
+    // (day > 12). Dotted needs a year, so "13.5 kg" is not 13 May.
+    for (const m of t.matchAll(/\b(\d{1,2})(?:\/(\d{1,2})(?:\/(\d{2,4}))?|\.(\d{1,2})\.(\d{2,4}))\b/g)) {
+      const year = m[3] ?? m[5];
+      const day = Number(m[1]);
+      const month = Number(m[2] ?? m[4]);
+      if (day > 12 && month >= 1 && month <= 12) add(day, month - 1, year ? Number(year) : null);
+    }
+  }
+  return found;
+}
+
+function dateNote(texts: string[], todayUtc: Date): string {
+  const dates = mentionedDates(texts, todayUtc).slice(-8);
+  if (!dates.length) return "";
+  const fmt = new Intl.DateTimeFormat("en-GB", { timeZone: "UTC", day: "numeric", month: "short", year: "numeric" });
+  const parts = dates.map((d) => `${fmt.format(d).replace("Sept", "Sep")} is a ${WEEKDAYS[d.getUTCDay()]}`);
+  return `Note (computed, authoritative): ${parts.join("; ")}.`;
+}
+
+function athensTodayUtc(): Date {
+  const parts = new Intl.DateTimeFormat("en-CA", {
+    timeZone: "Europe/Athens", year: "numeric", month: "2-digit", day: "2-digit",
+  }).formatToParts(new Date());
+  const get = (t: string) => Number(parts.find((p) => p.type === t)!.value);
+  return new Date(Date.UTC(get("year"), get("month") - 1, get("day")));
+}
+
 function buildSystemBlocks(
   business: Record<string, unknown>,
   stores: Array<Record<string, string>>,
   equipment: EquipmentRow[],
   zones: ZoneRow[],
+  userTexts: string[],
 ) {
   const stable = PROMPT_TEMPLATE
     .replace("{{HOW_IT_WORKS}}", renderHowItWorks())
@@ -496,13 +668,17 @@ function buildSystemBlocks(
     { type: "text" as const, text: live, cache_control: { type: "ephemeral" as const } },
     // Block 3 — today's date. Deliberately AFTER the last breakpoint and with NO
     // cache_control, so a new day cannot invalidate the cached prefix above.
-    { type: "text" as const, text: todayBlockAthens() },
+    // The per-conversation date note rides here for the same reason.
+    { type: "text" as const, text: [todayBlockAthens(), dateNote(userTexts, athensTodayUtc())].filter(Boolean).join("\n") },
   ];
 }
 
 /* ── Handler ─────────────────────────────────────────────────────────────── */
 
 Deno.serve(async (req: Request) => {
+  const alertTest = await alertTestResponse(req);
+  if (alertTest) return alertTest;
+
   if (req.method === "OPTIONS") return new Response(null, { headers: corsHeaders });
   if (req.method !== "POST") return json({ error: "Method not allowed" }, 405);
 
@@ -574,6 +750,7 @@ Deno.serve(async (req: Request) => {
     stores,
     (equipRows ?? []) as unknown as EquipmentRow[],
     (zoneRows ?? []) as unknown as ZoneRow[],
+    messages.filter((m) => m.role === "user").map((m) => m.content),
   );
 
   const anthropic = new Anthropic({ apiKey: ANTHROPIC_API_KEY });
@@ -616,7 +793,12 @@ Deno.serve(async (req: Request) => {
         }
         send("done", { usage });
       } catch (err) {
-        console.error("claude-chat stream error:", err instanceof Error ? err.message : err);
+        // The 401 from a revoked key ran for two weeks unnoticed: every upstream
+        // failure now goes to app_errors with its HTTP status.
+        const status = (err as { status?: number })?.status;
+        await logAppError(`Anthropic upstream error${status ? ` (HTTP ${status})` : ""}: ${err instanceof Error ? err.message : String(err)}`, {
+          status: status ?? null, model: MODEL, turn: userTurns,
+        });
         send("error", { error: "upstream_error" });
       } finally {
         controller.close();
@@ -627,7 +809,7 @@ Deno.serve(async (req: Request) => {
       try {
         const transcript = [...messages, { role: "assistant", content: assistantText }]
           .map((m) => ({ ...m, at: new Date().toISOString() }));
-        await supabase.from("chat_conversations").upsert({
+        const { error: upsertErr } = await supabase.from("chat_conversations").upsert({
           session_id: sessionId,
           ip_hash: ipHash,
           user_agent: (req.headers.get("user-agent") ?? "").slice(0, 500),
@@ -639,8 +821,9 @@ Deno.serve(async (req: Request) => {
           output_tokens: usage.output_tokens ?? null,
           cache_read_tokens: usage.cache_read_input_tokens ?? null,
         }, { onConflict: "session_id" });
+        if (upsertErr) throw new Error(upsertErr.message);
       } catch (err) {
-        console.error("claude-chat logging error:", err instanceof Error ? err.message : err);
+        await logAppError(`Chat transcript logging failed: ${err instanceof Error ? err.message : String(err)}`, {}, "warning");
       }
     },
   });
