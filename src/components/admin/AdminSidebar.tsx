@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import {
-  LayoutDashboard, ClipboardList, Package, CalendarDays, Users, BarChart3, ChevronLeft, X,
+  LayoutDashboard, ClipboardList, Package, CalendarDays, Users, BarChart3, MessageSquare, ChevronLeft, X,
 } from "lucide-react";
 import { NavLink } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
@@ -19,7 +19,7 @@ interface NavItem {
   icon: React.ElementType;
   shortcut?: string;
   end?: boolean;
-  badgeKey?: "pending" | "today";
+  badgeKey?: "pending" | "today" | "unreadChats";
 }
 
 const navItems: NavItem[] = [
@@ -29,20 +29,22 @@ const navItems: NavItem[] = [
   { to: "/admin/calendar", label: "Calendar", icon: CalendarDays, shortcut: "C" },
   { to: "/admin/customers", label: "Customers", icon: Users, shortcut: "U" },
   { to: "/admin/analytics", label: "Analytics", icon: BarChart3, shortcut: "A" },
+  { to: "/admin/chats", label: "Chats", icon: MessageSquare, shortcut: "H", badgeKey: "unreadChats" },
 ];
 
 interface Stats {
   pending: number;
   today: number;
+  unreadChats: number;
 }
 
 const AdminSidebar = ({ collapsed, mobileOpen, onToggle, onMobileClose }: AdminSidebarProps) => {
-  const [stats, setStats] = useState<Stats>({ pending: 0, today: 0 });
+  const [stats, setStats] = useState<Stats>({ pending: 0, today: 0, unreadChats: 0 });
 
   useEffect(() => {
     async function loadStats() {
       const today = new Date().toISOString().slice(0, 10);
-      const [pendingRes, todayRes] = await Promise.all([
+      const [pendingRes, todayRes, chatsRes] = await Promise.all([
         supabase.from("bookings")
           .select("id", { count: "exact", head: true })
           .eq("status", "pending")
@@ -51,10 +53,14 @@ const AdminSidebar = ({ collapsed, mobileOpen, onToggle, onMobileClose }: AdminS
           .select("id", { count: "exact", head: true })
           .eq("rental_start", today)
           .eq("is_archived", false),
+        supabase.from("chat_conversations")
+          .select("id", { count: "exact", head: true })
+          .eq("is_read", false),
       ]);
       setStats({
         pending: pendingRes.count ?? 0,
         today: todayRes.count ?? 0,
+        unreadChats: chatsRes.count ?? 0,
       });
     }
     loadStats();

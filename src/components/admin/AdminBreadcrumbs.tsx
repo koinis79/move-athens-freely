@@ -7,6 +7,7 @@ const routeLabels: Record<string, string> = {
   "/admin/inventory": "Inventory",
   "/admin/calendar": "Calendar",
   "/admin/customers": "Customers",
+  "/admin/chats": "Chats",
 };
 
 const AdminBreadcrumbs = () => {
