@@ -16,6 +16,12 @@
 --   surcharge) and step 0 (30-day cap + is_admin() exemption); keeps their
 --   is_blacklisted() check and the deposit_amount total. Migration:
 --   supabase/migrations/20261029000000_merge_create_booking.sql
+-- Oct 29, 2026 (later): SERVER-SIDE num_days. Each item is priced from its
+--   own start_date/end_date (sent by Checkout/NewBookingModal since PR #5),
+--   never from the client's num_days, which must match the computed value.
+--   Items without dates (old cached frontend) fall back to the booking span
+--   and log a WARNING; that fallback is removed one week after PR #5 ships.
+--   Migration: supabase/migrations/20261029120000_server_side_num_days.sql
 
 CREATE OR REPLACE FUNCTION public.create_booking(
   p_booking_number text,
@@ -54,6 +60,13 @@ DECLARE
   v_item_subtotal    NUMERIC;
   v_item_qty         INTEGER;
   v_item_days        INTEGER;
+  v_client_days      INTEGER;
+  v_item_start       DATE;
+  v_item_end         DATE;
+  v_item_span        INTEGER;
+  v_days_arr         INTEGER[] := '{}';
+  v_price_arr        NUMERIC[] := '{}';
+  v_idx              INTEGER := 0;
   v_delivery_fee     NUMERIC := 0;
   v_zone_slug        TEXT;
   v_surcharge        NUMERIC := 0;
@@ -138,11 +151,57 @@ BEGIN
 
   v_delivery_fee := v_delivery_fee + v_surcharge + v_collection_surcharge;
 
-  -- 2. Validate each item's price against the equipment table
+  -- 2. Price each item from SERVER-COMPUTED days.
+  --
+  --    The client's num_days is never used for pricing: a forged item with a
+  --    30-day range and num_days 3 would otherwise pay the 1-3 day tier. Nor
+  --    can the booking's rental_start/rental_end price it: Checkout stores the
+  --    min/max ENVELOPE across items, which would overcharge mixed carts. So
+  --    each item carries its own start_date/end_date (PR #5), and the days are
+  --    computed from those.
   FOR v_item IN SELECT * FROM jsonb_array_elements(p_items)
   LOOP
-    v_item_qty  := (v_item->>'quantity')::INTEGER;
-    v_item_days := (v_item->>'num_days')::INTEGER;
+    v_item_qty    := (v_item->>'quantity')::INTEGER;
+    v_client_days := (v_item->>'num_days')::INTEGER;
+
+    IF v_item->>'start_date' IS NOT NULL OR v_item->>'end_date' IS NOT NULL THEN
+      IF v_item->>'start_date' IS NULL OR v_item->>'end_date' IS NULL THEN
+        RAISE EXCEPTION 'Item dates incomplete: both start_date and end_date are required';
+      END IF;
+      v_item_start := (v_item->>'start_date')::DATE;
+      v_item_end   := (v_item->>'end_date')::DATE;
+      v_item_span  := v_item_end - v_item_start;
+
+      IF v_item_span < 0 THEN
+        RAISE EXCEPTION 'Item end date cannot be before its start date';
+      END IF;
+      -- Same cap and admin exemption as the booking-level check in step 0.
+      IF v_item_span > 30 AND NOT public.is_admin() THEN
+        RAISE EXCEPTION 'Rental too long: % days exceeds the 30-day maximum. Contact us on WhatsApp for a monthly rate.',
+          v_item_span;
+      END IF;
+      IF v_item_start < p_rental_start OR v_item_end > p_rental_end THEN
+        RAISE EXCEPTION 'Item dates % to % lie outside the booking % to %',
+          v_item_start, v_item_end, p_rental_start, p_rental_end;
+      END IF;
+
+      -- Exclusive count, floored at 1: identical to the frontend's
+      -- Math.max(1, differenceInDays(end, start)) in Checkout/NewBookingModal.
+      v_item_days := GREATEST(1, v_item_span);
+    ELSE
+      -- FALLBACK for an old cached frontend that sends no item dates. Remove
+      -- one week after PR #5 is deployed (step 3). The item must then span the
+      -- whole booking, so a short forged num_days is still rejected below; the
+      -- only cost is that an old mixed-date cart is rejected, never underpriced.
+      v_item_days := GREATEST(1, p_rental_end - p_rental_start);
+      RAISE WARNING 'create_booking %: item % has no start_date/end_date (old frontend?) - priced on the booking span (% days)',
+        p_booking_number, v_item->>'equipment_id', v_item_days;
+    END IF;
+
+    IF v_client_days IS DISTINCT FROM v_item_days THEN
+      RAISE EXCEPTION 'Rental length mismatch: item % is % days, got %',
+        v_item->>'equipment_id', v_item_days, v_client_days;
+    END IF;
 
     SELECT CASE
       WHEN v_item_days <= 3  THEN e.price_tier1
@@ -163,6 +222,10 @@ BEGIN
     -- total). create-checkout-session saves the card when it is > 0 and the
     -- deposit-holds job places the hold before delivery.
     v_deposit_total := v_deposit_total + v_eq_deposit * v_item_qty;
+
+    -- Remember what was priced, so step 5 stores exactly these values.
+    v_days_arr  := v_days_arr  || v_item_days;
+    v_price_arr := v_price_arr || v_eq_price;
   END LOOP;
 
   v_computed_total := v_computed_subtotal + v_delivery_fee;
@@ -189,20 +252,14 @@ BEGIN
   RETURNING id, bookings.booking_number
   INTO v_booking_id, v_booking_number;
 
-  -- 5. Insert booking items with SERVER-COMPUTED prices
+  -- 5. Insert booking items with the SERVER-COMPUTED days and tier price from
+  --    step 2 (same array order), never re-derived from the client payload.
   FOR v_item IN SELECT * FROM jsonb_array_elements(p_items)
   LOOP
+    v_idx       := v_idx + 1;
     v_item_qty  := (v_item->>'quantity')::INTEGER;
-    v_item_days := (v_item->>'num_days')::INTEGER;
-
-    SELECT CASE
-      WHEN v_item_days <= 3  THEN e.price_tier1
-      WHEN v_item_days <= 7  THEN e.price_tier2
-      WHEN v_item_days <= 14 THEN e.price_tier3
-      ELSE e.price_tier4
-    END INTO v_eq_price
-    FROM public.equipment e
-    WHERE e.id = (v_item->>'equipment_id')::UUID;
+    v_item_days := v_days_arr[v_idx];
+    v_eq_price  := v_price_arr[v_idx];
 
     INSERT INTO public.booking_items (
       booking_id, equipment_id, quantity, price_per_day, num_days, subtotal
