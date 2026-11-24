@@ -97,7 +97,7 @@ Please do not type health details, card numbers, passwords or ID numbers into th
 
 ## 8. Cookies and similar technologies
 
-We use cookies and similar technologies that store or access information on your device. Google Analytics helps us understand how the site is used (pages visited, device type, approximate location). Its cookies are set only if you accept them in our cookie banner, where Accept and Reject are offered equally, and you can change your choice at any time.
+We use cookies and similar technologies that store or access information on your device. Google Analytics helps us understand how the site is used (pages visited, device type, approximate location). Its cookies are set only if you accept them in our cookie banner, where Accept and Reject are offered equally, and you can change your choice at any time. We also use Vercel Web Analytics, a cookieless tool that counts page views without storing cookies or identifying visitors.
 
 The site also keeps a few things in your browser's local storage so that it works: your language choice, your shopping cart, and whether you have closed the chat tip. These are needed to provide the features you asked for and are not used for tracking.
 

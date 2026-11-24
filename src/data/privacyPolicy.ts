@@ -6,7 +6,7 @@
 // The "Internal notes" section of the EN file is excluded on purpose: it is a
 // working checklist, not public policy.
 //
-// Generated: 2026-10-02
+// Generated: 2026-11-24
 // Sections: en 10, gr 10
 
 /** A table inside a policy section. */
@@ -282,7 +282,7 @@ export const privacyPolicy: Record<"en" | "gr", PolicyDoc> = {
         "id": "8",
         "heading": "8. Cookies and similar technologies",
         "body": [
-          "We use cookies and similar technologies that store or access information on your device. Google Analytics helps us understand how the site is used (pages visited, device type, approximate location). Its cookies are set only if you accept them in our cookie banner, where Accept and Reject are offered equally, and you can change your choice at any time.",
+          "We use cookies and similar technologies that store or access information on your device. Google Analytics helps us understand how the site is used (pages visited, device type, approximate location). Its cookies are set only if you accept them in our cookie banner, where Accept and Reject are offered equally, and you can change your choice at any time. We also use Vercel Web Analytics, a cookieless tool that counts page views without storing cookies or identifying visitors.",
           "The site also keeps a few things in your browser's local storage so that it works: your language choice, your shopping cart, and whether you have closed the chat tip. These are needed to provide the features you asked for and are not used for tracking."
         ]
       },
@@ -562,7 +562,7 @@ export const privacyPolicy: Record<"en" | "gr", PolicyDoc> = {
         "id": "8",
         "heading": "8. Cookies και παρόμοιες τεχνολογίες",
         "body": [
-          "Χρησιμοποιούμε cookies και παρόμοιες τεχνολογίες που αποθηκεύουν ή αποκτούν πρόσβαση σε πληροφορίες στη συσκευή σας. Το Google Analytics μάς βοηθά να κατανοούμε πώς χρησιμοποιείται ο ιστότοπος (σελίδες που επισκέπτεστε, τύπος συσκευής, κατά προσέγγιση τοποθεσία). Τα cookies του τοποθετούνται μόνο αν τα αποδεχθείτε στο banner cookies, όπου η Αποδοχή και η Απόρριψη προσφέρονται ισότιμα, και μπορείτε να αλλάξετε την επιλογή σας οποτεδήποτε.",
+          "Χρησιμοποιούμε cookies και παρόμοιες τεχνολογίες που αποθηκεύουν ή αποκτούν πρόσβαση σε πληροφορίες στη συσκευή σας. Το Google Analytics μάς βοηθά να κατανοούμε πώς χρησιμοποιείται ο ιστότοπος (σελίδες που επισκέπτεστε, τύπος συσκευής, κατά προσέγγιση τοποθεσία). Τα cookies του τοποθετούνται μόνο αν τα αποδεχθείτε στο banner cookies, όπου η Αποδοχή και η Απόρριψη προσφέρονται ισότιμα, και μπορείτε να αλλάξετε την επιλογή σας οποτεδήποτε. Χρησιμοποιούμε επίσης το Vercel Web Analytics, ένα εργαλείο χωρίς cookies που μετρά τις προβολές σελίδων χωρίς να αποθηκεύει cookies ή να ταυτοποιεί τους επισκέπτες.",
           "Ο ιστότοπος αποθηκεύει επίσης λίγα στοιχεία στο local storage του προγράμματος περιήγησης για να λειτουργεί: τη γλώσσα που επιλέξατε, το καλάθι σας και το αν έχετε κλείσει την υπόδειξη του chat. Αυτά είναι αναγκαία για τις λειτουργίες που ζητήσατε και δεν χρησιμοποιούνται για παρακολούθηση."
         ]
       },

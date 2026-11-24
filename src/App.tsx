@@ -3,6 +3,7 @@ import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
+import { Analytics } from "@vercel/analytics/react";
 import { CartProvider } from "@/context/CartContext";
 import { AuthProvider } from "@/context/AuthContext";
 import ProtectedRoute from "@/components/ProtectedRoute";
@@ -53,6 +54,10 @@ const App = () => (
           <BrowserRouter>
             <LanguageSync />
             <ScrollToTop />
+            {/* Vercel Web Analytics: cookieless, no personal identifiers, so it runs
+                for every visitor without waiting for consent. GA4 stays
+                consent-gated in CookieConsent. */}
+            <Analytics />
             <Toaster />
             <Sonner />
             <Routes>
