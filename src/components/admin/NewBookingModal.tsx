@@ -24,6 +24,7 @@ import { Calendar } from "@/components/ui/calendar";
 import { cn } from "@/lib/utils";
 import { toast } from "@/hooks/use-toast";
 import { normalizePhone, PHONE_ERROR } from "@/lib/phone";
+import { reportClientError } from "@/lib/reportClientError";
 import { supabase } from "@/integrations/supabase/client";
 
 /* ── Static helpers ─────────────────────────────────────── */
@@ -229,7 +230,20 @@ const NewBookingModal = ({ open, onOpenChange, defaultDate }: Props) => {
       });
 
       if (rpcErr || !data || (Array.isArray(data) && data.length === 0)) {
-        throw new Error(rpcErr?.message ?? "Failed to create booking");
+        const message = rpcErr?.message ?? "Failed to create booking";
+        reportClientError("admin-new-booking", message, {
+          code: rpcErr?.code,
+          start_date: format(startDate, "yyyy-MM-dd"),
+          end_date: format(endDate, "yyyy-MM-dd"),
+          zone: selectedZone?.slug ?? null,
+          items: [{
+            slug: selectedEquipment.slug,
+            start_date: format(startDate, "yyyy-MM-dd"),
+            end_date: format(endDate, "yyyy-MM-dd"),
+            quantity,
+          }],
+        });
+        throw new Error(message);
       }
 
       const row = Array.isArray(data) ? data[0] : data;

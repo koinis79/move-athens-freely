@@ -13,6 +13,7 @@ import { useDeliveryZones } from "@/hooks/useDeliveryZones";
 import { supabase } from "@/integrations/supabase/client";
 import { getPriceForDays } from "@/data/equipment";
 import { normalizePhone, PHONE_ERROR } from "@/lib/phone";
+import { reportClientError } from "@/lib/reportClientError";
 import DeliverySection, {
   getDeliveryFee,
   getDeliveryZoneFee,
@@ -300,9 +301,20 @@ const Checkout = () => {
       });
 
       if (rpcErr || !data || (Array.isArray(data) && data.length === 0)) {
-        throw new Error(
-          rpcErr?.message ?? "Failed to create booking — no data returned"
-        );
+        const message = rpcErr?.message ?? "Failed to create booking — no data returned";
+        reportClientError("checkout", message, {
+          code: rpcErr?.code,
+          start_date: format(rentalStart, "yyyy-MM-dd"),
+          end_date: format(rentalEnd, "yyyy-MM-dd"),
+          zone: zoneSlug,
+          items: lineItems.map((line) => ({
+            slug: line.equipment.slug,
+            start_date: format(line.startDate, "yyyy-MM-dd"),
+            end_date: format(line.endDate, "yyyy-MM-dd"),
+            quantity: line.quantity,
+          })),
+        });
+        throw new Error(message);
       }
 
       const row = Array.isArray(data) ? data[0] : data;

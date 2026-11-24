@@ -1,18 +1,97 @@
 import Stripe from "https://esm.sh/stripe@14?target=deno";
 import { createClient } from "npm:@supabase/supabase-js@2";
 
+/* ── app_errors logging ───────────────────────────────────────────────────────
+ * Same block in every edge function (they are deliberately self-contained so
+ * each can be pasted into the dashboard) — keep the copies in sync; only
+ * APP_ERROR_SOURCE differs. Rows are emailed hourly by send-error-alerts.
+ *
+ * context = identifiers only (booking_number, slugs, dates, HTTP status, Stripe
+ * event type). Never names, emails, phones, addresses, card data, API keys or
+ * special-requirements text. As a backstop, keys that look personal or secret
+ * are dropped and emails / key-shaped strings are masked. Never throws.
+ *
+ * Alert test: a request with header `x-alert-test: <INTERNAL_API_KEY>` logs one
+ * synthetic 'info' row and returns before any real work.
+ */
+const APP_ERROR_SOURCE = "create-checkout-session";
+const APP_ERROR_BLOCKED_KEY = /(email|phone|name|address|card|cvc|iban|secret|token|key|password|note|requirement|health)/i;
+
+function scrubAppErrorText(s: string): string {
+  return s
+    .replace(/[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}/g, "[email]")
+    .replace(/\b(sk|rk|pk)_(live|test)_[A-Za-z0-9]+/g, "$1_$2_[redacted]")
+    .replace(/\bwhsec_[A-Za-z0-9]+/g, "whsec_[redacted]")
+    .replace(/\bsk-ant-[A-Za-z0-9_-]+/g, "sk-ant-[redacted]")
+    .replace(/\bre_[A-Za-z0-9_]{16,}/g, "re_[redacted]")
+    .replace(/Bearer\s+[A-Za-z0-9._-]+/gi, "Bearer [redacted]");
+}
+
+function scrubAppErrorContext(value: unknown, depth = 0): unknown {
+  if (depth > 3) return "[truncated]";
+  if (typeof value === "string") return scrubAppErrorText(value).slice(0, 300);
+  if (Array.isArray(value)) return value.slice(0, 20).map((v) => scrubAppErrorContext(v, depth + 1));
+  if (value && typeof value === "object") {
+    const out: Record<string, unknown> = {};
+    for (const [k, v] of Object.entries(value)) {
+      if (!APP_ERROR_BLOCKED_KEY.test(k)) out[k] = scrubAppErrorContext(v, depth + 1);
+    }
+    return out;
+  }
+  return value;
+}
+
+async function logAppError(
+  message: string,
+  context: Record<string, unknown> = {},
+  severity: "error" | "warning" | "info" = "error",
+): Promise<void> {
+  const row = {
+    source: APP_ERROR_SOURCE,
+    severity,
+    message: scrubAppErrorText(message).slice(0, 1000),
+    context: scrubAppErrorContext(context),
+  };
+  // Always in the function logs too, so nothing depends on the insert working.
+  console.error(`[app_errors] ${row.message}`, JSON.stringify(row.context));
+  try {
+    const key = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
+    const res = await fetch(`${Deno.env.get("SUPABASE_URL")}/rest/v1/app_errors`, {
+      method: "POST",
+      headers: { apikey: key, Authorization: `Bearer ${key}`, "Content-Type": "application/json", Prefer: "return=minimal" },
+      body: JSON.stringify(row),
+    });
+    if (!res.ok) console.error("[app_errors] insert failed:", res.status, await res.text());
+  } catch (e) {
+    console.error("[app_errors] insert threw:", e instanceof Error ? e.message : e);
+  }
+}
+
+async function alertTestResponse(req: Request): Promise<Response | null> {
+  const key = Deno.env.get("INTERNAL_API_KEY");
+  if (!key || req.headers.get("x-alert-test") !== key) return null;
+  await logAppError("TEST: synthetic error to check alerting", { test: true }, "info");
+  return new Response(JSON.stringify({ ok: true, test: true }), { headers: { "Content-Type": "application/json" } });
+}
+/* ── end app_errors logging ─────────────────────────────────────────────────── */
+
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
   "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
 };
 
 Deno.serve(async (req) => {
+  const alertTest = await alertTestResponse(req);
+  if (alertTest) return alertTest;
+
   if (req.method === "OPTIONS") {
     return new Response("ok", { headers: corsHeaders });
   }
 
+  let bookingNumberForLog: string | undefined;
   try {
     const { booking_number, customer_email, payment_type } = await req.json();
+    bookingNumberForLog = typeof booking_number === "string" ? booking_number : undefined;
     if (!booking_number || !customer_email) {
       return new Response(JSON.stringify({ error: "booking_number and customer_email required" }), {
         status: 400,
@@ -53,6 +132,13 @@ Deno.serve(async (req) => {
       .single();
 
     if (bookingErr || !booking || booking.payment_status === "paid") {
+      // A paid booking is a harmless double-click; a lookup failure right after
+      // create_booking means the checkout cannot proceed.
+      if (booking?.payment_status !== "paid") {
+        await logAppError(`Booking lookup failed: ${bookingErr?.message ?? "not found"}`, {
+          booking_number,
+        }, "warning");
+      }
       return new Response(JSON.stringify({ error: "Unable to process this booking" }), {
         status: 400,
         headers: { ...corsHeaders, "Content-Type": "application/json" },
@@ -156,7 +242,9 @@ Deno.serve(async (req) => {
       headers: { ...corsHeaders, "Content-Type": "application/json" },
     });
   } catch (err) {
-    console.error("create-checkout-session error:", err);
+    await logAppError(`Checkout session failed: ${err instanceof Error ? err.message : String(err)}`, {
+      booking_number: bookingNumberForLog,
+    });
     return new Response(JSON.stringify({ error: "Internal server error" }), {
       status: 500,
       headers: { ...corsHeaders, "Content-Type": "application/json" },
