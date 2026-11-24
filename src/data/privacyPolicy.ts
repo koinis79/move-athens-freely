@@ -44,7 +44,7 @@ export const privacyPolicy: Record<"en" | "gr", PolicyDoc> = {
     "pendingLabel": "Pending",
     "contactLine": "Questions about this policy? Email us at",
     "title": "Privacy Policy",
-    "lastUpdated": "2 October 2026",
+    "lastUpdated": "24 November 2026",
     "intro": [],
     "sections": [
       {
@@ -322,7 +322,7 @@ export const privacyPolicy: Record<"en" | "gr", PolicyDoc> = {
     "pendingLabel": "Εκκρεμεί",
     "contactLine": "Ερωτήσεις για αυτήν την πολιτική; Στείλτε email στο",
     "title": "Πολιτική Απορρήτου",
-    "lastUpdated": "2 Οκτωβρίου 2026",
+    "lastUpdated": "24 Νοεμβρίου 2026",
     "intro": [
       "Το ελληνικό κείμενο είναι το αυθεντικό· η αγγλική έκδοση παρέχεται για διευκόλυνση."
     ],

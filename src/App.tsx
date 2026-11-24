@@ -56,8 +56,12 @@ const App = () => (
             <ScrollToTop />
             {/* Vercel Web Analytics: cookieless, no personal identifiers, so it runs
                 for every visitor without waiting for consent. GA4 stays
-                consent-gated in CookieConsent. */}
-            <Analytics />
+                consent-gated in CookieConsent. Admin pages are not counted. */}
+            <Analytics
+              beforeSend={(event) =>
+                new URL(event.url).pathname.startsWith("/admin") ? null : event
+              }
+            />
             <Toaster />
             <Sonner />
             <Routes>

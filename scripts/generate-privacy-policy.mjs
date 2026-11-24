@@ -26,7 +26,7 @@ const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), "..");
 const OUT = join(ROOT, "src", "data", "privacyPolicy.ts");
 
 /** Publication date, in each language's own format. */
-const LAST_UPDATED = { en: "2 October 2026", gr: "2 Οκτωβρίου 2026" };
+const LAST_UPDATED = { en: "24 November 2026", gr: "24 Νοεμβρίου 2026" };
 
 /** Sections whose heading matches this are never published. */
 const EXCLUDE_HEADING = /^internal notes/i;
