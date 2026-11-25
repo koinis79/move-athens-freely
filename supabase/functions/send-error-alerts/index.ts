@@ -232,10 +232,12 @@ Deno.serve(async (req) => {
   const email = buildEmail(pending, groups);
   if (body.dry_run) return json({ ok: true, dry_run: true, ...email });
 
-  const to = Deno.env.get("ALERT_EMAIL");
+  // ALERT_EMAIL may hold several comma-separated addresses; Resend wants each
+  // as its own array element ("a@x, b@y" as one string is a 422).
+  const to = (Deno.env.get("ALERT_EMAIL") ?? "").split(",").map((s) => s.trim()).filter(Boolean);
   const resendKey = Deno.env.get("RESEND_API_KEY");
-  if (!to || !resendKey) {
-    await logAppError(`Cannot send alert digest: ${!to ? "ALERT_EMAIL" : "RESEND_API_KEY"} secret is not set`);
+  if (!to.length || !resendKey) {
+    await logAppError(`Cannot send alert digest: ${!to.length ? "ALERT_EMAIL" : "RESEND_API_KEY"} secret is not set`);
     return json({ error: "not_configured" }, 500);
   }
 
@@ -245,7 +247,7 @@ Deno.serve(async (req) => {
       headers: { Authorization: `Bearer ${resendKey}`, "Content-Type": "application/json" },
       body: JSON.stringify({
         from: "Movability <hello@movability.gr>",
-        to: [to],
+        to,
         subject: email.subject,
         text: email.text,
         html: email.html,
